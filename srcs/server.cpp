@@ -1,4 +1,5 @@
 // Server side C program to demonstrate Socket programming
+// all EXPLICATION ON = https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>

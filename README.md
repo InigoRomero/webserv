@@ -18,3 +18,13 @@ https://github.com/cclaude42/webserv
 
 Struct Sockets:
 https://es.wikibooks.org/wiki/Programación_en_C/Sockets
+
+RFC oficcial:
+rfc-editor.org/retrieve/
+ 
+Tutorial 1:
+https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa
+
+Turotial 2:
+https://ncona.com/2019/04/building-a-simple-server-with-cpp/
+
