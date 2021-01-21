@@ -3,7 +3,6 @@
 #include <cstdlib> // For exit() and EXIT_FAILURE
 #include <iostream> // For cout
 #include <unistd.h> // For read
-#include "gnl/get_next_line.h"
 #include <string>
 
 using namespace std;
@@ -23,7 +22,7 @@ int main() {
   sockaddr.sin_port = htons(9999); // Puerto para la conexión
                                     // htons is necessary to convert a number to
                                    // network byte order
-  if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) { //bind: to assign an IP address and port to the socket.
+  if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) { //bind: to assign an IP address and port to the socket. (dar un nombre al socket, identificarlo.)
     cout << "Failed to bind to port 9999. errno: " << errno << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -43,22 +42,17 @@ int main() {
   }
 
   // Read from the connection
-  while (1)
-  {
     signal(SIGINT, exit);
-    char *buffer = (char*)malloc(sizeof(101));
-    buffer[100] = '\0';
+    char buffer[101];
     read(connection, buffer, 100);
-    cout << "The message was: " << buffer;
+    buffer[100] = '\0';
+    cout << "The message was: " << buffer << " Bye";
 
     // Send a message to the connection
     string response = "Good talking to you\n"; 
     send(connection, response.c_str(), response.size(), 0);
-    cout << "holi";
-    free(buffer);
-    cout << "holi2";
-    // Close the connections if press control c
-  }
-  close(connection);
-  close(sockfd);
+    // Close the connections
+    std::cout << "Closing Server..." << std::endl;
+    close(connection);
+    close(sockfd);
 }
