@@ -6,15 +6,17 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <fstream>
+#include <streambuf>
 
-#define PORT 8080
+#define PORT 80
 int main()
 {
     int server_fd, new_socket; long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
     
-    char hello[19] = "Hello from server\n";
+    //char hello[28] = "<h1>Hello from server</h1>\n";
     
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
@@ -41,6 +43,19 @@ int main()
         perror("In listen");
         exit(EXIT_FAILURE);
     }
+
+  /*  FILE * pFile;
+    pFile = fopen ("../www/index.html","w");
+    if (pFile!=NULL)
+    {
+        fputs ("fopen example",pFile);
+        fclose (pFile);
+    }*/
+    std::ifstream t("../www/index.html");
+    std::string str((std::istreambuf_iterator<char>(t)),
+                 std::istreambuf_iterator<char>());
+    char cstr[str.size() + 1];
+    strcpy(cstr, str.c_str());
     while(1)
     {
         printf("\n+++++++ Waiting for new connection ++++++++\n\n");
@@ -53,8 +68,9 @@ int main()
         char buffer[30000] = {0};
         valread = read( new_socket , buffer, 30000);
         printf("%s\n",buffer );
-        //send(new_socket, hello, 19, 0); escribir con send
-        write(new_socket , hello , strlen(hello));
+       // send(new_socket, pFile, pFile.tellg(), 0); //escribir con send
+       // write(new_socket , hello , strlen(hello));
+        write(new_socket , cstr, strlen(cstr));
         printf("------------------Hello message sent-------------------\n");
         close(new_socket);
     }
