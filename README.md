@@ -28,3 +28,8 @@ https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-buil
 Turotial 2:
 https://ncona.com/2019/04/building-a-simple-server-with-cpp/
 
+Que es un Socket:
+https://beej.us/guide/bgnet/html/#intro
+
+Todo lo visto con apuntes y ordenado:
+https://www.notion.so/iromero42madrid/Webserv-3dd3eed69ad1451aae45515b7fbbb38b
