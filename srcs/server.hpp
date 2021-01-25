@@ -12,7 +12,7 @@
 #include <netinet/ip.h>
 #include <fcntl.h>
 #include <sys/select.h>
-
+#include <unistd.h>
 class Server
 {
     private:
@@ -23,6 +23,7 @@ class Server
     public:
         struct sockaddr_in _my_addr;
         int _sockfd;
+        int _port;
         std::string _name;
 
     private:

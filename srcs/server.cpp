@@ -1,11 +1,8 @@
 #include "server.hpp"
 
 Server::Server(std::string serverName, int port):
-    _sockfd(-1), _name(serverName)
+    _sockfd(-1) , _port(port),  _name(serverName)
 {
-    _my_addr.sin_family = AF_INET;
-    _my_addr.sin_port = port;
-    _my_addr.sin_addr.s_addr = INADDR_ANY;
     bzero(&_my_addr, sizeof(_my_addr));
 }
 
@@ -15,16 +12,21 @@ Server::~Server()
 int Server::start(void)
 {
     errno = 0;
-	
     // socket
+    _my_addr.sin_family = AF_INET;
+    _my_addr.sin_port = htons( _port );
+    _my_addr.sin_addr.s_addr = INADDR_ANY;
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
 		std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
         return (0);
     }
-    else
-        std::cout << _name << " port:" << std::to_string(_my_addr.sin_port) << " socket= " << std::to_string(_sockfd) << std::endl;
-    bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr);
+  //  std::cout << _name << " port:" << std::to_string(_my_addr.sin_port) << " socket= " << std::to_string(_sockfd) << std::endl;
+    if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr)<0)
+    {
+        perror("In bind");
+        return(0);
+    }
     int yes=1;
 
     // lose the pesky "Address already in use" error message
@@ -32,21 +34,69 @@ int Server::start(void)
         perror("setsockopt");
         return(0);
     }
-     if (listen(_sockfd, 10) == -1)
-	{
-		perror("listen");
-        return (0);
-    }
-    else
-		std::cout << _name << " port:" << std::to_string(_my_addr.sin_port) << " lister OK " << std::endl;
+
+    if (listen(_sockfd, 10) < 0)
+    {
+        perror("In listen");
+        exit(EXIT_FAILURE);
+    }/*
+    int accept_fd = 0;
+    //struct sockaddr_in	client_addr;
+    int addrlen = sizeof(_my_addr);
+    //bzero(&client_addr, sizeof(client_addr));
+
+    while(1)
+    {
+  
+        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&_my_addr, (socklen_t*)&addrlen)) == -1)
+        {
+            perror("accept");
+            return (0);
+        }
+        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&_my_addr, (socklen_t*)&addrlen))<0)
+        {
+            perror("In accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        char buffer[30000] = {0};
+        read( accept_fd , buffer, 30000);
+        printf("%s\n",buffer );
+    // send(new_socket, pFile, pFile.tellg(), 0); //escribir con send
+    // write(new_socket , hello , strlen(hello));
+        write(accept_fd , "hola", 4);
+        printf("------------------Hello message sent-------------------\n");
+        close(accept_fd);
+    }*/
     return (1);
 }
 
 int Server::acceptNewClient(void)
 {
     int accept_fd = 0;
-    struct sockaddr_in	client_addr;
-    int addrlen = sizeof(client_addr);
+    //struct sockaddr_in	client_addr;
+    int addrlen = sizeof(_my_addr);
 
-    bzero(&client_addr, sizeof(client_addr));
+    //bzero(&client_addr, sizeof(client_addr));
+
+    while(1)
+    {
+        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&_my_addr, (socklen_t*)&addrlen))<0)
+        {
+            perror("In accept");
+            return(0);
+        }
+        
+        char buffer[30000] = {0};
+        read( accept_fd , buffer, 30000);
+        printf("%s\n",buffer );
+    // send(new_socket, pFile, pFile.tellg(), 0); //escribir con send
+    // write(new_socket , hello , strlen(hello));
+        write(accept_fd , "hola", 4);
+        printf("------------------Hello message sent-------------------\n");
+        close(accept_fd);
+    }
+    return (1);
 }
