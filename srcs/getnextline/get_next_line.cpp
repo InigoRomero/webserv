@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iromero- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iromero- <iromero-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/16 11:52:16 by iromero-          #+#    #+#             */
-/*   Updated: 2019/11/18 15:06:08 by iromero-         ###   ########.fr       */
+/*   Updated: 2021/01/26 17:24:35 by iromero-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line.hpp"
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -45,14 +45,14 @@ static	int	getcharpls(char **line, char **aux, int n)
 
 int			get_next_line(int fd, char **line)
 {
-	char			buffer[BUFFER_SIZE + 1];
+	char			buffer[512 + 1];
 	static char		*aux[4096];
 	int				n;
 	char			*temp;
 
-	if (fd < 0 || BUFFER_SIZE < 1 || !line)
+	if (fd < 0 || 512 < 1 || !line)
 		return (-1);
-	while ((n = read(fd, buffer, BUFFER_SIZE)) > 0)
+	while ((n = read(fd, buffer, 512)) > 0)
 	{
 		buffer[n] = 0;
 		if (!aux[fd])

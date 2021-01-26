@@ -14,20 +14,27 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <signal.h>
+#include "getnextline/get_next_line.hpp"
 
 class Conf
 {
     private:
         Conf();
+        const char *_path;
+        std::vector<std::string> _conf;
 
     protected:
-        //
 
     public:
-        std::string _path;
 
-        Conf(std::string path);
+        Conf(const char *path);
 		~Conf();
+
+        class ConfigFileException: public std::exception {
+            virtual const char* what() const throw();
+        };
+        void ReadFile();
+        
 };
 
 

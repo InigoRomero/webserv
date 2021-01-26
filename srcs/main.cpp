@@ -8,8 +8,10 @@ int main(int argc, char **av)
         std::cerr << "Usage: ./webserv config-file" << std::endl;
     	return (EXIT_FAILURE);
     }
-  
-    Server serv = Server("Loco", 8080);
+    Conf conf = Conf(av[1]);
+    conf.ReadFile();
+    /*Server serv = Server("Loco", 8080);
     serv.start();
-    serv.acceptNewClient();
+    serv.acceptNewClient();*/
+    system("leaks a.out");
 }
