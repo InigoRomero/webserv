@@ -1,4 +1,5 @@
 #include "server.hpp"
+#define MAXDATASIZE 1000
 
 Server::Server(std::string serverName, int port):
     _sockfd(-1) , _port(port),  _name(serverName)
@@ -21,49 +22,56 @@ int Server::start(void)
 		std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
         return (0);
     }
-    if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr)<0)
-    {
-        perror("In bind");
-        return(0);
-    }
     int yes = 1;
     if (setsockopt(_sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
         perror("setsockopt");
         return(0);
     }
+    if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr)<0)
+    {
+        perror("In bind");
+        return(0);
+    }
 
     if (listen(_sockfd, 10) < 0)
     {
-        perror("In listen");
-        exit(EXIT_FAILURE);
+        perror("listen");
+        return(0);
     }
+   /* if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
+	{
+		perror("fcntl");
+        return (0);
+    }*/
     return (1);
 }
 
 int Server::acceptNewClient(void)
 {
     int accept_fd = 0;
-    //struct sockaddr_in	client_addr;
-    int addrlen = sizeof(_my_addr);
+    struct sockaddr_in	client_addr;
+    int addrlen, numbytes;
+    char buf[MAXDATASIZE];
+    bzero(&client_addr, sizeof(client_addr));
 
-    //bzero(&client_addr, sizeof(client_addr));
-
+    printf("server: waiting for connections...\n");
     while(1)
     {
-        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&_my_addr, (socklen_t*)&addrlen))<0)
+        addrlen = sizeof client_addr;
+        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen))<0)
         {
             perror("In accept");
             return(0);
         }
-        
-        char buffer[30000] = {0};
-        read( accept_fd , buffer, 30000);
-        printf("%s\n",buffer );
-    // send(new_socket, "hola", 4, 0); //escribir con send
-        write(accept_fd , "hola", 4);
-        printf("------------------Hello message sent-------------------\n");
-        close(accept_fd);
+        if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+            perror("recv");
+            exit(1);
+        }
+        buf[numbytes] = '\0';
+        printf("client: received '%s'\n",buf);
+        if (send(accept_fd, "Hello, world!", 13, 0) == -1)
+                perror("send");
+        close(accept_fd);  // parent doesn't need this
     }
     return (1);
 }
