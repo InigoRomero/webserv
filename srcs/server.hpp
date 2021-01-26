@@ -24,9 +24,16 @@ class Server
 
     public:
         struct sockaddr_in _my_addr;
-        int _sockfd;
-        int _port;
         std::string _name;
+        int _port;
+        int _sockfd;
+        /* TO DO: Una estructura o subclase para poder tener un vector de todos los methods de cada server (para poder guardar esto: method	    GET
+        root	    ./www/tester
+		index	    getindex.html
+		cgi			.bla
+		cgi_path    ./www/tester/CGI/cgi_tester)*/
+        
+        
 
     private:
         Server();

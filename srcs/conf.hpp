@@ -3,6 +3,7 @@
 
 #define UNAVAILABLE_TIME  20
 
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -22,7 +23,7 @@ class Conf
         Conf();
         const char *_path;
         std::vector<std::string> _conf;
-
+        std::vector<std::string> _methods;
     protected:
 
     public:
