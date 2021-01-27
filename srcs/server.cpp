@@ -68,16 +68,16 @@ fd_set Server::acceptNewClient(fd_set master)
         perror("In accept");
         exit(0);
     }
-        printf("selectserver: new connection");
-       if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
-            perror("recv");
-            exit(1);
-        }
-        buf[numbytes] = '\0';
-        printf("client: received '%s'\n",buf);
-        if (send(accept_fd, "Hello, world!", 13, 0) == -1)
-                perror("send");
-        close(accept_fd);  // parent doesn't need this*/
+    printf("selectserver: new connection");
+    if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("recv");
+        exit(1);
+    }
+    buf[numbytes] = '\0';
+    printf("client: received '%s'\n",buf);
+    if (send(accept_fd, "Hello, world!", 13, 0) == -1)
+            perror("send");
+    close(accept_fd);  // parent doesn't need this*/
    // FD_SET(_sockfd, &master);
     return (master);
 }

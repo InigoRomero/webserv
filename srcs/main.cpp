@@ -2,7 +2,7 @@
 #include "conf.hpp"
 #define MAXDATASIZE 1000
 
-int newAcceptNewClient(std::vector<Server> servers)
+int init(std::vector<Server> servers)
 {
     struct sockaddr_in	client_addr;
     int addrlen;
@@ -69,34 +69,7 @@ int main(int argc, char **av)
 		std::cerr << "[+] " << e.what() << std::endl;
 	}
     servers = conf.getServer();
-  //  for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
-   //     (*it).start();
-   int i = 0;
-    for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
-    { 
-        i++;
-        std::cout << "Server:" << i << "\n{ "<< std::endl;
-        std::cout << "  Lister: " << (*it)._port << std::endl;
-        std::cout << "  Error: " << (*it)._error << std::endl;
-        std::cout << "  Name: " << (*it)._name << std::endl;
-        std::cout << "  Host: " << (*it)._host << std::endl;
-        std::cout << "  Methods:  \n{ "<< std::endl;
-        for (std::vector<struct methods>::iterator it2 = (*it)._methods.begin(); it2 != (*it)._methods.end(); it2++)
-        {
-            std::cout << "  {\n   Method type: " << (*it2).name << std::endl;
-            std::cout << "   root: " << (*it2).root << std::endl;
-            std::cout << "   index: " << (*it2).index << std::endl;
-            std::cout << "   cgi: " << (*it2).cgi << std::endl;
-            std::cout << "   cgi_path: " << (*it2).cgi_path << std::endl;
-            std::cout << "   max_body: " << (*it2).max_body << "\n  }"<< std::endl;
-        }
-        std::cout << " }\n";
-        std::cout << "}\n";
-    }
-   newAcceptNewClient(servers);
-   // servers.back().acceptNewClient();
-
-
+    init(servers);
     /* SHOW ALL SERVERS CONF
     int i = 0;
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)

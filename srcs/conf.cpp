@@ -82,7 +82,7 @@ void Conf::fillServer()
             }
             while ((*it).find("}") == std::string::npos)
             {
-                if ((*it).find("location") != std::string::npos)
+                if ((*it).find("location") != std::string::npos) //falta coger texto location
                 {
                     it++;
                     struct methods methods;
