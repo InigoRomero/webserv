@@ -3,19 +3,8 @@
 
 #define UNAVAILABLE_TIME  20
 
-
-#include <string>
-#include <iostream>
-#include <vector>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h> 
-#include <netinet/ip.h>
-#include <fcntl.h>
-#include <sys/select.h>
-#include <unistd.h>
-#include <signal.h>
 #include "getnextline/get_next_line.hpp"
+#include "server.hpp"
 
 class Conf
 {
@@ -23,7 +12,7 @@ class Conf
         Conf();
         const char *_path;
         std::vector<std::string> _conf;
-        std::vector<std::string> _methods;
+        std::vector<Server> _servers;
     protected:
 
     public:
@@ -34,7 +23,11 @@ class Conf
         class ConfigFileException: public std::exception {
             virtual const char* what() const throw();
         };
-        void ReadFile();
+        void ReadFile(); //get in vector of strings all the data
+        void fillServer(); //get the info from the conf vector to Server vector object
+        void checkFile();
+        std::vector<Server> getServer() const; 
+        //std::vector<Server> GetInfo();
         
 };
 

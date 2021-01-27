@@ -1,8 +1,14 @@
 #include "server.hpp"
 #define MAXDATASIZE 1000
 
-Server::Server(std::string serverName, int port):
-    _sockfd(-1) , _port(port),  _name(serverName)
+Server::Server():
+     _methods(), _port(-1),  _error(""), _name(""), _host("")
+{
+    bzero(&_my_addr, sizeof(_my_addr));
+}
+
+Server::Server(int port, std::string error, std::string serverName, std::string host):
+      _port(port),  _error(error), _name(serverName), _host(host)
 {
     bzero(&_my_addr, sizeof(_my_addr));
 }
@@ -74,4 +80,30 @@ int Server::acceptNewClient(void)
         close(accept_fd);  // parent doesn't need this
     }
     return (1);
+}
+
+//seters
+void	Server::setError(const std::string &error)
+{ 
+    this->_error = error; 
+}
+
+void	Server::setName(const std::string &name)
+{ 
+    this->_name = name; 
+}
+
+void	Server::setHost(const std::string &host)
+{ 
+    this->_host = host; 
+}
+
+void	Server::setPort(int port)
+{ 
+    this->_port = port; 
+}
+
+void	Server::setMethods(struct methods methods)
+{ 
+    this->_methods.push_back(methods); 
 }
