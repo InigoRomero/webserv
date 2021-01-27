@@ -22,7 +22,9 @@ struct methods {
     std::string index;
     std::string cgi;
     std::string cgi_path;
-    std::string max_body;
+    int max_body;
+    int auto_index;
+    std::string auth;
 };
 
 class Server
@@ -54,7 +56,7 @@ class Server
 		~Server();
     
         int start(void);
-        int acceptNewClient(void);
+        fd_set acceptNewClient(fd_set master);
         void setError(const std::string &error);
         void setName(const std::string &name);
         void setHost(const std::string &host);

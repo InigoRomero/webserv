@@ -24,19 +24,17 @@ void Conf::ReadFile()
 
     if ((fd = open(_path, O_RDONLY)) == -1)
         throw ConfigFileException();
-    while ((ret = get_next_line(fd, &line)))
+    while ((ret = get_next_line(fd, &line)) >= 0)
     {
         std::string line2(line);
         line2.erase(std::remove_if(line2.begin(), line2.end(), isspace), line2.end());
         if(line2[0] == '#' || line2.empty())
             continue;
         _conf.push_back(line2);
-        free(line);
-    }
-    if (line)
-    {
-        _conf.push_back(line);
-        free(line);
+        if (line)
+            free(line);
+        if (ret == 0)
+            break ;
     }
     if (ret < 0)
         throw ConfigFileException();
@@ -68,50 +66,55 @@ void Conf::fillServer()
         {
             it++;
             _servers.push_back(Server());
-            while ((*it).find("{") == std::string::npos)
+            while ((*it).find("{") == std::string::npos && (*it).find("}") == std::string::npos)
             {
                 if ((found = (*it).find("listen")) != std::string::npos)
                     _servers.back().setPort(stoi((*it).substr(found + 6, std::string::npos)));
-                if ((found = (*it).find("error")) != std::string::npos)
+                else if ((found = (*it).find("error")) != std::string::npos)
                     _servers.back().setError((*it).substr(found + 5, std::string::npos));
-                if ((found = (*it).find("name")) != std::string::npos)
+                else if ((found = (*it).find("name")) != std::string::npos)
                     _servers.back().setName((*it).substr(found + 4, std::string::npos));
-                if ((found = (*it).find("host")) != std::string::npos)
+                else if ((found = (*it).find("host")) != std::string::npos)
                     _servers.back().setHost((*it).substr(found + 4, std::string::npos));
-
+                else
+                    throw ConfigFileException();
                 it++;
             }
-            while ((*it).find("}") == std::string::npos && it != _conf.end())
+            while ((*it).find("}") == std::string::npos)
             {
-                if ((*it).find("{") != std::string::npos)
+                if ((*it).find("location") != std::string::npos)
                 {
+                    it++;
                     struct methods methods;
-                    while ((*it).find("}") == std::string::npos && it != _conf.end())
+                    while ((*it).find("}") == std::string::npos) //compare en vez de find por si  "}" no esta en una linea a parte??
                     {
                         if ((*it).find("method") == 0)
                             methods.name = (*it).substr(6, std::string::npos);
-                        if ((*it).find("name") == 0)
-                            methods.name = (*it).substr(4, std::string::npos);
-                        if ((*it).find("root") == 0)
+                        else if ((*it).find("root") == 0)
                             methods.root = (*it).substr(4, std::string::npos);
-                        if ((*it).find("root") == 0)
-                            methods.root = (*it).substr(4, std::string::npos);
-                        if ((*it).find("index") == 0)
+                        else if ((*it).find("index") == 0)
                             methods.index = (*it).substr(5, std::string::npos);
-                        if ((*it).find("cgi") == 0)
-                            methods.cgi = (*it).substr(3, std::string::npos);
-                        if ((*it).find("cgi_path") == 0)
+                        else if ((*it).find("cgi_path") == 0)
                             methods.cgi_path = (*it).substr(8, std::string::npos);
-                        if ((*it).find("max_body") == 0)
-                            methods.max_body = (*it).substr(8, std::string::npos);
+                        else if ((*it).find("cgi") == 0)
+                            methods.cgi = (*it).substr(3, std::string::npos);
+                        else if ((*it).find("max_body") == 0)
+                            methods.max_body = stoi((*it).substr(8, std::string::npos));
+                        else if ((*it).find("auto_index") == 0)
+                            methods.auto_index = stoi((*it).substr(10, std::string::npos));
+                        else if ((*it).find("auth") == 0)
+                            methods.auth = (*it).substr(4, std::string::npos);
+                        else
+                           throw ConfigFileException();
                         it++;
                     }
                     _servers.back().setMethods(methods);
-                    if (it + 1 != _conf.end())
-                        it++;
+                    it++;
                 }
             }
         }
+        else
+            throw ConfigFileException();
     }
 }
 

@@ -52,24 +52,24 @@ int Server::start(void)
     return (1);
 }
 
-int Server::acceptNewClient(void)
+fd_set Server::acceptNewClient(fd_set master)
 {
     int accept_fd = 0;
     struct sockaddr_in	client_addr;
-    int addrlen, numbytes;
+    ssize_t addrlen;
+    ssize_t numbytes;
     char buf[MAXDATASIZE];
-    bzero(&client_addr, sizeof(client_addr));
+   memset(&client_addr, 0, sizeof(struct sockaddr));
 
     printf("server: waiting for connections...\n");
-    while(1)
+    addrlen = sizeof client_addr;
+    if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen))<0)
     {
-        addrlen = sizeof client_addr;
-        if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen))<0)
-        {
-            perror("In accept");
-            return(0);
-        }
-        if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("In accept");
+        exit(0);
+    }
+        printf("selectserver: new connection");
+       if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
             perror("recv");
             exit(1);
         }
@@ -77,9 +77,9 @@ int Server::acceptNewClient(void)
         printf("client: received '%s'\n",buf);
         if (send(accept_fd, "Hello, world!", 13, 0) == -1)
                 perror("send");
-        close(accept_fd);  // parent doesn't need this
-    }
-    return (1);
+        close(accept_fd);  // parent doesn't need this*/
+   // FD_SET(_sockfd, &master);
+    return (master);
 }
 
 //seters
