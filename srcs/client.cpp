@@ -36,9 +36,9 @@ void Client::readFD()
      char			buffer[MAXDATASIZE + 1];
      int ret = 0;
 
-     std::cout << "hola" << std::endl;
+     setReadFD(open("../www/index.html", O_RDONLY));
      ret = read(_read_fd, buffer, MAXDATASIZE);
-     std::cout << buffer << std::endl;
-     if (send(_fd, buffer, MAXDATASIZE, 0) == -1)
-            perror("send");
+     buffer[ret] = '\0';
+     _sendInfo += buffer;
+
 }

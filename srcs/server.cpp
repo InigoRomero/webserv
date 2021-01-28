@@ -93,14 +93,11 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 
 int  Server::writeResponse(std::vector<Client>::iterator it)
 {
-   /* std::cout << "sending mlaplana passwords... " << it->_sendInfo<< std::endl;
+    std::cout << "sending mlaplana passwords... " << std::endl;
     char char_array[it->_sendInfo.size()];
     strcpy(char_array, it->_sendInfo.c_str());
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
-            perror("send");*/
-    std::string		path;
-	it->setReadFD(open("../www/index.html", O_RDONLY));
-    std::cout << it->_read_fd << std::endl;
+            perror("send");
     return(1);
 }
 
