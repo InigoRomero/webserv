@@ -59,18 +59,20 @@ int init(std::vector<Server> servers)
                     it->readRequest(it2);
                     FD_CLR(it2->_fd, it2->_rSet);
                     it->proccessRequest(it2);
-                    FD_SET(it2->_fd, it2->_wSet);
                 }
 
                 if (FD_ISSET(it2->_fd, it2->_wSet))
                 {   
                     it->writeResponse(it2);
                     FD_CLR(it2->_fd, it2->_wSet);
+                    FD_SET(it2->_fd, it2->_rSet);
                     //FD_SET(it2->_fd, &rSet);
-                    close(it2->_fd);
                    // it2 = it->_clients.erase(it2);
                 }
-            }
+                if (it2->_read_fd != -1)
+						it2->readFD();
+                    close(it2->_fd);
+                }
         }
     }
     return (1);

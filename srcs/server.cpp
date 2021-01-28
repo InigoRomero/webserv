@@ -93,16 +93,20 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 
 int  Server::writeResponse(std::vector<Client>::iterator it)
 {
-    std::cout << "sending mlaplana passwords..." << std::endl;
-    if (send(it->_fd, it->_sendInfo, strlen(it->_sendInfo), 0) == -1)
-            perror("send");
+   /* std::cout << "sending mlaplana passwords... " << it->_sendInfo<< std::endl;
+    char char_array[it->_sendInfo.size()];
+    strcpy(char_array, it->_sendInfo.c_str());
+    if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
+            perror("send");*/
+    std::string		path;
+	it->_read_fd = open("./www/index.html", O_RDONLY);
+
     return(1);
 }
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    char info[14] = "<h1>jaja</h1>";
-    it->setSendInfo(info);
+    it->setSendInfo(std::string("<h1>chinatown</h1>"));
     return 0;
     
 }

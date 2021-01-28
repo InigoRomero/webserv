@@ -31,10 +31,11 @@ class Client
 		std::string         _recvInfo;
         struct sockaddr_in  _client_addr;
         std::string         _ip;
-        char*         _sendInfo;
+        std::string         _sendInfo;
 
         void setRecvInfo(std::string info);
-        void setSendInfo(char *info);
+        void setSendInfo(std::string info);
+        void readFD();
 };
 
 #endif
