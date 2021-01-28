@@ -54,17 +54,19 @@ class Server
 
     public:
         Server();
-        Server(int port, std::string error, std::string serverName, std::string );
+        Server(int port, std::string error, std::string serverName, std::string host);
 		~Server();
     
         int start(void);
-        fd_set acceptNewClient(fd_set readSet, fd_set writeSet);
+        int acceptNewClient(fd_set *readSet, fd_set *writeSet);
         void setError(const std::string &error);
         void setName(const std::string &name);
         void setHost(const std::string &host);
         void setPort(int port);
         void setMethods(struct methods methods);
-        int  readRequest(std::vector<Client*>::iterator it);
+        int  readRequest(std::vector<Client>::iterator it);
+        int  writeResponse(std::vector<Client>::iterator it);
+        int proccessRequest(std::vector<Client>::iterator it);
 };
 
 

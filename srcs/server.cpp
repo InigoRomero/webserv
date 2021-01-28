@@ -44,7 +44,8 @@ int Server::start(void)
         perror("listen");
         return(0);
     }
-   /* if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
+    /*
+    if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
         return (0);
@@ -52,40 +53,59 @@ int Server::start(void)
     return (1);
 }
 
-fd_set Server::acceptNewClient(fd_set readSet, fd_set writeSet)
+int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 {
     int                 accept_fd = 0;
     struct sockaddr_in  client_addr;
     ssize_t             addrlen;
-    ssize_t             numbytes;
-    char                buf[MAXDATASIZE];
+
 
     memset(&client_addr, 0, sizeof(struct sockaddr));
     addrlen = sizeof client_addr;
-    if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen))<0)
+    if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen)) < 0)
     {
         perror("In accept");
         exit(0);
     }
+    FD_SET(accept_fd, readSet);
+    Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
+    _clients.push_back(newClient);
+    std::cout << "new Client accepted\n";
 
-    if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+    return (1);
+}
+
+ int  Server::readRequest(std::vector<Client>::iterator it)
+ {
+    ssize_t             numbytes;
+    char                buf[MAXDATASIZE];
+
+    if ((numbytes = recv(it->_fd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
         exit(1);
     }
     buf[numbytes] = '\0';
-    Client newClient = Client(accept_fd, &readSet, &writeSet, buf);
-    _clients.push_back(newClient);
-    printf("client: received: %s",buf);
-    if (send(accept_fd, "Hello, world!\n", 14, 0) == -1)
+    std::string str(buf);
+    it->setRecvInfo(str);
+    std::cout << "server received: " << buf << std::endl;
+    return(1);
+ }
+
+int  Server::writeResponse(std::vector<Client>::iterator it)
+{
+    std::cout << "sending mlaplana passwords..." << std::endl;
+    if (send(it->_fd, it->_sendInfo, strlen(it->_sendInfo), 0) == -1)
             perror("send");
-    close(accept_fd);  // parent doesn't need this*/
-    return (readSet);
+    return(1);
 }
 
- int  Server::readRequest(std::vector<Client*>::iterator it)
- {
-
- }
+int  Server::proccessRequest(std::vector<Client>::iterator it)
+{
+    char info[14] = "<h1>jaja</h1>";
+    it->setSendInfo(info);
+    return 0;
+    
+}
 
 //seters
 void	Server::setError(const std::string &error) { this->_error = error; }

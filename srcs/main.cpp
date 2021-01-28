@@ -50,15 +50,26 @@ int init(std::vector<Server> servers)
              //   if (config.getOpenFd(g_servers) > MAX_FD)
 			//		s->refuseConnection();
 		    //	else
-                    readSet = (*it).acceptNewClient(readSet, writeSet);
-                    
+                (*it).acceptNewClient(&readSet, &writeSet);   
             }
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
-                if (FD_ISSET(it2->_fd, &readSet))
-					it->readRequest(it2);
-				//if (FD_ISSET(it2->_fd, &writeSet))
-				//	writeResponse(it2)
+                if (FD_ISSET(it2->_fd, it2->_rSet))
+                {
+                    it->readRequest(it2);
+                    FD_CLR(it2->_fd, it2->_rSet);
+                    it->proccessRequest(it2);
+                    FD_SET(it2->_fd, it2->_wSet);
+                }
+
+                if (FD_ISSET(it2->_fd, it2->_wSet))
+                {   
+                    it->writeResponse(it2);
+                    FD_CLR(it2->_fd, it2->_wSet);
+                    //FD_SET(it2->_fd, &rSet);
+                    close(it2->_fd);
+                   // it2 = it->_clients.erase(it2);
+                }
             }
         }
     }
