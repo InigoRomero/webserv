@@ -14,6 +14,7 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <signal.h>
+#include  "client.hpp"
 
 struct methods {
     std::string location;
@@ -37,6 +38,7 @@ class Server
     public:
         struct sockaddr_in _my_addr;
         std::vector<struct methods> _methods;
+        std::vector<Client> _clients;
         int          _port;
         std::string _error;
         std::string _name;
@@ -56,12 +58,13 @@ class Server
 		~Server();
     
         int start(void);
-        fd_set acceptNewClient(fd_set master);
+        fd_set acceptNewClient(fd_set readSet, fd_set writeSet);
         void setError(const std::string &error);
         void setName(const std::string &name);
         void setHost(const std::string &host);
         void setPort(int port);
         void setMethods(struct methods methods);
+        int  readRequest(std::vector<Client*>::iterator it);
 };
 
 

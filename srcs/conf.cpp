@@ -28,9 +28,8 @@ void Conf::ReadFile()
     {
         std::string line2(line);
         line2.erase(std::remove_if(line2.begin(), line2.end(), isspace), line2.end());
-        if(line2[0] == '#' || line2.empty())
-            continue;
-        _conf.push_back(line2);
+        if(!(line2[0] == '#' || line2.empty()))
+            _conf.push_back(line2);
         if (line)
             free(line);
         if (ret == 0)
@@ -54,6 +53,19 @@ void Conf::checkFile()
     }
     if (sum != 0)
         throw ConfigFileException();
+}
+
+void Conf::initMethods(struct methods *methods)
+{
+    methods->location = "";
+    methods->name = "";
+    methods->root = "";
+    methods->index = "";
+    methods->cgi_path = "";
+    methods->cgi = "";
+    methods->max_body = -1;
+    methods->auto_index = -1;
+    methods->auth = "";
 }
 
 void Conf::fillServer()
@@ -84,31 +96,34 @@ void Conf::fillServer()
             {
                 if ((*it).find("location") != std::string::npos) //falta coger texto location
                 {
+                    struct methods p;
+                    initMethods(&p);
+                    p.location = (*it).substr(8, std::string::npos);
+                    p.location = p.location.substr(0, p.location.length() - 1);
                     it++;
-                    struct methods methods;
                     while ((*it).find("}") == std::string::npos) //compare en vez de find por si  "}" no esta en una linea a parte??
                     {
                         if ((*it).find("method") == 0)
-                            methods.name = (*it).substr(6, std::string::npos);
+                            p.name = (*it).substr(6, std::string::npos);
                         else if ((*it).find("root") == 0)
-                            methods.root = (*it).substr(4, std::string::npos);
+                            p.root = (*it).substr(4, std::string::npos);
                         else if ((*it).find("index") == 0)
-                            methods.index = (*it).substr(5, std::string::npos);
+                            p.index = (*it).substr(5, std::string::npos);
                         else if ((*it).find("cgi_path") == 0)
-                            methods.cgi_path = (*it).substr(8, std::string::npos);
+                            p.cgi_path = (*it).substr(8, std::string::npos);
                         else if ((*it).find("cgi") == 0)
-                            methods.cgi = (*it).substr(3, std::string::npos);
+                            p.cgi = (*it).substr(3, std::string::npos);
                         else if ((*it).find("max_body") == 0)
-                            methods.max_body = stoi((*it).substr(8, std::string::npos));
+                            p.max_body = stoi((*it).substr(8, std::string::npos));
                         else if ((*it).find("auto_index") == 0)
-                            methods.auto_index = stoi((*it).substr(10, std::string::npos));
+                            p.auto_index = stoi((*it).substr(10, std::string::npos));
                         else if ((*it).find("auth") == 0)
-                            methods.auth = (*it).substr(4, std::string::npos);
+                            p.auth = (*it).substr(4, std::string::npos);
                         else
                            throw ConfigFileException();
                         it++;
                     }
-                    _servers.back().setMethods(methods);
+                    _servers.back().setMethods(p);
                     it++;
                 }
             }

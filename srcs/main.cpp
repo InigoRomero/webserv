@@ -1,17 +1,25 @@
 #include "server.hpp"
 #include "conf.hpp"
-#define MAXDATASIZE 1000
+
+int max_fd(std::vector<Server> servers)
+{
+    int max = 0;
+    int fd;
+
+    for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
+    {
+        fd = it->_sockfd;
+        if (fd > max)
+            max = fd;
+    }
+    return (max);
+}
 
 int init(std::vector<Server> servers)
 {
-    struct sockaddr_in	client_addr;
-    int addrlen;
-    //fd_set read_fds;
-    //fd_set master;
-    fd_set					readSet;
-    fd_set					writeSet;
-    fd_set					rSet;
-    fd_set					wSet;
+    struct sockaddr_in	    client_addr;
+    int                     addrlen;
+    fd_set					readSet, writeSet, rSet, wSet;
     struct timeval			timeout;
 
     signal(SIGINT, exit);
@@ -22,29 +30,36 @@ int init(std::vector<Server> servers)
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
-		it->start();
-    for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
+    {
+		if(!(it->start()))
+            perror("start");
 		FD_SET(it->_sockfd, &rSet);
+    }
     bzero(&client_addr, sizeof(client_addr));
+    printf("server: waiting for connections...\n");
     for(;;)
     {
-        readSet = rSet;
+        readSet = rSet; //reset fds
 		writeSet = wSet;
         addrlen = sizeof client_addr;
-        int		max = 0;
-	    int		fd;
-
-        for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
-        {
-            fd = it->_sockfd;
-            if (fd > max)
-                max = fd;
-        }
-        select(max + 1, &readSet, &writeSet, NULL, &timeout);
+        select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
-            if (FD_ISSET((*it)._sockfd, &readSet)) 
-                readSet = (*it).acceptNewClient(readSet);
+            if (FD_ISSET((*it)._sockfd, &readSet))
+            {
+             //   if (config.getOpenFd(g_servers) > MAX_FD)
+			//		s->refuseConnection();
+		    //	else
+                    readSet = (*it).acceptNewClient(readSet, writeSet);
+                    
+            }
+            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
+            {
+                if (FD_ISSET(it2->_fd, &readSet))
+					it->readRequest(it2);
+				//if (FD_ISSET(it2->_fd, &writeSet))
+				//	writeResponse(it2)
+            }
         }
     }
     return (1);
@@ -52,13 +67,14 @@ int init(std::vector<Server> servers)
 
 int main(int argc, char **av)
 {
-    std::vector<Server> servers;
 	if (argc != 2)
     {
         std::cerr << "Usage: ./webserv config-file" << std::endl;
     	return (EXIT_FAILURE);
     }
+    std::vector<Server> servers;
     Conf conf = Conf(av[1]);
+
     try
 	{
         conf.ReadFile();
@@ -70,8 +86,9 @@ int main(int argc, char **av)
 	}
     servers = conf.getServer();
     init(servers);
-    /* SHOW ALL SERVERS CONF
-    int i = 0;
+    //system("leaks a.out");
+    //SHOW ALL SERVERS CONF
+    /*int i = 0;
     for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
     { 
         i++;
@@ -92,6 +109,5 @@ int main(int argc, char **av)
         }
         std::cout << " }\n";
         std::cout << "}\n";
-    } */
-    //system("leaks a.out");
+    }*/
 }

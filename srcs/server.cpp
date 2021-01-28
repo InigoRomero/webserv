@@ -52,58 +52,48 @@ int Server::start(void)
     return (1);
 }
 
-fd_set Server::acceptNewClient(fd_set master)
+fd_set Server::acceptNewClient(fd_set readSet, fd_set writeSet)
 {
-    int accept_fd = 0;
-    struct sockaddr_in	client_addr;
-    ssize_t addrlen;
-    ssize_t numbytes;
-    char buf[MAXDATASIZE];
-   memset(&client_addr, 0, sizeof(struct sockaddr));
+    int                 accept_fd = 0;
+    struct sockaddr_in  client_addr;
+    ssize_t             addrlen;
+    ssize_t             numbytes;
+    char                buf[MAXDATASIZE];
 
-    printf("server: waiting for connections...\n");
+    memset(&client_addr, 0, sizeof(struct sockaddr));
     addrlen = sizeof client_addr;
     if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen))<0)
     {
         perror("In accept");
         exit(0);
     }
-    printf("selectserver: new connection");
+
     if ((numbytes = recv(accept_fd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
         exit(1);
     }
     buf[numbytes] = '\0';
-    printf("client: received '%s'\n",buf);
-    if (send(accept_fd, "Hello, world!", 13, 0) == -1)
+    Client newClient = Client(accept_fd, &readSet, &writeSet, buf);
+    _clients.push_back(newClient);
+    printf("client: received: %s",buf);
+    if (send(accept_fd, "Hello, world!\n", 14, 0) == -1)
             perror("send");
     close(accept_fd);  // parent doesn't need this*/
-   // FD_SET(_sockfd, &master);
-    return (master);
+    return (readSet);
 }
+
+ int  Server::readRequest(std::vector<Client*>::iterator it)
+ {
+
+ }
 
 //seters
-void	Server::setError(const std::string &error)
-{ 
-    this->_error = error; 
-}
+void	Server::setError(const std::string &error) { this->_error = error; }
 
-void	Server::setName(const std::string &name)
-{ 
-    this->_name = name; 
-}
+void	Server::setName(const std::string &name) { this->_name = name; }
 
-void	Server::setHost(const std::string &host)
-{ 
-    this->_host = host; 
-}
+void	Server::setHost(const std::string &host) { this->_host = host; }
 
-void	Server::setPort(int port)
-{ 
-    this->_port = port; 
-}
+void	Server::setPort(int port) { this->_port = port; }
 
-void	Server::setMethods(struct methods methods)
-{ 
-    this->_methods.push_back(methods); 
-}
+void	Server::setMethods(struct methods methods) { this->_methods.push_back(methods); }
