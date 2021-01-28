@@ -99,8 +99,8 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
             perror("send");*/
     std::string		path;
-	it->_read_fd = open("./www/index.html", O_RDONLY);
-
+	it->setReadFD(open("../www/index.html", O_RDONLY));
+    std::cout << it->_read_fd << std::endl;
     return(1);
 }
 

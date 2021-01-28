@@ -25,10 +25,18 @@ void Client::setSendInfo(std::string info)
 {
      _sendInfo = info;
 }
+
+void Client::setReadFD(int fd)
+{
+     _read_fd = fd;
+}
+
 void Client::readFD()
 {
      char			buffer[MAXDATASIZE + 1];
      int ret = 0;
+
+     std::cout << "hola" << std::endl;
      ret = read(_read_fd, buffer, MAXDATASIZE);
      std::cout << buffer << std::endl;
      if (send(_fd, buffer, MAXDATASIZE, 0) == -1)

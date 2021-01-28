@@ -35,6 +35,7 @@ class Client
 
         void setRecvInfo(std::string info);
         void setSendInfo(std::string info);
+        void setReadFD(int fd);
         void readFD();
 };
 
