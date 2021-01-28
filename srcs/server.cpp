@@ -103,7 +103,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    it->setSendInfo(std::string("<h1>chinatown</h1>"));
+   // it->setSendInfo(std::string("<h1>chinatown</h1>"));
     return 0;
     
 }

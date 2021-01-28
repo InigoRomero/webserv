@@ -56,11 +56,17 @@ int init(std::vector<Server> servers)
             {
                 if (FD_ISSET(it2->_fd, it2->_rSet))
                 {
-                    std::cout << "hola1" << std::endl;
                     it->readRequest(it2);
                     FD_CLR(it2->_fd, it2->_rSet);
                     it->proccessRequest(it2);
-                    it2->setReadFD(0);
+                    //do what request wants
+                }
+                if (FD_ISSET(it2->_fd, it2->_wSet))
+                {   
+                    it->writeResponse(it2);
+                    FD_CLR(it2->_fd, it2->_wSet);
+                    FD_CLR(it2->_fd, it2->_rSet);
+                    close(it2->_fd);
                 }
                 if (it2->_read_fd != -1)
                 {
@@ -68,14 +74,6 @@ int init(std::vector<Server> servers)
                     it2->setReadFD(-1);
                     FD_CLR(it2->_fd, it2->_rSet);
                     FD_SET(it2->_fd, it2->_wSet);
-                }
-                if (FD_ISSET(it2->_fd, it2->_wSet))
-                {   
-                    std::cout << "hola2" << std::endl;
-                    it->writeResponse(it2);
-                    FD_CLR(it2->_fd, it2->_wSet);
-                    FD_CLR(it2->_fd, it2->_rSet);
-                    close(it2->_fd);
                 }
                 }
         }
@@ -129,3 +127,12 @@ int main(int argc, char **av)
         std::cout << "}\n";
     }*/
 }
+
+/*Get 
+    Resquest data
+    Check if request its okey 
+    parse request data
+    if is not okey return error page
+    if its okey do a GET
+    https://github.com/Fraberg/webserv/blob/dcb9dd16c95281466fb9b0a4f080a74c472d7f18/project/v1/srcs/request/Parsing.cpp
+*/
