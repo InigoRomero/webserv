@@ -23,8 +23,8 @@ struct methods {
     std::string index;
     std::string cgi;
     std::string cgi_path;
-    int max_body;
-    int auto_index;
+    int         max_body;
+    int         auto_index;
     std::string auth;
 };
 
@@ -36,14 +36,14 @@ class Server
         //
 
     public:
-        struct sockaddr_in _my_addr;
+        struct sockaddr_in          _my_addr;
         std::vector<struct methods> _methods;
-        std::vector<Client> _clients;
-        int          _port;
-        std::string _error;
-        std::string _name;
-        std::string _host;
-        int         _sockfd;
+        std::vector<Client>         _clients;
+        int                         _port;
+        std::string                 _error;
+        std::string                 _name;
+        std::string                 _host;
+        int                         _sockfd;
         
         
 
@@ -57,16 +57,16 @@ class Server
         Server(int port, std::string error, std::string serverName, std::string host);
 		~Server();
     
-        int start(void);
-        int acceptNewClient(fd_set *readSet, fd_set *writeSet);
-        void setError(const std::string &error);
-        void setName(const std::string &name);
-        void setHost(const std::string &host);
-        void setPort(int port);
-        void setMethods(struct methods methods);
-        int  readRequest(std::vector<Client>::iterator it);
-        int  writeResponse(std::vector<Client>::iterator it);
-        int proccessRequest(std::vector<Client>::iterator it);
+        int     start(void);
+        int     acceptNewClient(fd_set *readSet, fd_set *writeSet);
+        void    setError(const std::string &error);
+        void    setName(const std::string &name);
+        void    setHost(const std::string &host);
+        void    setPort(int port);
+        void    setMethods(struct methods methods);
+        int     readRequest(std::vector<Client>::iterator it);
+        int     writeResponse(std::vector<Client>::iterator it);
+        int     proccessRequest(std::vector<Client>::iterator it);
 };
 
 

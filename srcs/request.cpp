@@ -20,14 +20,14 @@ Request::Request(): _req(""), _validate(false)
     _headers.insert(std::pair<std::string,std::string>("Transfer-Encoding:", "")); 
     _headers.insert(std::pair<std::string,std::string>("User-Agent:", "")); 
     _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate:", ""));
-    this->_methods.push_back("GET");
-    this->_methods.push_back("POST");
-    this->_methods.push_back("PUT");
-    this->_methods.push_back("HEAD");
-    this->_methods.push_back("CONNECT");
-    this->_methods.push_back("OPTIONS");
-    this->_methods.push_back("TRACE");
-    this->_methods.push_back("PATCH");
+    this->_avMethods.push_back("GET");
+    this->_avMethods.push_back("POST");
+    this->_avMethods.push_back("PUT");
+    this->_avMethods.push_back("HEAD");
+    this->_avMethods.push_back("CONNECT");
+    this->_avMethods.push_back("OPTIONS");
+    this->_avMethods.push_back("TRACE");
+    this->_avMethods.push_back("PATCH");
 }
 
 Request::Request(std::string req): _req(req)
@@ -43,18 +43,19 @@ Request::~Request()
 void Request::parseRequest()
 {
 	std::cout << "Server recived\n";
-	//std::cout << _req << std::endl;
+    std::cout << _req;
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
 
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
-    	std::cout << lines.back() << std::endl;
     	_req.erase(0, pos + 1);
 	}
     validateHeader(lines);
-    std::cout << "Validated: " << _validate << std::endl;
+    if (!_validate)
+        sendError();
     std::string::iterator it = lines[0].begin();
+    //eliminar espacios repetidos
     while (isspace(*it))
         it = lines[0].erase(it);
     while (it != lines[0].end())
@@ -64,11 +65,15 @@ void Request::parseRequest()
         else
             it++;
     }
-    std::cout << lines[0] << std::endl;
-    //pos = lines[0].find(' ');
-    //std::string method = lines[0].substr(0, pos);
-    //std::string uri = lines[0].substr(pos + 1, ' ');
-    
+    std::vector<std::string> fline;
+	while ((pos = lines[0].find(' ')) != std::string::npos) {
+    	fline.push_back(lines[0].substr(0, pos));
+    	lines[0].erase(0, pos + 1);
+	}
+    fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
+    _method = fline[0];
+    _uri = fline[1];
+    _version = fline[2];
     //take all the headers we have to take
     for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
     {
@@ -81,20 +86,6 @@ void Request::parseRequest()
             }
         }
     }
-    for(std::map<std::string, std::string>::iterator it= _headers.begin();
-    it != _headers.end(); ++it)
-    {
-        std::cout << it->first << " - " << it->second <<"\n";
-    }
-    /*lines[0].erase(std::remove_if(lines[0].begin(), lines[0].end(), isspace), lines[0].end());
-	std::cout << lines[0];
-	std::string method = lines[0].substr(0, lines[0].find('/'));
-	std::string ver = lines[0].substr(lines[0].find("HTTP/1.1"), std::string::npos);
-	if (ver != "HTTP/1.1")
-		exit(1);
-	std::string uri = lines[0].substr(lines[0].find('/'), lines[0].find("HTTP/1.1"));
-    */
-	//std::string method = lines[0].
 }
 
 void Request::validateHeader(std::vector<std::string> reqL)
@@ -102,7 +93,7 @@ void Request::validateHeader(std::vector<std::string> reqL)
     //check method
     size_t found = 0;
 
-    for (std::vector<std::string>::iterator it = _methods.begin(); it != _methods.end(); it++)
+    for (std::vector<std::string>::iterator it = _avMethods.begin(); it != _avMethods.end(); it++)
     {
         if ((found = reqL[0].find((*it))) != std::string::npos)
         {
@@ -115,4 +106,9 @@ void Request::validateHeader(std::vector<std::string> reqL)
 void Request::setRequest(std::string req)
 {
 	_req = req;
+}
+
+void Request::sendError()
+{
+    std::cout << "pixa que te has liado" << std::endl;
 }

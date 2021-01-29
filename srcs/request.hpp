@@ -37,17 +37,20 @@ public:
 	Request(std::string req);
 	~Request();
 
-    std::string                 _req;
-   // std::vector<std::string>    _headersAllowed;
-    std::vector<std::string>    _methods;
-    std::map<std::string, std::string>          _headers; 
-    bool                        _validate;
+    std::string                         _req;
+    std::vector<std::string>            _avMethods;
+    std::string                         _method;
+    std::string                         _uri;
+    std::string                         _version;
+    std::map<std::string, std::string>  _headers; 
+    bool                                _validate;
 
     void setRequest(std::string req);
 	void parseRequest();
 	void parseHeaders();
     void validateHeader(std::vector<std::string> reqL);
     void validateRequest();
+    void sendError();
 };
 
 #endif
