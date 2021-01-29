@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <string>
 #include <map>
+#include "request.hpp"
 
 class Client
 {
@@ -28,12 +29,11 @@ class Client
         int                 _port;
 		fd_set		        *_rSet;
 		fd_set		        *_wSet;
-		std::string         _recvInfo;
         struct sockaddr_in  _client_addr;
         std::string         _ip;
         std::string         _sendInfo;
+        Request             _request;
 
-        void setRecvInfo(std::string info);
         void setSendInfo(std::string info);
         void setReadFD(int fd);
         void readFD();

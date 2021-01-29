@@ -86,8 +86,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     }
     buf[numbytes] = '\0';
     std::string str(buf);
-    it->setRecvInfo(str);
-    std::cout << "server received: " << buf << std::endl;
+    it->_request.setRequest(str); 
     return(1);
  }
 
@@ -103,7 +102,8 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-   // it->setSendInfo(std::string("<h1>chinatown</h1>"));
+    it->_request.parseRequest();
+    //it->setSendInfo(std::string("<h1>chinatown</h1>"));
     return 0;
     
 }
