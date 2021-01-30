@@ -29,6 +29,7 @@ public:
 	void parseHeaders();
     void validateHeader(std::vector<std::string> reqL);
     void validateRequest();
+    void handleGet();
 };
 
 #endif

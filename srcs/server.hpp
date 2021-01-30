@@ -14,7 +14,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <signal.h>
-#include  "client.hpp"
+#include "client.hpp"
+#include "methods.hpp"
 
 struct methods {
     std::string location;
@@ -44,6 +45,10 @@ class Server
         std::string                 _name;
         std::string                 _host;
         int                         _sockfd;
+		fd_set					    *_readSet;
+		fd_set					    *_writeSet;
+		fd_set					    *_rSet;
+		fd_set					    *_wSet;
         
         
 
@@ -57,7 +62,7 @@ class Server
         Server(int port, std::string error, std::string serverName, std::string host);
 		~Server();
     
-        int     start(void);
+        int     start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet);
         int     acceptNewClient(fd_set *readSet, fd_set *writeSet);
         void    setError(const std::string &error);
         void    setName(const std::string &name);

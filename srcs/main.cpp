@@ -17,23 +17,21 @@ int max_fd(std::vector<Server> servers)
 
 int init(std::vector<Server> servers)
 {
-    fd_set					readSet, writeSet, rSet, wSet;
+    fd_set					readSet;
+	fd_set					writeSet;
+	fd_set					rSet;
+	fd_set					wSet;
     struct timeval			timeout;
 
-    signal(SIGINT, exit);
-	FD_ZERO(&rSet);
-	FD_ZERO(&wSet);
-	FD_ZERO(&readSet);
-	FD_ZERO(&writeSet);
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
     {
-		if(!(it->start()))
+		if(!(it->start(&rSet, &wSet, &readSet, &writeSet)))
             perror("start");
 		FD_SET(it->_sockfd, &rSet);
     }
-    printf("server: waiting for connections...\n");
+    std::cout << "Listening for connections..." << std::endl;
     for(;;)
     {
         readSet = rSet; //reset fds
@@ -42,13 +40,7 @@ int init(std::vector<Server> servers)
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))
-            {
-             //   if (config.getOpenFd(g_servers) > MAX_FD)
-			//		s->refuseConnection();
-		    //	else
-                std::cout << "why ypu: " << (*it)._sockfd << std::endl;
                 (*it).acceptNewClient(&readSet, &writeSet);   
-            }
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
                 if (FD_ISSET(it2->_fd, it2->_rSet))
@@ -56,8 +48,6 @@ int init(std::vector<Server> servers)
                     it->readRequest(it2);
                     FD_CLR(it2->_fd, it2->_rSet);
                     it->proccessRequest(it2);
-                   // FD_SET(it2->_fd, it2->_wSet);
-                    //do what request wants
                 }
                 if (it2->_read_fd != -1)
                 {
@@ -74,8 +64,7 @@ int init(std::vector<Server> servers)
                     FD_CLR(it2->_fd, &readSet);
                     close(it2->_fd);
                 }
-               // std::cout << it2->_read_fd << std::endl;
-                }
+            }
         }
     }
     return (1);

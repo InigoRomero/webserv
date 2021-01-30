@@ -50,7 +50,7 @@ int Request::parseRequest()
     	_req.erase(0, pos + 1);
 	}
     validateHeader(lines);
-    if (_validate) //rembember to change !_validate
+    if (!_validate)
         return(0);
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos

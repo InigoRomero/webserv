@@ -16,8 +16,17 @@ Server::Server(int port, std::string error, std::string serverName, std::string 
 Server::~Server()
 {}
 
-int Server::start(void)
+int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 {
+	signal(SIGINT, exit);
+	FD_ZERO(rSet);
+	FD_ZERO(wSet);
+	FD_ZERO(readSet);
+	FD_ZERO(writeSet);
+    _readSet = readSet;
+	_writeSet = writeSet;
+	_wSet = wSet;
+	_rSet = rSet;
     errno = 0;
     // socket
     _my_addr.sin_family = AF_INET;
@@ -103,9 +112,19 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    
+    it->setSendInfo("HTTP/1.1 200 OK\n");
+    it->setStatus("HTTP/1.1 200 OK");
     if(!it->_request.parseRequest())
+    {
+        it->setSendInfo("HTTP/1.1 400 bad Request\n");
+        it->setStatus("400");
         sendError(it);
+    }
+    if (it->_request._method == "GET")
+        responseGet(it);
+    if (it->_status != "HTTP/1.1 200 OK")
+        sendError(it);
+    FD_SET(it->_fd, _writeSet);
     //it->setSendInfo(std::string("<h1>chinatown</h1>"));
     return 0;
 }
@@ -113,9 +132,9 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 void Server::sendError(std::vector<Client>::iterator it)
 {
     std::string		path;
-	//path = client.conf["error"] + "/" + client.res.status_code.substr(0, 3) + ".html";
-	//client.conf["path"] = path;
-    path = "." + _error + "/" + "404" + ".html";
+
+    size_t pos = it->_status.find(" ");
+    path = "." + _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
 	it->setReadFD(open(path.c_str(), O_RDONLY));
 }
 
