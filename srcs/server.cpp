@@ -18,11 +18,6 @@ Server::~Server()
 
 int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 {
-	signal(SIGINT, exit);
-	FD_ZERO(rSet);
-	FD_ZERO(wSet);
-	FD_ZERO(readSet);
-	FD_ZERO(writeSet);
     _readSet = readSet;
 	_writeSet = writeSet;
 	_wSet = wSet;

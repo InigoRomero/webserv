@@ -4,6 +4,7 @@ void responseGet(std::vector<Client>::iterator client)
 {
 	std::string response = client->_request._version;
 	std::string		path;
+	
 	int ret = 0;
 	//check if request file exist
 	path = "../www" + client->_request._uri;

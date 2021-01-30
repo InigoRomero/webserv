@@ -23,6 +23,11 @@ int init(std::vector<Server> servers)
 	fd_set					wSet;
     struct timeval			timeout;
 
+	signal(SIGINT, exit);
+	FD_ZERO(&rSet);
+	FD_ZERO(&wSet);
+	FD_ZERO(&readSet);
+	FD_ZERO(&writeSet);
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
