@@ -124,8 +124,8 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         responseGet(it);
     if (it->_status != "HTTP/1.1 200 OK")
         sendError(it);
-    FD_SET(it->_fd, _writeSet);
-    //it->setSendInfo(std::string("<h1>chinatown</h1>"));
+   // FD_SET(it->_fd, _writeSet);
+
     return 0;
 }
 
