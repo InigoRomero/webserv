@@ -34,6 +34,8 @@ void Client::readFD()
 
      ret = read(_read_fd, buffer, MAXDATASIZE);
      buffer[ret] = '\0';
-     _sendInfo += buffer;
+     _sendInfo = buffer;
+     std::cout << _sendInfo << std::endl;
+     close(_read_fd);
      setReadFD(-1);
 }

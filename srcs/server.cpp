@@ -69,7 +69,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     }
     Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
     _clients.push_back(newClient);
-        FD_SET(accept_fd, readSet);
+    FD_SET(accept_fd, readSet);
     //FD_CLR(accept_fd, readSet);
     std::cout << "new Client accepted\n";
 

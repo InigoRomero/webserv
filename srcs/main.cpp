@@ -17,8 +17,6 @@ int max_fd(std::vector<Server> servers)
 
 int init(std::vector<Server> servers)
 {
-    struct sockaddr_in	    client_addr;
-    int                     addrlen;
     fd_set					readSet, writeSet, rSet, wSet;
     struct timeval			timeout;
 
@@ -35,13 +33,11 @@ int init(std::vector<Server> servers)
             perror("start");
 		FD_SET(it->_sockfd, &rSet);
     }
-    bzero(&client_addr, sizeof(client_addr));
     printf("server: waiting for connections...\n");
     for(;;)
     {
         readSet = rSet; //reset fds
 		writeSet = wSet;
-        addrlen = sizeof client_addr;
         select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
@@ -68,6 +64,7 @@ int init(std::vector<Server> servers)
                     it2->readFD();
                     FD_CLR(it2->_fd, it2->_rSet);
                     FD_SET(it2->_fd, it2->_wSet);
+                    close(it2->_read_fd);
                 }
                 if (FD_ISSET(it2->_fd, it2->_wSet))
                 {   
