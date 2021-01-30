@@ -67,9 +67,10 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
         perror("In accept");
         exit(0);
     }
-    FD_SET(accept_fd, readSet);
     Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
     _clients.push_back(newClient);
+        FD_SET(accept_fd, readSet);
+    //FD_CLR(accept_fd, readSet);
     std::cout << "new Client accepted\n";
 
     return (1);
@@ -102,10 +103,20 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    it->_request.parseRequest();
+    
+    if(!it->_request.parseRequest())
+        sendError(it);
     //it->setSendInfo(std::string("<h1>chinatown</h1>"));
     return 0;
-    
+}
+
+void Server::sendError(std::vector<Client>::iterator it)
+{
+    std::string		path;
+	//path = client.conf["error"] + "/" + client.res.status_code.substr(0, 3) + ".html";
+	//client.conf["path"] = path;
+    path = "." + _error + "/" + "404" + ".html";
+	it->setReadFD(open(path.c_str(), O_RDONLY));
 }
 
 //seters

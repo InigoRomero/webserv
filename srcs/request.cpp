@@ -40,10 +40,8 @@ Request::~Request()
 
 }
 
-void Request::parseRequest()
+int Request::parseRequest()
 {
-	std::cout << "Server recived\n";
-    std::cout << _req;
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
 
@@ -52,8 +50,8 @@ void Request::parseRequest()
     	_req.erase(0, pos + 1);
 	}
     validateHeader(lines);
-    if (!_validate)
-        sendError();
+    if (_validate) //rembember to change !_validate
+        return(0);
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos
     while (isspace(*it))
@@ -86,6 +84,7 @@ void Request::parseRequest()
             }
         }
     }
+    return (1);
 }
 
 void Request::validateHeader(std::vector<std::string> reqL)
@@ -106,9 +105,4 @@ void Request::validateHeader(std::vector<std::string> reqL)
 void Request::setRequest(std::string req)
 {
 	_req = req;
-}
-
-void Request::sendError()
-{
-    std::cout << "pixa que te has liado" << std::endl;
 }

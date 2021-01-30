@@ -50,6 +50,7 @@ int init(std::vector<Server> servers)
              //   if (config.getOpenFd(g_servers) > MAX_FD)
 			//		s->refuseConnection();
 		    //	else
+                std::cout << "why ypu: " << (*it)._sockfd << std::endl;
                 (*it).acceptNewClient(&readSet, &writeSet);   
             }
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
@@ -59,22 +60,24 @@ int init(std::vector<Server> servers)
                     it->readRequest(it2);
                     FD_CLR(it2->_fd, it2->_rSet);
                     it->proccessRequest(it2);
+                   // FD_SET(it2->_fd, it2->_wSet);
                     //do what request wants
+                }
+                if (it2->_read_fd != -1)
+                {
+                    it2->readFD();
+                    FD_CLR(it2->_fd, it2->_rSet);
+                    FD_SET(it2->_fd, it2->_wSet);
                 }
                 if (FD_ISSET(it2->_fd, it2->_wSet))
                 {   
                     it->writeResponse(it2);
                     FD_CLR(it2->_fd, it2->_wSet);
                     FD_CLR(it2->_fd, it2->_rSet);
+                    FD_CLR(it2->_fd, &readSet);
                     close(it2->_fd);
                 }
-                if (it2->_read_fd != -1)
-                {
-                    it2->readFD();
-                    it2->setReadFD(-1);
-                    FD_CLR(it2->_fd, it2->_rSet);
-                    FD_SET(it2->_fd, it2->_wSet);
-                }
+               // std::cout << it2->_read_fd << std::endl;
                 }
         }
     }

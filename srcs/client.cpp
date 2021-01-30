@@ -28,11 +28,12 @@ void Client::setReadFD(int fd)
 
 void Client::readFD()
 {
+     
      char			buffer[MAXDATASIZE + 1];
      int ret = 0;
 
-     setReadFD(open("../www/index.html", O_RDONLY));
      ret = read(_read_fd, buffer, MAXDATASIZE);
      buffer[ret] = '\0';
      _sendInfo += buffer;
+     setReadFD(-1);
 }

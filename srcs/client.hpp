@@ -33,6 +33,7 @@ class Client
         std::string         _ip;
         std::string         _sendInfo;
         Request             _request;
+        pid_t               _cgi_pid;
 
         void setSendInfo(std::string info);
         void setReadFD(int fd);

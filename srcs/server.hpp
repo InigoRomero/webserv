@@ -67,6 +67,7 @@ class Server
         int     readRequest(std::vector<Client>::iterator it);
         int     writeResponse(std::vector<Client>::iterator it);
         int     proccessRequest(std::vector<Client>::iterator it);
+        void    sendError(std::vector<Client>::iterator it);
 };
 
 
