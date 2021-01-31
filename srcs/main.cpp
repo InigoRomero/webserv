@@ -36,7 +36,7 @@ int init(std::vector<Server> servers)
             perror("start");
 		FD_SET(it->_sockfd, &rSet);
     }
-    std::cout << "Listening for connections..." << std::endl;
+    std::cout << "Server waiting for connections..." << std::endl;
     for(;;)
     {
         readSet = rSet; //reset fds
@@ -56,7 +56,7 @@ int init(std::vector<Server> servers)
                 }
                 if (it2->_read_fd != -1)
                 {
-                    it2->readFD();
+                    it2->readFd();
                     FD_CLR(it2->_fd, it2->_rSet);
                     FD_SET(it2->_fd, it2->_wSet);
                     close(it2->_read_fd);

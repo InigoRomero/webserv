@@ -15,6 +15,6 @@ void responseGet(std::vector<Client>::iterator client)
 		return ;
 	}
 	// if exits
-	client->setReadFD(ret);
+	client->setReadFd(ret);
 }
 
