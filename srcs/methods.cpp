@@ -18,6 +18,6 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 		return ;
 	}
 	// if exits
-	client->setReadFD(ret);
+	client->setReadFd(ret);
 }
 

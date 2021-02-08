@@ -21,12 +21,12 @@ void Client::setSendInfo(std::string info)
      _sendInfo = info;
 }
 
-void Client::setReadFD(int fd)
+void Client::setReadFd(int fd)
 {
      _read_fd = fd;
 }
 
-void Client::readFD()
+void Client::readFd()
 {
      
      char			buffer[MAXDATASIZE + 1];
@@ -36,7 +36,15 @@ void Client::readFD()
      buffer[ret] = '\0';
      _sendInfo += buffer;
      close(_read_fd);
-     setReadFD(-1);
+     setReadFd(-1);
+}
+
+void Client::writeFd()
+{
+     int ret = 0;
+
+     ret = write(_write_fd, _request._body.c_str(), _request._body.length()); // .size()??
+     
 }
 
 void Client::setStatus(std::string status)

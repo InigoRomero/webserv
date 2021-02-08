@@ -21,7 +21,8 @@ public:
     std::string                         _method;
     std::string                         _uri;
     std::string                         _version;
-    std::map<std::string, std::string>  _headers; 
+    std::map<std::string, std::string>  _headers;
+    std::string                         _body;
     bool                                _validate;
 
     void setRequest(std::string req);

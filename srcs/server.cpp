@@ -91,6 +91,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     }
     buf[numbytes] = '\0';
     std::string str(buf);
+    //std::cout << buf << std::endl;
     it->_request.setRequest(str); 
     return(1);
  }
@@ -130,7 +131,8 @@ void Server::sendError(std::vector<Client>::iterator it)
 
     size_t pos = it->_status.find(" ");
     path = "." + _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
-	it->setReadFD(open(path.c_str(), O_RDONLY));
+	it->setReadFd(open(path.c_str(), O_RDONLY));
+	it->setReadFd(open(path.c_str(), O_RDONLY));
 }
 
 //seters

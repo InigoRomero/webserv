@@ -37,9 +37,10 @@ class Client
         pid_t               _cgi_pid;
 
         void setSendInfo(std::string info);
-        void setReadFD(int fd);
+        void setReadFd(int fd);
         void setStatus(std::string status);
-        void readFD();
+        void readFd();
+        void writeFd();
 };
 
 #endif
