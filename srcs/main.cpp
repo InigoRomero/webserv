@@ -122,10 +122,6 @@ int main(int argc, char **av)
     }*/
 }
 
-/*      Get Resquest data
-        Check if request its okey 
-        parse request data
-        if is not okey return error page
-        if its okey do a GET
-        https://github.com/Fraberg/webserv/blob/dcb9dd16c95281466fb9b0a4f080a74c472d7f18/project/v1/srcs/request/Parsing.cpp
+/*      
+Coger el nombre del archivo que se esta pidiendo y segun el tipo que sea devolver un content type u otro
 */

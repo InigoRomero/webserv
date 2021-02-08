@@ -33,14 +33,17 @@ class Client
         std::string         _ip;
         std::string         _sendInfo;
         std::string         _path;
+        std::string         _rFile;
         Request             _request;
         std::string         _status;
         pid_t               _cgi_pid;
+
 
         void setSendInfo(std::string info);
         void setReadFd(int fd);
         void setStatus(std::string status);
         void setPath(std::string path);
+        void setRFile(std::string file);
         void readFd();
         void writeFd();
 };

@@ -58,3 +58,8 @@ void Client::setPath(std::string path)
 {
      _path = path;
 }
+
+void Client::setRFile(std::string file)
+{
+     _rFile = file;
+}
