@@ -32,6 +32,7 @@ class Client
         struct sockaddr_in  _client_addr;
         std::string         _ip;
         std::string         _sendInfo;
+        std::string         _path;
         Request             _request;
         std::string         _status;
         pid_t               _cgi_pid;
@@ -39,6 +40,7 @@ class Client
         void setSendInfo(std::string info);
         void setReadFd(int fd);
         void setStatus(std::string status);
+        void setPath(std::string path);
         void readFd();
         void writeFd();
 };

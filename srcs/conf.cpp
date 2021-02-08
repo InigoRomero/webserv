@@ -92,6 +92,7 @@ void Conf::fillServer()
                     throw ConfigFileException();
                 it++;
             }
+            _servers.back().setConf(_path);
             while ((*it).find("}") == std::string::npos)
             {
                 if ((*it).find("location") != std::string::npos) //falta coger texto location

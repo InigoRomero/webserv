@@ -16,6 +16,7 @@
 #include <signal.h>
 #include "client.hpp"
 #include "methods.hpp"
+#include "utils.hpp"
 
 struct methods {
     std::string location;
@@ -39,11 +40,13 @@ class Server
     public:
         struct sockaddr_in          _my_addr;
         std::vector<struct methods> _methods;
+        std::map<std::string, std::string> 	_headers;
         std::vector<Client>         _clients;
         int                         _port;
         std::string                 _error;
         std::string                 _name;
         std::string                 _host;
+        std::string                 _conf;
         int                         _sockfd;
 		fd_set					    *_readSet;
 		fd_set					    *_writeSet;
@@ -67,6 +70,7 @@ class Server
         void    setError(const std::string &error);
         void    setName(const std::string &name);
         void    setHost(const std::string &host);
+        void    setConf(const std::string &host);
         void    setPort(int port);
         void    setMethods(struct methods methods);
         int     readRequest(std::vector<Client>::iterator it);

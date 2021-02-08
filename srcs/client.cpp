@@ -1,5 +1,5 @@
 #include "client.hpp"
-#define MAXDATASIZE 1000
+#define MAXDATASIZE 10000
 
 Client::Client():
      _fd(-1), _read_fd(-1),  _write_fd(-1), _rSet(nullptr), _wSet(nullptr), _request(Request())
@@ -34,6 +34,8 @@ void Client::readFd()
 
      ret = read(_read_fd, buffer, MAXDATASIZE);
      buffer[ret] = '\0';
+     //comproba
+     _sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";
      _sendInfo += buffer;
      close(_read_fd);
      setReadFd(-1);
@@ -50,4 +52,9 @@ void Client::writeFd()
 void Client::setStatus(std::string status)
 {
      _status = status;
+}
+
+void Client::setPath(std::string path)
+{
+     _path = path;
 }

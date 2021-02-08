@@ -108,11 +108,11 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    it->setSendInfo("HTTP/1.1 200 OK\n");
+    it->setSendInfo("HTTP/1.1 200 OK\r\n");
     it->setStatus("HTTP/1.1 200 OK");
     if(!it->_request.parseRequest())
     {
-        it->setSendInfo("HTTP/1.1 400 bad Request\n");
+        it->setSendInfo("HTTP/1.1 400 bad Request\r\n");
         it->setStatus("400");
         sendError(it);
     }
@@ -121,7 +121,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     if (it->_status != "HTTP/1.1 200 OK")
         sendError(it);
    // FD_SET(it->_fd, _writeSet);
-
+    createHeader(it, (*this));
     return 0;
 }
 
@@ -131,7 +131,7 @@ void Server::sendError(std::vector<Client>::iterator it)
 
     size_t pos = it->_status.find(" ");
     path = "." + _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
-	it->setReadFd(open(path.c_str(), O_RDONLY));
+    it->setPath(path.c_str());
 	it->setReadFd(open(path.c_str(), O_RDONLY));
 }
 
@@ -141,6 +141,8 @@ void	Server::setError(const std::string &error) { this->_error = error; }
 void	Server::setName(const std::string &name) { this->_name = name; }
 
 void	Server::setHost(const std::string &host) { this->_host = host; }
+
+void	Server::setConf(const std::string &conf) { this->_conf = conf; }
 
 void	Server::setPort(int port) { this->_port = port; }
 
