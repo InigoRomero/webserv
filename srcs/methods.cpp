@@ -5,12 +5,19 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 	std::string response = client->_request._version;
 	std::string		path;
 	int ret = 0;
+	size_t pos;
 
 	path = ".."+client->_request._uri;
 	for (std::vector<struct methods>::iterator it = serv._methods.begin(); it != serv._methods.end(); it++)
-		if (client->_request._uri == it->location)
-			path = "." + it->root + "/"+ it->index;
-	std::cout << path << std::endl;
+	{
+		if ((pos = client->_request._uri.find(it->location)) != std::string::npos)
+		{
+			if (pos + 1 < client->_request._uri.size())
+				path = "." + it->root + "/"+ client->_request._uri.substr(pos + 1, std::string::npos);
+			else
+				path = "." + it->root + "/"+ it->index;
+		}
+	}
 	if ((ret = open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("HTTP/1.1 404 Not Found");
@@ -38,7 +45,6 @@ std::string getLastModified(std::string path)
 	struct tm	*tm;
 	struct stat	file_info;
 
-	std::cout << path << std::endl;
 	if (lstat(path.c_str(), &file_info) == -1)
 		return ("");
 	tm = localtime(&file_info.st_mtime);
