@@ -12,9 +12,11 @@
 #include <map>
 #include "request.hpp"
 
+class Request;
+
 class Client
 {
-
+    friend class Request;
     private:
     protected:
         //

@@ -20,6 +20,7 @@ Request::Request(): _req(""), _validate(false)
     _headers.insert(std::pair<std::string,std::string>("Transfer-Encoding:", "")); 
     _headers.insert(std::pair<std::string,std::string>("User-Agent:", "")); 
     _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate:", ""));
+    _headers.insert(std::pair<std::string,std::string>("body", ""));
     this->_avMethods.push_back("GET");
     this->_avMethods.push_back("POST");
     this->_avMethods.push_back("PUT");
@@ -43,11 +44,12 @@ Request::~Request()
 int Request::parseRequest()
 {
 	std::vector<std::string> lines;
-	size_t pos = 0, found = 0;
+	size_t pos = 0, found = 0, aux;
 
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
-    	_req.erase(0, pos + 1);
+        aux = pos;
+        _req = _req.substr(pos+1);
 	}
     validateHeader(lines);
     if (!_validate)
@@ -72,6 +74,8 @@ int Request::parseRequest()
     _method = fline[0];
     _uri = fline[1];
     _version = fline[2];
+    if (_method == "POST" || _method == "PUT")
+        lines.push_back(_req.substr(aux - 1, std::string::npos));
     //take all the headers we have to take
     for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
     {
@@ -84,6 +88,8 @@ int Request::parseRequest()
             }
         }
     }
+    _headers["body"] = lines.back();
+    std::cout << "body: " << _headers["body"] << std::endl;
     return (1);
 }
 
@@ -102,7 +108,19 @@ void Request::validateHeader(std::vector<std::string> reqL)
     }
 }
 
+void Request::parseBody(Client &client)
+{
+    (void)client;
+}
+
 void Request::setRequest(std::string req)
 {
 	_req = req;
+}
+
+void Request::execCGI()
+{/*
+    char **args = NULL;
+    char **env = NULL;
+    int ret;*/
 }

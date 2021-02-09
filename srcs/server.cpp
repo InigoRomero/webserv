@@ -83,9 +83,9 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
  int  Server::readRequest(std::vector<Client>::iterator it)
  {
     ssize_t             numbytes;
-    char                buf[MAXDATASIZE];
+    char                buf[10000];
 
-    if ((numbytes = recv(it->_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+    if ((numbytes = recv(it->_fd, buf, 9999, 0)) == -1) {
         perror("recv");
         exit(1);
     }
@@ -102,7 +102,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     char char_array[it->_sendInfo.size()];
     strcpy(char_array, it->_sendInfo.c_str());
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
-            perror("send");
+        perror("send");
     return(1);
 }
 

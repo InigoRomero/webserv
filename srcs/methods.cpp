@@ -20,8 +20,6 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 	}
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
-	std::cout << client->_rFile << std::endl;
-	std::cout << path << std::endl;
 	if ((ret = open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("HTTP/1.1 404 Not Found");
