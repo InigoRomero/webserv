@@ -51,7 +51,7 @@ int main()
         fputs ("fopen example",pFile);
         fclose (pFile);
     }*/
-    std::ifstream t("../www/index.html");
+    std::ifstream t("www/index.html");
     std::string str((std::istreambuf_iterator<char>(t)),
                  std::istreambuf_iterator<char>());
     char cstr[str.size() + 1];

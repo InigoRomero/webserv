@@ -130,7 +130,7 @@ void Server::sendError(std::vector<Client>::iterator it)
     std::string		path;
 
     size_t pos = it->_status.find(" ");
-    path = "." + _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
+    path = _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
     it->setPath(path.c_str());
 	it->setReadFd(open(path.c_str(), O_RDONLY));
 }

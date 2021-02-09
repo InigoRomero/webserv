@@ -7,20 +7,21 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 	int ret = 0;
 	size_t pos;
 
-	path = ".."+client->_request._uri;
+	path = client->_request._uri;
 	for (std::vector<struct methods>::iterator it = serv._methods.begin(); it != serv._methods.end(); it++)
 	{
 		if ((pos = client->_request._uri.find(it->location)) != std::string::npos)
 		{
 			if (pos + 1 < client->_request._uri.size())
-				path = "." + it->root + "/"+ client->_request._uri.substr(pos + 1, std::string::npos);
+				path =  it->root + "/"+ client->_request._uri.substr(pos + 1, std::string::npos);
 			else
-				path = "." + it->root + "/"+ it->index;
+				path = it->root + "/"+ it->index;
 		}
 	}
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
 	std::cout << client->_rFile << std::endl;
+	std::cout << path << std::endl;
 	if ((ret = open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("HTTP/1.1 404 Not Found");
@@ -38,7 +39,44 @@ void createHeader(std::vector<Client>::iterator client, Server serv)
 	client->setSendInfo(client->_sendInfo + "Sever: "+ serv._name + "/1.0.0\r\n");
 	client->setSendInfo(client->_sendInfo + "Date: " + get_date() + "\r\n");
 	client->setSendInfo(client->_sendInfo + "Last-Modified: " + getLastModified(client->_path)+ "\r\n"); //date de archivo requested by client
-	client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
+	client->setSendInfo(client->_sendInfo + "Content-Type: " + getDataType(client->_rFile) + "\r\n");
+	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
+}
+
+std::string getDataType(std::string fileExt)
+{
+	if (fileExt == ".txt")
+		return ("text/plain");
+	else if (fileExt == ".bin")
+		return ("application/octet-stream");
+	else if (fileExt == ".jpeg")
+		return ("image/jpeg");
+	else if (fileExt == ".jpg")
+		return ("image/jpeg");
+	else if (fileExt == ".html")
+		return ("text/html");
+	else if (fileExt == ".htm")
+		return ("text/html");
+	else if (fileExt == ".png")
+		return ("image/png");
+	else if (fileExt == ".bmp")
+		return ("image/bmp");
+	else if (fileExt == ".pdf")
+		return ("application/pdf");
+	else if (fileExt == ".tar")
+		return ("application/x-tar");
+	else if (fileExt == ".json")
+		return ("application/json");
+	else if (fileExt == ".css")
+		return ("text/css");
+	else if (fileExt == ".js")
+		return ("pplication/javascript");
+	else if (fileExt == ".mp3")
+		return ("audio/mpeg");
+	else if (fileExt == ".avi")
+		return ("video/x-msvideo");
+	else
+		return ("error");
 }
 
 std::string getLastModified(std::string path)

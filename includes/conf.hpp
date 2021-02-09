@@ -3,7 +3,7 @@
 
 #define UNAVAILABLE_TIME  20
 
-#include "getnextline/get_next_line.hpp"
+#include "get_next_line.hpp"
 #include "server.hpp"
 
 class Conf
