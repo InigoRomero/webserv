@@ -31,6 +31,13 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 	client->setReadFd(ret);
 }
 
+void responsePost(std::vector<Client>::iterator client, Server serv)
+{
+	(void)serv;
+	client->_request.parseBody((*client));
+}
+
+
 void createHeader(std::vector<Client>::iterator client, Server serv)
 {
 	std::map<std::string, std::string> 	headers;

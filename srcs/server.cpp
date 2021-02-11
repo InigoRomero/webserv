@@ -118,6 +118,8 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     }
     if (it->_request._method == "GET")
         responseGet(it, (*this));
+    else if (it->_request._method == "POST")
+        responsePost(it, (*this));
     if (it->_status != "HTTP/1.1 200 OK")
         sendError(it);
    // FD_SET(it->_fd, _writeSet);
