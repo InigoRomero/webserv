@@ -2,11 +2,11 @@
 #define MAXDATASIZE 10000
 
 Client::Client():
-     _fd(-1), _read_fd(-1),  _write_fd(-1), _rSet(nullptr), _wSet(nullptr), _request(Request())
+     _fd(-1), _read_fd(-1),  _write_fd(-1), _rSet(nullptr), _wSet(nullptr), _request(new Request())
 {}
 
 Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  client_addr):
-     _fd(fd), _read_fd(-1), _write_fd(-1), _rSet(readSet), _wSet(writeSet), _client_addr(client_addr), _request(Request()), _status("HTTP/1.1 200 OK")
+     _fd(fd), _read_fd(-1), _write_fd(-1), _rSet(readSet), _wSet(writeSet), _client_addr(client_addr), _request(new Request()), _status("HTTP/1.1 200 OK")
 {
 	_ip = inet_ntoa(client_addr.sin_addr);
 	_port = htons(client_addr.sin_port);
@@ -45,7 +45,7 @@ void Client::writeFd()
 {
      int ret = 0;
 
-     ret = write(_write_fd, _request._body.c_str(), _request._body.length()); // .size()??
+     ret = write(_write_fd, _request->_body.c_str(), _request->_body.length()); // .size()??
      
 }
 

@@ -92,7 +92,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     buf[numbytes] = '\0';
     std::string str(buf);
     //std::cout << buf << std::endl;
-    it->_request.setRequest(str); 
+    it->_request->setRequest(str); 
     return(1);
  }
 
@@ -110,15 +110,15 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1 200 OK\r\n");
     it->setStatus("HTTP/1.1 200 OK");
-    if(!it->_request.parseRequest())
+    if(!it->_request->parseRequest())
     {
         it->setSendInfo("HTTP/1.1 400 bad Request\r\n");
         it->setStatus("400");
         sendError(it);
     }
-    if (it->_request._method == "GET")
+    if (it->_request->_method == "GET")
         responseGet(it, (*this));
-    else if (it->_request._method == "POST")
+    else if (it->_request->_method == "POST")
         responsePost(it, (*this));
     if (it->_status != "HTTP/1.1 200 OK")
         sendError(it);

@@ -2,18 +2,18 @@
 
 void responseGet(std::vector<Client>::iterator client, Server serv)
 {
-	std::string response = client->_request._version;
+	std::string response = client->_request->_version;
 	std::string		path;
 	int ret = 0;
 	size_t pos;
 
-	path = client->_request._uri;
+	path = client->_request->_uri;
 	for (std::vector<struct methods>::iterator it = serv._methods.begin(); it != serv._methods.end(); it++)
 	{
-		if ((pos = client->_request._uri.find(it->location)) != std::string::npos)
+		if ((pos = client->_request->_uri.find(it->location)) != std::string::npos)
 		{
-			if (pos + 1 < client->_request._uri.size())
-				path =  it->root + "/"+ client->_request._uri.substr(pos + 1, std::string::npos);
+			if (pos + 1 < client->_request->_uri.size())
+				path =  it->root + "/"+ client->_request->_uri.substr(pos + 1, std::string::npos);
 			else
 				path = it->root + "/"+ it->index;
 		}
@@ -34,7 +34,7 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
-	client->_request.parseBody((*client));
+	client->_request->parseBody((*client));
 }
 
 
