@@ -45,7 +45,7 @@ void Client::writeFd()
 {
      int ret = 0;
 
-     ret = write(_write_fd, _request->_body.c_str(), _request->_body.length()); // .size()??
+     ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].length()); // .size()??
      
 }
 

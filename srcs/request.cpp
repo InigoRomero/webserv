@@ -122,7 +122,9 @@ void Request::parseBody(Client &client)
     bytes = strlen(client._request->_req.c_str()); // creo que _req se queda vacio al leerla y hacerle substr
     if (bytes >= client._request->_bodyLen)
 	{
-
+       // memset(client._request->_req.c_str() + client._request->_bodyLen , 0, BUFFER_SIZE - client._request->_bodyLen);
+		client._request.body += client.rBuf;
+		client.chunk.len = 0;
     }
     else
     {
