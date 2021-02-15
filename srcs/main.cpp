@@ -77,21 +77,18 @@ int init(std::vector<Server> servers)
 
 int main(int argc, char **av)
 {
-	if (argc != 2)
-    {
+	if (argc != 2) {
         std::cerr << "Usage: ./webserv config-file" << std::endl;
     	return (EXIT_FAILURE);
     }
     std::vector<Server> servers;
     Conf conf = Conf(av[1]);
-
-    try
-	{
+    try {
         conf.ReadFile();
 		conf.checkFile();
         conf.fillServer();
-    }catch(std::exception const &e)
-	{
+    }
+    catch(std::exception const &e) {
 		std::cerr << "[+] " << e.what() << std::endl;
 	}
     servers = conf.getServer();

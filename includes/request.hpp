@@ -25,7 +25,7 @@ class Request
         std::string                         _uri;
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
-        std::string                         _body;
+        unsigned int                        _bodyLen;
         bool                                _validate;
 
         void setRequest(std::string req);

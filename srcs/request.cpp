@@ -110,7 +110,24 @@ void Request::validateHeader(std::vector<std::string> reqL)
 
 void Request::parseBody(Client &client)
 {
-    (void)client;
+    unsigned int	bytes;
+    // if the llega el content Length
+    client._request->_bodyLen = atoi(client._request->_headers["Content-Length"].c_str());
+    if (client._request->_bodyLen < 0)
+    {
+        client.setSendInfo("400 Bad Request Error");
+        return ;
+    }
+    
+    bytes = strlen(client._request->_req.c_str()); // creo que _req se queda vacio al leerla y hacerle substr
+    if (bytes >= client._request->_bodyLen)
+	{
+
+    }
+    else
+    {
+
+    }
 }
 
 void Request::setRequest(std::string req)
@@ -119,8 +136,9 @@ void Request::setRequest(std::string req)
 }
 
 void Request::execCGI()
-{/*
-    char **args = NULL;
+{
+    /*char **args = NULL;
     char **env = NULL;
-    int ret;*/
+    int ret;
+*/
 }
