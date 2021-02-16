@@ -35,6 +35,7 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
 	client->_request->parseBody((*client));
+	std::cout << "send Info: " <<client->_sendInfo << std::endl;
 }
 
 

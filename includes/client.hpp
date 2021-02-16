@@ -39,6 +39,8 @@ class Client
         Request             *_request;
         std::string         _status;
         pid_t               _cgi_pid;
+        bool                _chunkDone;
+        bool                _chunkFound;
 
 
         void setSendInfo(std::string info);

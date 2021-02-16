@@ -20,6 +20,7 @@ class Request
         Request(std::string req);
         ~Request();
 
+        char*                               _rBuf;
         std::string                         _req;
         std::vector<std::string>            _avMethods;
         std::string                         _method;
@@ -36,6 +37,9 @@ class Request
         void validateRequest();
         void handleGet();
         void execCGI();
+        void setRbuf(char *req);
+        void fillBody(Client &client);
+        int  findLen(Client &client);
         void parseBody(Client &client);
 };
 

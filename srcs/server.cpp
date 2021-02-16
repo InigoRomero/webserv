@@ -91,14 +91,15 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     }
     buf[numbytes] = '\0';
     std::string str(buf);
+
     //std::cout << buf << std::endl;
+    it->_request->setRbuf(buf); 
     it->_request->setRequest(str); 
     return(1);
  }
 
 int  Server::writeResponse(std::vector<Client>::iterator it)
 {
-    std::cout << "sending mlaplana passwords... " << std::endl;
     char char_array[it->_sendInfo.size()];
     strcpy(char_array, it->_sendInfo.c_str());
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
