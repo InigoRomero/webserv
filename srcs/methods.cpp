@@ -22,8 +22,8 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 		client->setRFile(path.substr(pos, std::string::npos));
 	if ((ret = open(path.c_str(), O_RDONLY)) == -1)
 	{
-		client->setStatus("HTTP/1.1 400 Bad Request");
-		client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
+		client->setStatus("400 Bad Request");
+		//client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
 		return ;
 	}
 	// if exits
@@ -42,10 +42,14 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 void createHeader(std::vector<Client>::iterator client, Server serv)
 {
 	std::map<std::string, std::string> 	headers;
-	client->setSendInfo(client->_sendInfo + "Sever: "+ serv._name + "/1.0.0\r\n");
-	client->setSendInfo(client->_sendInfo + "Date: " + get_date() + "\r\n");
-	client->setSendInfo(client->_sendInfo + "Last-Modified: " + getLastModified(client->_path)+ "\r\n"); //date de archivo requested by client
-	client->setSendInfo(client->_sendInfo + "Content-Type: " + getDataType(client->_rFile) + "\r\n");
+	
+	std::string response = " " + client->_status + "\r\n";
+	response = response + "Sever: webserv/1.0.0\r\n";
+	response = response + "Sever: "+ serv._name + "/1.0.0\r\n";
+	response = response + "Date: " + get_date() + "\r\n";
+	response = response + "Last-Modified: " + getLastModified(client->_path)+ "\r\n"; //date de archivo requested by client
+	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
+	client->setSendInfo(response);
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
 }
 

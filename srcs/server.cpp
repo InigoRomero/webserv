@@ -109,19 +109,18 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 
 int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
-    it->setSendInfo("HTTP/1.1 200 OK\r\n");
-    it->setStatus("HTTP/1.1 200 OK");
-    if(!it->_request->parseRequest())
+    it->setSendInfo("HTTP/1.1");
+    it->setStatus("200 OK");
+    if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host sin este header http/1.1 responde bad request
     {
-        it->setSendInfo("HTTP/1.1 400 bad Request\r\n");
-        it->setStatus("400");
+        it->setStatus("400 Bad Request");
         sendError(it);
     }
     if (it->_request->_method == "GET")
         responseGet(it, (*this));
     else if (it->_request->_method == "POST")
         responsePost(it, (*this));
-    if (it->_status != "HTTP/1.1 200 OK")
+    if (it->_status != "200 OK")
         sendError(it);
    // FD_SET(it->_fd, _writeSet);
     createHeader(it, (*this));

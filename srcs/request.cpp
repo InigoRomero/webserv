@@ -131,7 +131,7 @@ void Request::parseBody(Client &client)
             client._request->_bodyLen = 0;
         }
         else
-            client.setStatus("HTTP/1.1 400 Bad Request");
+            client.setStatus("400 Bad Request");
   //  }
     if(client._request->_headers["Transfer-Encoding"] == "chunked")
     {
@@ -156,7 +156,7 @@ void Request::parseBody(Client &client)
         }
     }
     else
-        client.setStatus("HTTP/1.1 400 Bad Request");
+        client.setStatus("400 Bad Request");
 }
 
 void			Request::fillBody(Client &client)
