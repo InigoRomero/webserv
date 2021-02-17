@@ -43,7 +43,7 @@ void createHeader(std::vector<Client>::iterator client, Server serv)
 {
 	std::map<std::string, std::string> 	headers;
 	
-	std::string response = " " + client->_status + "\r\n";
+	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";
 	response = response + "Sever: "+ serv._name + "/1.0.0\r\n";
 	response = response + "Date: " + get_date() + "\r\n";
