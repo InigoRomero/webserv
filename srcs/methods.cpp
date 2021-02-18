@@ -35,6 +35,7 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
 	client->_request->parseBody((*client));
+	//exec CGI
 	//FD_SET(client->_fd, client->_wSet);
 }
 
