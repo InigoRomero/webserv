@@ -45,7 +45,7 @@ int Request::parseRequest()
 {
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0, aux;
-
+    //std::cout << "request:\n " << _req << std::endl;
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
         aux = pos;
@@ -75,7 +75,7 @@ int Request::parseRequest()
     _uri = fline[1];
     _version = fline[2];
     if (_method == "POST" || _method == "PUT")
-        lines.push_back(_req.substr(aux - 1, std::string::npos));
+        lines.push_back(_req.substr(0, std::string::npos));
     //take all the headers we have to take
     for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
     {
@@ -109,14 +109,13 @@ void Request::validateHeader(std::vector<std::string> reqL)
 
 void Request::parseBody(Client &client)
 {
-   // std::cout << "rbuf: " << client._request->_rBuf << std::endl;
-  //  if (client._request->_headers.find("Content-Length") != client._request->_headers.end())
-   // {   
-        
+    //std::cout << "rbuf: \n" << client._request->_rBuf << std::endl;
+    if (client._request->_headers.find("Content-Length") != client._request->_headers.end())
+    {   
         // GET BODY
         unsigned int	bytes;
         // if the llega el content Length
-        client._request->_bodyLen = atoi(client._request->_headers["Content-Length"].c_str());
+        client._request->_bodyLen = atoi(client._request->_headers["Content-Length:"].c_str());
         if (client._request->_bodyLen < 0)
         {
             client.setSendInfo("400 Bad Request Error");
@@ -126,16 +125,16 @@ void Request::parseBody(Client &client)
         bytes = strlen(client._request->_req.c_str()); // creo que _req se queda vacio al leerla y hacerle substr
         if (bytes >= client._request->_bodyLen)
         {
-           // memset(client._request->_rBuf+ client._request->_bodyLen , 0, BUFFER_SIZE - client._request->_bodyLen);
+            memset(client._request->_rBuf+ client._request->_bodyLen , 0, BUFFER_SIZE - client._request->_bodyLen);
             client._sendInfo += client._request->_rBuf;
             client._request->_bodyLen = 0;
         }
         else
             client.setStatus("400 Bad Request");
-  //  }
-    if(client._request->_headers["Transfer-Encoding"] == "chunked")
+    }
+    if(client._request->_headers["Transfer-Encoding:"].find("chunked") != std::string::npos)
     {
-        std::cout << "Estoy en DECHUNKBODY" << std::endl;
+        //std::cout << "Estoy en DECHUNKBODY" << std::endl;
         //DECHUNKBODY
         if (strstr(client._request->_req.c_str(), "\r\n")  && client._chunkFound == false)
         {
@@ -157,6 +156,7 @@ void Request::parseBody(Client &client)
     }
     else
         client.setStatus("400 Bad Request");
+    
 }
 
 void			Request::fillBody(Client &client)
@@ -205,16 +205,50 @@ void Request::setRequest(std::string req)
 {
 	_req = req;
 }
-
+/*
 void Request::setRbuf(char *req)
 {
 	_rBuf = req;
-}
+}*/
 
-void Request::execCGI()
+void Request::execCGI(Client &client)
 {
-    /*char **args = NULL;
+    (void)client;
+/*
+    char **args = NULL;
     char **env = NULL;
     int ret;
+    int fd[2];
+    int tmp_fd;
+
+    close(client._read_fd); //why
+    client._read_fd = -1; //idk
+    //cond
+    if (!(args = (char**)malloc(sizeof(char *) * 3)))
+        return NULL;
+    args[0] = strdup(client._path.c_str()); // req->location->cgi_root || php_root
+    args[1] = strdup() // req->file
+    args[2] = NULL;
+    tmp_fd = open("./www/temp_file", O_WRONLY | O_CREAT, 0666);
+    pipe(fd);
+    if (!(client._cgi_pid = fork()))
+    {
+        close(fd[1]);
+        dup2(fd[0], 0);  //why
+        dup2(tmp_fd, 1);
+        errno = 0;
+		if ((ret = execve(path.c_str(), args, env)) == -1)
+		{
+			std::cerr << "Error with CGI: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+    }
+    else
+    {
+        wait(NULL);
+        close(fd[0]);
+        client._write_fd = fd[1];
+        client.__read_fd = open("./www/temp_file", O_RDONLY);
+    }
 */
 }

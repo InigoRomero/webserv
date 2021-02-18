@@ -84,7 +84,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
  {
     ssize_t             numbytes;
     char                buf[10000];
-
+ 
     if ((numbytes = recv(it->_fd, buf, 9999, 0)) == -1) {
         perror("recv");
         exit(1);
@@ -93,7 +93,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     std::string str(buf);
 
     //std::cout << buf << std::endl;
-    it->_request->setRbuf(buf); 
+    //it->_request->setRbuf(buf); 
     it->_request->setRequest(str); 
     return(1);
  }
@@ -102,6 +102,8 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 {
     char char_array[it->_sendInfo.size()];
     strcpy(char_array, it->_sendInfo.c_str());
+    char_array[it->_sendInfo.size()] = '\0';
+    std::cout << "SEND INFO: \n" << char_array << std::endl;
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
         perror("send");
     return(1);
@@ -120,6 +122,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         responseGet(it, (*this));
     else if (it->_request->_method == "POST")
         responsePost(it, (*this));
+    std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
         sendError(it);
    // FD_SET(it->_fd, _writeSet);
@@ -131,10 +134,11 @@ void Server::sendError(std::vector<Client>::iterator it)
 {
     std::string		path;
 
-    size_t pos = it->_status.find(" ");
-    path = _error + "/" + it->_status.substr(pos + 1, 3) + ".html";
+    path = _error + "/" + it->_status.substr(0, 3) + ".html";
     it->setPath(path.c_str());
 	it->setReadFd(open(path.c_str(), O_RDONLY));
+   // std::cout << "readfd: " << it->_read_fd << std::endl;
+    //std::cout << "path: " << path << std::endl;
 }
 
 //seters

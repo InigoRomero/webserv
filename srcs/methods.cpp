@@ -20,7 +20,7 @@ void responseGet(std::vector<Client>::iterator client, Server serv)
 	}
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
-	if ((ret = open(path.c_str(), O_RDONLY)) == -1)
+	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("400 Bad Request");
 		//client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
@@ -35,7 +35,7 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
 	client->_request->parseBody((*client));
-	std::cout << "send Info: " <<client->_sendInfo << std::endl;
+	//FD_SET(client->_fd, client->_wSet);
 }
 
 
@@ -43,7 +43,7 @@ void createHeader(std::vector<Client>::iterator client, Server serv)
 {
 	std::map<std::string, std::string> 	headers;
 	
-	std::string response = " " + client->_status + "\r\n";
+	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";
 	response = response + "Sever: "+ serv._name + "/1.0.0\r\n";
 	response = response + "Date: " + get_date() + "\r\n";
