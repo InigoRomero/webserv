@@ -39,18 +39,16 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 }
 
 
-void createHeader(std::vector<Client>::iterator client, Server serv)
+void createHeader(std::vector<Client>::iterator client)
 {
 	std::map<std::string, std::string> 	headers;
 	
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	if (client->_status == "405 Not Allowed")
-		response = response + client->_conf.method;
+		response = response + "Allow: " + client->_conf.method + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";
-	response = response + "Sever: "+ serv._name + "/1.0.0\r\n";
-
 	response = response + "Date: " + get_date() + "\r\n";
-	response = response + "Last-Modified: " + getLastModified(client->_path)+ "\r\n"; //date de archivo requested by client
+	response = response + "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
 	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
 	client->setSendInfo(response);
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");

@@ -100,12 +100,17 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 
 int  Server::writeResponse(std::vector<Client>::iterator it)
 {
-    char char_array[it->_sendInfo.size()];
-    strcpy(char_array, it->_sendInfo.c_str());
-    char_array[it->_sendInfo.size()] = '\0';
+    unsigned long	bytes;
+
+    bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
+    if (bytes < it->_sendInfo.size())
+        it->_sendInfo = it->_sendInfo.substr(bytes);
+    else
+        it->_sendInfo.clear();
+   // client->last_date = ft::getDate();
     //std::cout << "SEND INFO: \n" << char_array << std::endl;
-    if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
-        perror("send");
+   // if (send(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size(), 0) == -1)
+     //   perror("send");
     return(1);
 }
 
@@ -120,11 +125,14 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         sendError(it);   
     }
     getLocationAndMethod(it);
+    std::cout << "Location: " << it->_conf.location << std::endl;
+    std::cout << "Method: " << it->_request->_method << std::endl;
+    std::cout << "fd: " << it->_fd << std::endl;
     if (it->_conf.method.find(it->_request->_method) == std::string::npos)
 	{
 		it->setStatus("405 Not Allowed");
         sendError(it);
-        createHeader(it, (*this)); 
+        createHeader(it); 
 		return (0);
 	}
     if (it->_request->_method == "GET")
@@ -134,7 +142,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
         sendError(it);    
-    createHeader(it, (*this));   // FD_SET(it->_fd, _writeSet);
+    createHeader(it);   // FD_SET(it->_fd, _writeSet);
     return 0;
 }
 

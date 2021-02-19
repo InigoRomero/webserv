@@ -38,6 +38,7 @@ class Client
         std::string         _sendInfo;
         std::string         _path;
         std::string         _rFile;
+        std::string         _lastDate;
         Request             *_request;
         std::string         _status;
         pid_t               _cgi_pid;

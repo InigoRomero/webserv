@@ -119,6 +119,15 @@ int main(int argc, char **av)
     }*/
 }
 
-/*      
-Coger el nombre del archivo que se esta pidiendo y segun el tipo que sea devolver un content type u otro
-*/
+/*      CERRAR CONEXION SI LLEVA X TIEMPO SIN HACER PETICIONES
+case Client::STANDBY:
+			if (getTimeDiff(client->last_date) >= TIMEOUT)
+				client->status = Client::DONE;
+			break ;
+		case Client::DONE:
+			delete client;
+			_clients.erase(it);
+			g_logger.log("[" + std::to_string(_port) + "] " + "connected clients: " + std::to_string(_clients.size()), LOW);
+			return (0);
+            
+            */
