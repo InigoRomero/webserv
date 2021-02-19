@@ -55,19 +55,6 @@ void Conf::checkFile()
         throw ConfigFileException();
 }
 
-void Conf::initMethods(struct location *methods)
-{
-    methods->location = "";
-    methods->method = "";
-    methods->root = "";
-    methods->index = "";
-    methods->cgi_path = "";
-    methods->cgi = "";
-    methods->max_body = -1;
-    methods->auto_index = -1;
-    methods->auth = "";
-}
-
 void Conf::fillServer()
 {
     for (std::vector<std::string>::iterator it = _conf.begin(); it != _conf.end(); it++)

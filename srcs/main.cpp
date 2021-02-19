@@ -46,7 +46,7 @@ int init(std::vector<Server> servers)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))
                 (*it).acceptNewClient(&readSet, &writeSet);   
-            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
+            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
                 if (FD_ISSET(it2->_fd, it2->_rSet))
                 {
@@ -70,12 +70,13 @@ int init(std::vector<Server> servers)
                     close(it2->_fd);
                 }
                 //check timeout to close connection
-                if (compareTime(it2->_lastDate) >= 10)
+                if (it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10)
                 {
-			        it2 = it->_clients.erase(it2);
+			        it->_clients.erase(it2);
                     std::cout << "Bye client" << std::endl;
-                    continue;
                 }
+                else
+                    it2++;
             }
         }
     }

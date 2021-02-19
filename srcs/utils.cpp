@@ -29,3 +29,24 @@ int				compareTime(std::string start)
 	result += (now_tm->tm_sec - start_tm.tm_sec);
 	return (result);
 }
+
+void initMethods(struct location *methods)
+{
+	methods->location.clear();
+    methods->method.clear();
+    methods->root.clear();
+    methods->index.clear();
+    methods->cgi_path .clear();
+    methods->cgi.clear();
+    methods->auth.clear();
+
+    methods->location = "";
+    methods->method = "";
+    methods->root = "";
+    methods->index = "";
+    methods->cgi_path = "";
+    methods->cgi = "";
+    methods->max_body = -1;
+    methods->auto_index = -1;
+    methods->auth = "";
+}

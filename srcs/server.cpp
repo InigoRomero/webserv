@@ -106,11 +106,15 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
     else
+    {
         it->_sendInfo.clear();
+        it->_path.clear();
+        it->_status.clear();
+        it->_rFile.clear();
+        initMethods(&it->_conf);
+        delete it->_request;
+    }
     it->_lastDate = get_date();
-    //std::cout << "SEND INFO: \n" << char_array << std::endl;
-   // if (send(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size(), 0) == -1)
-     //   perror("send");
     return(1);
 }
 
