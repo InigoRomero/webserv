@@ -107,7 +107,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
         it->_sendInfo = it->_sendInfo.substr(bytes);
     else
         it->_sendInfo.clear();
-   // client->last_date = ft::getDate();
+    it->_lastDate = get_date();
     //std::cout << "SEND INFO: \n" << char_array << std::endl;
    // if (send(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size(), 0) == -1)
      //   perror("send");

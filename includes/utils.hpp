@@ -9,5 +9,6 @@
 #include <iostream>
 
 std::string		get_date();
+int				compareTime(std::string start);
 
 #endif

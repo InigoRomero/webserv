@@ -69,6 +69,13 @@ int init(std::vector<Server> servers)
                     FD_CLR(it2->_fd, &readSet);
                     close(it2->_fd);
                 }
+                //check timeout to close connection
+                if (compareTime(it2->_lastDate) >= 10)
+                {
+			        it2 = it->_clients.erase(it2);
+                    std::cout << "Bye client" << std::endl;
+                    continue;
+                }
             }
         }
     }
