@@ -214,8 +214,7 @@ void Request::setRbuf(char *req)
 void Request::execCGI(Client &client)
 {
     (void)client;
-/*
-    char **args = NULL;
+ /*   char **args = NULL;
     char **env = NULL;
     int ret;
     int fd[2];
@@ -225,9 +224,9 @@ void Request::execCGI(Client &client)
     client._read_fd = -1; //idk
     //cond
     if (!(args = (char**)malloc(sizeof(char *) * 3)))
-        return NULL;
-    args[0] = strdup(client._path.c_str()); // req->location->cgi_root || php_root
-    args[1] = strdup() // req->file
+        return ;
+    args[0] = strdup(client._conf.cgi_path.c_str()); // req->location->cgi_root || php_root // cgi path del requested location
+    args[1] = strdup(client._request->_uri.c_str()); // req->file
     args[2] = NULL;
     tmp_fd = open("./www/temp_file", O_WRONLY | O_CREAT, 0666);
     pipe(fd);
@@ -249,6 +248,5 @@ void Request::execCGI(Client &client)
         close(fd[0]);
         client._write_fd = fd[1];
         client.__read_fd = open("./www/temp_file", O_RDONLY);
-    }
-*/
+    }*/
 }

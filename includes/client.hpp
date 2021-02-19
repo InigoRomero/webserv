@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include "request.hpp"
+#include "location.hpp"
 
 class Request;
 
@@ -29,6 +30,7 @@ class Client
 		int			        _read_fd;
 		int			        _write_fd;
         int                 _port;
+        struct location     _conf;
 		fd_set		        *_rSet;
 		fd_set		        *_wSet;
         struct sockaddr_in  _client_addr;

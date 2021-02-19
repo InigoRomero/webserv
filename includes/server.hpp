@@ -17,18 +17,7 @@
 #include "client.hpp"
 #include "methods.hpp"
 #include "utils.hpp"
-
-struct methods {
-    std::string location;
-    std::string name;
-    std::string root;
-    std::string index;
-    std::string cgi;
-    std::string cgi_path;
-    int         max_body;
-    int         auto_index;
-    std::string auth;
-};
+#include "location.hpp"
 
 class Server
 {
@@ -39,7 +28,7 @@ class Server
 
     public:
         struct sockaddr_in          _my_addr;
-        std::vector<struct methods> _methods;
+        std::vector<struct location> _methods;
         std::map<std::string, std::string> 	_headers;
         std::vector<Client>         _clients;
         int                         _port;
@@ -72,12 +61,12 @@ class Server
         void    setHost(const std::string &host);
         void    setConf(const std::string &host);
         void    setPort(int port);
-        void    setMethods(struct methods methods);
+        void    setMethods(struct location methods);
         int     readRequest(std::vector<Client>::iterator it);
         int     writeResponse(std::vector<Client>::iterator it);
         int     proccessRequest(std::vector<Client>::iterator it);
         void    sendError(std::vector<Client>::iterator it);
+        void    getLocationAndMethod(std::vector<Client>::iterator it);
 };
-
 
 #endif

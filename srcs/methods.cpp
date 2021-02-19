@@ -1,28 +1,22 @@
 #include "methods.hpp"
 
-void responseGet(std::vector<Client>::iterator client, Server serv)
+void responseGet(std::vector<Client>::iterator client)
 {
 	std::string response = client->_request->_version;
 	std::string		path;
 	int ret = 0;
 	size_t pos;
 
-	path = client->_request->_uri;
-	for (std::vector<struct methods>::iterator it = serv._methods.begin(); it != serv._methods.end(); it++)
-	{
-		if ((pos = client->_request->_uri.find(it->location)) != std::string::npos)
-		{
-			if (pos + 1 < client->_request->_uri.size())
-				path =  it->root + "/"+ client->_request->_uri.substr(pos + 1, std::string::npos);
-			else
-				path = it->root + "/"+ it->index;
-		}
-	}
+	if (client->_conf.root.size() < client->_request->_uri.size())
+		path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.root.size(), std::string::npos);
+	else
+		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
+	std::cout << "path: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
-		client->setStatus("400 Bad Request");
+		client->setStatus("404 Not Found");
 		//client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
 		return ;
 	}
@@ -35,7 +29,12 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
 	client->_request->parseBody((*client));
-	//exec CGI
+	//If en la conf hay que ejecutar cgi ?
+	//client->_request->execCGI((*client));
+	//else
+	if (client->_status == "200 OK")
+		FD_SET(client->_fd, client->_wSet);
+
 	//FD_SET(client->_fd, client->_wSet);
 }
 
@@ -45,8 +44,11 @@ void createHeader(std::vector<Client>::iterator client, Server serv)
 	std::map<std::string, std::string> 	headers;
 	
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
+	if (client->_status == "405 Not Allowed")
+		response = response + client->_conf.method;
 	response = response + "Sever: webserv/1.0.0\r\n";
 	response = response + "Sever: "+ serv._name + "/1.0.0\r\n";
+
 	response = response + "Date: " + get_date() + "\r\n";
 	response = response + "Last-Modified: " + getLastModified(client->_path)+ "\r\n"; //date de archivo requested by client
 	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";

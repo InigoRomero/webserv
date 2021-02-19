@@ -55,10 +55,10 @@ void Conf::checkFile()
         throw ConfigFileException();
 }
 
-void Conf::initMethods(struct methods *methods)
+void Conf::initMethods(struct location *methods)
 {
     methods->location = "";
-    methods->name = "";
+    methods->method = "";
     methods->root = "";
     methods->index = "";
     methods->cgi_path = "";
@@ -97,7 +97,7 @@ void Conf::fillServer()
             {
                 if ((*it).find("location") != std::string::npos) //falta coger texto location
                 {
-                    struct methods p;
+                    struct location p;
                     initMethods(&p);
                     p.location = (*it).substr(8, std::string::npos);
                     p.location = p.location.substr(0, p.location.length() - 1);
@@ -105,7 +105,7 @@ void Conf::fillServer()
                     while ((*it).find("}") == std::string::npos) //compare en vez de find por si  "}" no esta en una linea a parte??
                     {
                         if ((*it).find("method") == 0)
-                            p.name = (*it).substr(6, std::string::npos);
+                            p.method = (*it).substr(6, std::string::npos);
                         else if ((*it).find("root") == 0)
                             p.root = (*it).substr(4, std::string::npos);
                         else if ((*it).find("index") == 0)

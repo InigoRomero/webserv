@@ -26,7 +26,7 @@ class Conf
         void                ReadFile(); //get in vector of strings all the data
         void                fillServer(); //get the info from the conf vector to Server vector object
         void                checkFile();
-        void                initMethods(struct methods *methods);
+        void                initMethods(struct location *methods);
         std::vector<Server> getServer() const; 
         //std::vector<Server> GetInfo();
         

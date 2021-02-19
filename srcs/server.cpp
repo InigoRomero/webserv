@@ -94,7 +94,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 
     //std::cout << buf << std::endl;
     //it->_request->setRbuf(buf); 
-    it->_request->setRequest(str); 
+    it->_request->setRequest(str);
     return(1);
  }
 
@@ -103,7 +103,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     char char_array[it->_sendInfo.size()];
     strcpy(char_array, it->_sendInfo.c_str());
     char_array[it->_sendInfo.size()] = '\0';
-    std::cout << "SEND INFO: \n" << char_array << std::endl;
+    //std::cout << "SEND INFO: \n" << char_array << std::endl;
     if (send(it->_fd, char_array, it->_sendInfo.size(), 0) == -1)
         perror("send");
     return(1);
@@ -113,21 +113,42 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1");
     it->setStatus("200 OK");
+
     if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host sin este header http/1.1 responde bad request
     {
         it->setStatus("400 Bad Request");
-        sendError(it);
+        sendError(it);   
     }
+    getLocationAndMethod(it);
+    if (it->_conf.method.find(it->_request->_method) == std::string::npos)
+	{
+		it->setStatus("405 Not Allowed");
+        sendError(it);
+        createHeader(it, (*this)); 
+		return (0);
+	}
     if (it->_request->_method == "GET")
-        responseGet(it, (*this));
+        responseGet(it);
     else if (it->_request->_method == "POST")
         responsePost(it, (*this));
     std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
-        sendError(it);
-   // FD_SET(it->_fd, _writeSet);
-    createHeader(it, (*this));
+        sendError(it);    
+    createHeader(it, (*this));   // FD_SET(it->_fd, _writeSet);
     return 0;
+}
+
+void Server::getLocationAndMethod(std::vector<Client>::iterator it)
+{
+    for (std::vector<struct location>::iterator it2 = _methods.begin(); it2 != _methods.end(); it2++)
+    {
+        if (it->_request->_uri == it2->location)
+        {
+            it->_conf = *it2;
+            return ;
+        }
+    }
+    it->setStatus("400 Bad Request");
 }
 
 void Server::sendError(std::vector<Client>::iterator it)
@@ -152,4 +173,4 @@ void	Server::setConf(const std::string &conf) { this->_conf = conf; }
 
 void	Server::setPort(int port) { this->_port = port; }
 
-void	Server::setMethods(struct methods methods) { this->_methods.push_back(methods); }
+void	Server::setMethods(struct location methods) { this->_methods.push_back(methods); }

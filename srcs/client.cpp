@@ -6,7 +6,7 @@ Client::Client():
 {}
 
 Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  client_addr):
-     _fd(fd), _read_fd(-1), _write_fd(-1), _rSet(readSet), _wSet(writeSet), _client_addr(client_addr), _request(new Request()), _status("")
+     _fd(fd), _read_fd(-1), _write_fd(-1) ,_rSet(readSet), _wSet(writeSet), _client_addr(client_addr), _request(new Request()), _status("")
 {
 	_ip = inet_ntoa(client_addr.sin_addr);
 	_port = htons(client_addr.sin_port);
