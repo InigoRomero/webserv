@@ -21,6 +21,7 @@ void responseGet(std::vector<Client>::iterator client)
 	}
 	// if exits
 	client->setPath(path.c_str());
+	std::cout << "I am updating read fd" << std::endl;
 	client->setReadFd(ret);
 }
 

@@ -45,11 +45,10 @@ int Request::parseRequest()
 {
 
 	std::vector<std::string> lines;
-	size_t pos = 0, found = 0, aux;
+	size_t pos = 0, found = 0;
     //std::cout << "request:\n " << _req << std::endl;
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
-        aux = pos;
         _req = _req.substr(pos+1);
 	}
     if (_req[_req.size() - 1] != '\n')
