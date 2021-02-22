@@ -43,7 +43,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         return(0);
     }
 
-    if (listen(_sockfd, 10) < 0)
+    if (listen(_sockfd, 256) < 0)
     {
         perror("listen");
         return(0);
@@ -102,6 +102,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 {
     unsigned long	bytes;
 
+    std::cout << "Send info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
@@ -122,7 +123,6 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1");
     it->setStatus("200 OK");
-
     if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host sin este header http/1.1 responde bad request
     {
         it->setStatus("400 Bad Request");

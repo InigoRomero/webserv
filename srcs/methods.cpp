@@ -13,7 +13,6 @@ void responseGet(std::vector<Client>::iterator client)
 		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
-	std::cout << "path: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("404 Not Found");

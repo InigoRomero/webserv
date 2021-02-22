@@ -43,6 +43,7 @@ Request::~Request()
 
 int Request::parseRequest()
 {
+
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0, aux;
     //std::cout << "request:\n " << _req << std::endl;
@@ -51,6 +52,8 @@ int Request::parseRequest()
         aux = pos;
         _req = _req.substr(pos+1);
 	}
+    if (_req[_req.size() - 1] != '\n')
+        lines.push_back(_req.substr(0, _req.size() - 1));
     validateHeader(lines);
     if (!_validate)
         return(0);
@@ -96,8 +99,8 @@ int Request::parseRequest()
 void Request::validateHeader(std::vector<std::string> reqL)
 {
     //check method
+    std::cout << "reqL: " << reqL[0] << std::endl;
     size_t found = 0;
-
     for (std::vector<std::string>::iterator it = _avMethods.begin(); it != _avMethods.end(); it++)
     {
         if ((found = reqL[0].find((*it))) != std::string::npos)
