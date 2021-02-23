@@ -33,11 +33,11 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         return (0);
     }
     int yes = 1;
-    if (setsockopt(_sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
+    if (setsockopt(_sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof (int)) == -1) {
         perror("setsockopt");
         return(0);
     }
-    if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr)<0)
+    if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr) < 0)
     {
         perror("In bind");
         return(0);
@@ -109,11 +109,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     else
     {
         it->_sendInfo.clear();
-        it->_path.clear();
-        it->_status.clear();
-        it->_rFile.clear();
-        initMethods(&it->_conf);
-        delete it->_request;
+       // delete it->_request;
     }
     it->_lastDate = get_date();
     return(1);

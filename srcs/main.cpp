@@ -48,6 +48,11 @@ int init(std::vector<Server> servers)
                 (*it).acceptNewClient(&readSet, &writeSet);   
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
+                if (it2->_chunkDone)
+                {
+                    FD_SET(it2->_fd, &writeSet);
+                    it2->_chunkDone = false;
+                }
                 if (FD_ISSET(it2->_fd, &readSet))
                 {
                     it->readRequest(it2);
@@ -56,18 +61,14 @@ int init(std::vector<Server> servers)
                 }
                 if (FD_ISSET(it2->_fd, &writeSet))
                 {   
-                    std::cout << "HOLA" << std::endl;
                     it->writeResponse(it2);
                     FD_CLR(it2->_fd, &writeSet);
-                   // FD_CLR(it2->_fd, it2->_rSet);
-                   // FD_CLR(it2->_fd, &readSet);
+                    FD_CLR(it2->_fd, &readSet);
                     close(it2->_fd);
                 }
                 if (it2->_read_fd != -1)
                 {
                     it2->readFd();
-                    FD_CLR(it2->_fd, &readSet);
-                    FD_SET(it2->_fd, &writeSet);
                     close(it2->_read_fd);
                 }
                 //check timeout to close connection

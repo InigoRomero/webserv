@@ -38,6 +38,7 @@ void Client::readFd()
      _sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";
      _sendInfo += buffer;
      close(_read_fd);
+     _chunkDone = true;
      setReadFd(-1);
 }
 

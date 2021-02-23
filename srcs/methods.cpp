@@ -33,8 +33,9 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 	//client->_request->execCGI((*client));
 	//else
 	if (client->_status == "200 OK")
-		FD_SET(client->_fd, client->_wSet);
-
+		client->_chunkDone = true;
+		//FD_SET(client->_fd, client->_wSet);
+    //client->_chunkDone = true;
 	//FD_SET(client->_fd, client->_wSet);
 }
 
