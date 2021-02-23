@@ -92,7 +92,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     std::string str(buf);
 
 
-    std::cout << "BUFFER: " << buf << std::endl;
+    std::cout << "BUFFER LEIDO:\n" << buf << "\n\n" << std::endl;
     //it->_request->setRbuf(buf); 
     it->_request->setRequest(str);
     return(1);
@@ -102,7 +102,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
 {
     unsigned long	bytes;
 
-    std::cout << "Send info: \n" << it->_sendInfo << std::endl;
+    std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
