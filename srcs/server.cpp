@@ -48,8 +48,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         perror("listen");
         return(0);
     }
-    /*
-    if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
+  /*  if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
         return (0);
@@ -85,14 +84,15 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     ssize_t             numbytes;
     char                buf[10000];
  
-    if ((numbytes = recv(it->_fd, buf, 9999, 0)) == -1) {
-        perror("recv");
+    if ((numbytes = read(it->_fd, buf, 9999)) == -1) {
+        perror("read");
         exit(1);
     }
     buf[numbytes] = '\0';
     std::string str(buf);
 
-    //std::cout << buf << std::endl;
+
+    std::cout << "BUFFER: " << buf << std::endl;
     //it->_request->setRbuf(buf); 
     it->_request->setRequest(str);
     return(1);
@@ -127,9 +127,10 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     getLocationAndMethod(it);
     std::cout << "Location: " << it->_conf.location << std::endl;
     std::cout << "Method: " << it->_request->_method << std::endl;
-    std::cout << "fd: " << it->_fd << std::endl;
+   // std::cout << "fd: " << it->_fd << std::endl;
     if (it->_conf.method.find(it->_request->_method) == std::string::npos)
 	{
+        std::cout << "LOLOLOLOLO"<< std::endl;
 		it->setStatus("405 Not Allowed");
         sendError(it);
         createHeader(it); 
@@ -148,14 +149,23 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 
 void Server::getLocationAndMethod(std::vector<Client>::iterator it)
 {
+    std::string aux;
+
+    aux = it->_request->_uri;
+    if (aux.size() > 1)
+    {
+       aux = aux.substr(1);
+        aux = aux.substr(0, aux.find("/"));
+    }
     for (std::vector<struct location>::iterator it2 = _methods.begin(); it2 != _methods.end(); it2++)
     {
-        if (it->_request->_uri == it2->location)
+        if (it2->location.find(aux) != std::string::npos)
         {
             it->_conf = *it2;
             return ;
         }
     }
+    std::cout << "SOY TONTO" << std::endl;
     it->setStatus("400 Bad Request");
 }
 

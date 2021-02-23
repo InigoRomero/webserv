@@ -48,7 +48,7 @@ int init(std::vector<Server> servers)
                 (*it).acceptNewClient(&readSet, &writeSet);   
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
-                if (it2->_chunkDone)
+                if (it2->_chunkDone) // check if request is done
                 {
                     FD_SET(it2->_fd, &writeSet);
                     it2->_chunkDone = false;
@@ -100,6 +100,7 @@ int main(int argc, char **av)
     }
     catch(std::exception const &e) {
 		std::cerr << "[+] " << e.what() << std::endl;
+        return (EXIT_FAILURE);
 	}
     servers = conf.getServer();
     init(servers);

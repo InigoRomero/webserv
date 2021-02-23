@@ -46,7 +46,7 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    //std::cout << "request:\n " << _req << std::endl;
+    std::cout << "request:\n " << _req << std::endl;
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
         _req = _req.substr(pos+1);
@@ -124,7 +124,6 @@ void Request::parseBody(Client &client)
             client.setSendInfo("400 Bad Request Error");
             return ;
         }
-        
         bytes = strlen(client._request->_req.c_str()); // creo que _req se queda vacio al leerla y hacerle substr
         if (bytes >= client._request->_bodyLen)
         {

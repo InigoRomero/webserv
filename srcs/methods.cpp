@@ -7,12 +7,14 @@ void responseGet(std::vector<Client>::iterator client)
 	int ret = 0;
 	size_t pos;
 
+	std::cout << "HI: " << client->_request->_uri << std::endl;
 	if (client->_conf.root.size() < client->_request->_uri.size())
-		path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.root.size(), std::string::npos);
+		path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
 	else
 		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
+	std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("404 Not Found");
@@ -21,7 +23,6 @@ void responseGet(std::vector<Client>::iterator client)
 	}
 	// if exits
 	client->setPath(path.c_str());
-	std::cout << "I am updating read fd" << std::endl;
 	client->setReadFd(ret);
 }
 
@@ -88,7 +89,7 @@ std::string getDataType(std::string fileExt)
 	else if (fileExt == ".avi")
 		return ("video/x-msvideo");
 	else
-		return ("error");
+		return ("application/octet-stream");
 }
 
 std::string getLastModified(std::string path)
