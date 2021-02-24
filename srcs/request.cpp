@@ -1,6 +1,6 @@
 #include "request.hpp"
 
-Request::Request(): _req(""), _validate(false)
+Request::Request(): _req("")
 {
     _headers.insert(std::pair<std::string,std::string>("Accept-Charsets:", "" ));
     _headers.insert(std::pair<std::string,std::string>("Accept-Language:", "")); 
@@ -21,14 +21,7 @@ Request::Request(): _req(""), _validate(false)
     _headers.insert(std::pair<std::string,std::string>("User-Agent:", "")); 
     _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate:", ""));
     _headers.insert(std::pair<std::string,std::string>("body", ""));
-    this->_avMethods.push_back("GET");
-    this->_avMethods.push_back("POST");
-    this->_avMethods.push_back("PUT");
-    this->_avMethods.push_back("HEAD");
-    this->_avMethods.push_back("CONNECT");
-    this->_avMethods.push_back("OPTIONS");
-    this->_avMethods.push_back("TRACE");
-    this->_avMethods.push_back("PATCH");
+    _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
 }
 
 Request::Request(std::string req): _req(req)
@@ -46,16 +39,13 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    std::cout << "request:\n " << _req << std::endl;
+    std::cout << "request:\n*****\n" << _req << "\n*****\n";
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
         _req = _req.substr(pos+1);
 	}
-    if (_req[_req.size() - 1] != '\n')
-        lines.push_back(_req.substr(0, _req.size() - 1));
-    validateHeader(lines);
-    if (!_validate)
-        return(0);
+    if (_req != "\r")
+        lines.push_back(_req);
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos
     while (isspace(*it))
@@ -77,6 +67,8 @@ int Request::parseRequest()
     //std::cout << "Method of the client: " << _method << std::endl;
     _uri = fline[1];
     _version = fline[2];
+    if (_avMethods.find(_method) == std::string::npos)
+        return 0;
     if (_method == "POST" || _method == "PUT")
         lines.push_back(_req.substr(0, std::string::npos));
     //take all the headers we have to take
@@ -93,21 +85,6 @@ int Request::parseRequest()
     }
     _headers["body"] = lines.back();
     return (1);
-}
-
-void Request::validateHeader(std::vector<std::string> reqL)
-{
-    //check method
-    std::cout << "reqL: " << reqL[0] << std::endl;
-    size_t found = 0;
-    for (std::vector<std::string>::iterator it = _avMethods.begin(); it != _avMethods.end(); it++)
-    {
-        if ((found = reqL[0].find((*it))) != std::string::npos)
-        {
-            _validate = true;
-            break ;
-        }
-    }
 }
 
 void Request::parseBody(Client &client)

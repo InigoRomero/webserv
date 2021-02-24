@@ -92,7 +92,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     std::string str(buf);
 
 
-    std::cout << "BUFFER LEIDO:\n" << buf << "\n\n" << std::endl;
+    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << buf << "\n*****\n" << std::endl;
     //it->_request->setRbuf(buf); 
     it->_request->setRequest(str);
     return(1);
@@ -119,7 +119,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1");
     it->setStatus("200 OK");
-    if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host sin este header http/1.1 responde bad request
+    if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
         it->setStatus("400 Bad Request");
         sendError(it);   
