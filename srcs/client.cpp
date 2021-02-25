@@ -29,10 +29,10 @@ void Client::setReadFd(int fd)
 void Client::readFd()
 {
      
-     char			buffer[MAXDATASIZE + 1];
+     char			buffer[BUFFER_SIZE + 1];
      int ret = 0;
 
-     ret = read(_read_fd, buffer, MAXDATASIZE);
+     ret = read(_read_fd, buffer, BUFFER_SIZE);
      buffer[ret] = '\0';
      //comproba
      _sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";

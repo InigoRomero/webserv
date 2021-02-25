@@ -82,19 +82,44 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
  int  Server::readRequest(std::vector<Client>::iterator it)
  {
     ssize_t             numbytes;
-    char                buf[10000];
- 
-    if ((numbytes = read(it->_fd, buf, 9999)) == -1) {
+    char                buf[BUFFER_SIZE + 1];
+    //char *rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    //memset((void *)rBuf, 0, BUFFER_SIZE + 1);
+    //char *temp = NULL, *aux = NULL;
+
+    numbytes = 0;
+    if ((numbytes = read(it->_fd, buf, BUFFER_SIZE)) == -1) {
         perror("read");
         exit(1);
     }
-    buf[numbytes] = '\0';
+    std::cout << "\nCLIENTE ANTES:\n*****\n" << buf << "\n*****\n" << std::endl;
+    if (numbytes > 0)
+        buf[numbytes] = '\0';
+   /* while ((numbytes = read(it->_fd, buf, 1)) > 0)
+    {
+
+    }*/
+    /*
+    while ((numbytes = read(it->_fd, buf, 512)) > 1)
+	{
+        buf[numbytes] = 0;
+        std::cout << "buffer: " << buf << std::endl;
+		if (!aux)
+			aux = ft_strdup(buf);
+        else
+        {
+            temp = ft_strjoin(buf, aux);
+            free(aux);
+            aux = temp;
+             std::cout << "aux: " << aux << std::endl;
+        }
+	}*/
     std::string str(buf);
-
-
     std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << buf << "\n*****\n" << std::endl;
-    //it->_request->setRbuf(buf); 
+    //   it->_request->setRbuf(buf);
     it->_request->setRequest(str);
+  //  free(rBuf);
+    //free(aux);
     return(1);
  }
 

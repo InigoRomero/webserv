@@ -7,7 +7,6 @@ void responseGet(std::vector<Client>::iterator client)
 	int ret = 0;
 	size_t pos;
 
-	std::cout << "HI: " << client->_request->_uri << std::endl;
 	if (client->_conf.root.size() < client->_request->_uri.size())
 		path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
 	else
@@ -17,6 +16,7 @@ void responseGet(std::vector<Client>::iterator client)
 	std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
+
 		client->setStatus("404 Not Found");
 		//client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
 		return ;

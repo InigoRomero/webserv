@@ -18,6 +18,7 @@
 #include "methods.hpp"
 #include "utils.hpp"
 #include "location.hpp"
+#include "get_next_line.hpp"
 
 class Server
 {
