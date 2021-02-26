@@ -31,7 +31,7 @@ Request::Request(std::string req): _req(req)
 
 Request::~Request()
 {
-
+    free(_rBuf);
 }
 
 int Request::parseRequest()

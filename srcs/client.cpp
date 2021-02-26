@@ -14,7 +14,9 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
 }
 
 Client::~Client()
-{}
+{
+
+}
 
 void Client::setSendInfo(std::string info)
 {

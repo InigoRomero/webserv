@@ -82,44 +82,34 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
  int  Server::readRequest(std::vector<Client>::iterator it)
  {
     ssize_t             numbytes;
-    char                buf[BUFFER_SIZE + 1];
-    //char *rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-    //memset((void *)rBuf, 0, BUFFER_SIZE + 1);
-    //char *temp = NULL, *aux = NULL;
+    int bytes;
+    char                aux[BUFFER_SIZE + 1];
 
     numbytes = 0;
-    if ((numbytes = read(it->_fd, buf, BUFFER_SIZE)) == -1) {
-        perror("read");
-        exit(1);
-    }
-    std::cout << "\nCLIENTE ANTES:\n*****\n" << buf << "\n*****\n" << std::endl;
-    if (numbytes > 0)
-        buf[numbytes] = '\0';
-   /* while ((numbytes = read(it->_fd, buf, 1)) > 0)
-    {
+    it->_request->_rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 
-    }*/
-    /*
-    while ((numbytes = read(it->_fd, buf, 512)) > 1)
-	{
-        buf[numbytes] = 0;
-        std::cout << "buffer: " << buf << std::endl;
-		if (!aux)
-			aux = ft_strdup(buf);
-        else
-        {
-            temp = ft_strjoin(buf, aux);
-            free(aux);
-            aux = temp;
-             std::cout << "aux: " << aux << std::endl;
+    while (42)
+    {
+        bytes = strlen(it->_request->_rBuf);
+        std::cout << "BYTES: " << bytes << std::endl;
+         std::cout << "buf: " << it->_request->_rBuf  << std::endl;
+        if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
+            perror("read");
+            exit(1);
         }
-	}*/
-    std::string str(buf);
-    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << buf << "\n*****\n" << std::endl;
-    //   it->_request->setRbuf(buf);
-    it->_request->setRequest(str);
-  //  free(rBuf);
-    //free(aux);
+
+        it->_request->_rBuf [numbytes + bytes] = '\0';
+        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || read(it->_fd, aux, BUFFER_SIZE) == 1) {
+            break ;
+        }
+    }
+    std::cout << "\nCLIENTE ANTES:\n*****\n" << it->_request->_rBuf  << "\n*****\n" << std::endl;
+  //  if (numbytes > 0)
+    //    buf[numbytes] = '\0';
+    std::string str1 = it->_request->_rBuf;
+    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str1 << "\n*****\n" << std::endl;
+    it->_request->setRequest(str1);
+    
     return(1);
  }
 

@@ -20,7 +20,7 @@ class Request
         Request(std::string req);
         ~Request();
 
-        char              _rBuf[BUFFER_SIZE + 1];
+        char                                *_rBuf;
         std::string                         _req;
         std::string                         _avMethods;
         std::string                         _method;
