@@ -85,30 +85,27 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     ssize_t             numbytes;
     int bytes;
 
-    numbytes = 0;
-    bytes = strlen(it->_request->_rBuf);
-   // std::cout << "BYTES: " << bytes << std::endl;
-    //std::cout << "ANTES: " << it->_request->_rBuf  << std::endl;
-    if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
-        perror("read");
-        exit(1);
-    }
-    
-    if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 1)
+    while (42)
     {
-        it->_request->_rBuf [numbytes + bytes] = '\0';
-        std::string str1 = it->_request->_rBuf;
-        it->_request->setRequest(str1);
-        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
-        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-        free(it->_request->_rBuf);
-        it->_request->_rBuf = NULL;
-       // std::cout << "\nDESPUES DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
-      //  it->_request->_rBuf = NULL;
-       // it->_request->_rBuf[0] = 0;
-        return (0);
+        numbytes = 0;
+        bytes = strlen(it->_request->_rBuf);
+        if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
+            perror("read");
+            exit(1);
+        }
+        
+        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 1)
+        {
+            it->_request->_rBuf [numbytes + bytes] = '\0';
+            std::string str1 = it->_request->_rBuf;
+            it->_request->setRequest(str1);
+            std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+            memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+            free(it->_request->_rBuf);
+            it->_request->_rBuf = NULL;
+            return (0);
+        }
     }
-    std::cout << "CUANTO HE LEIDO: " << numbytes << std::endl;
     return(1);
  }
 
