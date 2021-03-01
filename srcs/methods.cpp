@@ -7,18 +7,22 @@ void responseGet(std::vector<Client>::iterator client)
 	int ret = 0;
 	size_t pos;
 
-	if (client->_conf.root.size() < client->_request->_uri.size())
-		path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	if (client->_conf.location.size() < client->_request->_uri.size())
+	{
+		if (client->_request->_uri.find(".") == std::string::npos)
+			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
+		else
+			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	}
 	else
 		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
+	
 	std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
-
 		client->setStatus("404 Not Found");
-		//client->setSendInfo("HTTP/1.1 400 Bad Request\r\n");
 		return ;
 	}
 	// if exits

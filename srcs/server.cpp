@@ -94,7 +94,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
             exit(1);
         }
         
-        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 1)
+        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 0)
         {
             it->_request->_rBuf [numbytes + bytes] = '\0';
             std::string str1 = it->_request->_rBuf;
@@ -138,10 +138,8 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     getLocationAndMethod(it);
     std::cout << "Location: " << it->_conf.location << std::endl;
     std::cout << "Method: " << it->_request->_method << std::endl;
-   // std::cout << "fd: " << it->_fd << std::endl;
     if (it->_conf.method.find(it->_request->_method) == std::string::npos)
 	{
-        std::cout << "LOLOLOLOLO"<< std::endl;
 		it->setStatus("405 Not Allowed");
         sendError(it);
         createHeader(it); 
@@ -176,7 +174,6 @@ void Server::getLocationAndMethod(std::vector<Client>::iterator it)
             return ;
         }
     }
-    std::cout << "SOY TONTO" << std::endl;
     it->setStatus("400 Bad Request");
 }
 
