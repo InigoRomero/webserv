@@ -22,6 +22,8 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate:", ""));
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
+    _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    std::cout << "QUE TIENE: " << _rBuf << std::endl;
 }
 
 Request::Request(std::string req): _req(req)
@@ -31,7 +33,7 @@ Request::Request(std::string req): _req(req)
 
 Request::~Request()
 {
-    free(_rBuf);
+  
 }
 
 int Request::parseRequest()

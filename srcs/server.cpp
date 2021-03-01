@@ -48,6 +48,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         perror("listen");
         return(0);
     }
+    FD_SET(_sockfd, _rSet);
   /*  if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
@@ -83,33 +84,31 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
  {
     ssize_t             numbytes;
     int bytes;
-    char                aux[BUFFER_SIZE + 1];
 
     numbytes = 0;
-    it->_request->_rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-
-    while (42)
-    {
-        bytes = strlen(it->_request->_rBuf);
-        std::cout << "BYTES: " << bytes << std::endl;
-         std::cout << "buf: " << it->_request->_rBuf  << std::endl;
-        if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
-            perror("read");
-            exit(1);
-        }
-
-        it->_request->_rBuf [numbytes + bytes] = '\0';
-        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || read(it->_fd, aux, BUFFER_SIZE) == 1) {
-            break ;
-        }
+    bytes = strlen(it->_request->_rBuf);
+   // std::cout << "BYTES: " << bytes << std::endl;
+    //std::cout << "ANTES: " << it->_request->_rBuf  << std::endl;
+    if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
+        perror("read");
+        exit(1);
     }
-    std::cout << "\nCLIENTE ANTES:\n*****\n" << it->_request->_rBuf  << "\n*****\n" << std::endl;
-  //  if (numbytes > 0)
-    //    buf[numbytes] = '\0';
-    std::string str1 = it->_request->_rBuf;
-    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str1 << "\n*****\n" << std::endl;
-    it->_request->setRequest(str1);
     
+    if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 1)
+    {
+        it->_request->_rBuf [numbytes + bytes] = '\0';
+        std::string str1 = it->_request->_rBuf;
+        it->_request->setRequest(str1);
+        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+        free(it->_request->_rBuf);
+        it->_request->_rBuf = NULL;
+       // std::cout << "\nDESPUES DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+      //  it->_request->_rBuf = NULL;
+       // it->_request->_rBuf[0] = 0;
+        return (0);
+    }
+    std::cout << "CUANTO HE LEIDO: " << numbytes << std::endl;
     return(1);
  }
 
@@ -124,7 +123,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     else
     {
         it->_sendInfo.clear();
-       // delete it->_request;
+        delete it->_request;
     }
     it->_lastDate = get_date();
     return(1);
