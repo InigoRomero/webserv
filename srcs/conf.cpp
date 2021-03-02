@@ -111,7 +111,7 @@ void Conf::fillServer()
                            throw ConfigFileException();
                         it++;
                     }
-                    _servers.back().setMethods(p);
+                    _servers.back().setLocations(p);
                     it++;
                 }
             }

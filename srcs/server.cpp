@@ -2,7 +2,7 @@
 #define MAXDATASIZE 1000
 
 Server::Server():
-     _methods(), _port(-1),  _error(""), _name(""), _host("")
+     _locations(), _port(-1),  _error(""), _name(""), _host("")
 {
     bzero(&_my_addr, sizeof(_my_addr));
 }
@@ -48,7 +48,6 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         perror("listen");
         return(0);
     }
-    FD_SET(_sockfd, _rSet);
   /*  if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
@@ -133,7 +132,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
         it->setStatus("400 Bad Request");
-        sendError(it);   
+        sendError(it);
     }
     getLocationAndMethod(it);
     std::cout << "Location: " << it->_conf.location << std::endl;
@@ -166,7 +165,7 @@ void Server::getLocationAndMethod(std::vector<Client>::iterator it)
        aux = aux.substr(1);
         aux = aux.substr(0, aux.find("/"));
     }
-    for (std::vector<struct location>::iterator it2 = _methods.begin(); it2 != _methods.end(); it2++)
+    for (std::vector<struct location>::iterator it2 = _locations.begin(); it2 != _locations.end(); it2++)
     {
         if (it2->location.find(aux) != std::string::npos)
         {
@@ -199,4 +198,4 @@ void	Server::setConf(const std::string &conf) { this->_conf = conf; }
 
 void	Server::setPort(int port) { this->_port = port; }
 
-void	Server::setMethods(struct location methods) { this->_methods.push_back(methods); }
+void	Server::setLocations(struct location methods) { this->_locations.push_back(methods); }

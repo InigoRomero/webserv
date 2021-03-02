@@ -124,7 +124,7 @@ int main(int argc, char **av)
         std::cout << "  Name: " << (*it)._name << std::endl;
         std::cout << "  Host: " << (*it)._host << std::endl;
         std::cout << "  Methods:  \n{ "<< std::endl;
-        for (std::vector<struct location>::iterator it2 = (*it)._methods.begin(); it2 != (*it)._methods.end(); it2++)
+        for (std::vector<struct location>::iterator it2 = (*it)._locations.begin(); it2 != (*it)._locations.end(); it2++)
         {
             std::cout << "  {\n   Method type: " << (*it2).name << std::endl;
             std::cout << "   root: " << (*it2).root << std::endl;

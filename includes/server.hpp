@@ -29,7 +29,7 @@ class Server
 
     public:
         struct sockaddr_in          _my_addr;
-        std::vector<struct location> _methods;
+        std::vector<struct location> _locations;
         std::map<std::string, std::string> 	_headers;
         std::vector<Client>         _clients;
         int                         _port;
@@ -62,7 +62,7 @@ class Server
         void    setHost(const std::string &host);
         void    setConf(const std::string &host);
         void    setPort(int port);
-        void    setMethods(struct location methods);
+        void    setLocations(struct location methods);
         int     readRequest(std::vector<Client>::iterator it);
         int     writeResponse(std::vector<Client>::iterator it);
         int     proccessRequest(std::vector<Client>::iterator it);
