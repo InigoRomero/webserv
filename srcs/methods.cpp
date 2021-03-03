@@ -19,7 +19,7 @@ void responseGet(std::vector<Client>::iterator client)
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
 	
-	std::cout << "PATH: " << path << std::endl;
+	//std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->setStatus("404 Not Found");

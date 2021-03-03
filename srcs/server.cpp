@@ -29,7 +29,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
     _my_addr.sin_addr.s_addr = INADDR_ANY;
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
+		//std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
         return (0);
     }
     int yes = 1;
@@ -48,7 +48,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         perror("listen");
         return(0);
     }
-  /*  if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
+   /* if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
         return (0);
@@ -60,21 +60,22 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 {
     int                 accept_fd = 0;
     struct sockaddr_in  client_addr;
-    ssize_t             addrlen;
+    socklen_t             addrlen;
 
 
     memset(&client_addr, 0, sizeof(struct sockaddr));
-    addrlen = sizeof client_addr;
-    if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, (socklen_t*)&addrlen)) < 0)
+    addrlen = sizeof(client_addr);
+    if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &addrlen)) < 0)
     {
         perror("In accept");
         exit(0);
     }
     Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
+
     _clients.push_back(newClient);
     FD_SET(accept_fd, readSet);
     //FD_CLR(accept_fd, readSet);
-    std::cout << "new Client accepted\n";
+   // std::cout << "new Client accepted\n";
 
     return (1);
 }
@@ -97,7 +98,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
         {
             std::string str1 = it->_request->_rBuf;
             it->_request->setRequest(str1);
-            std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+          //  std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
             return(0);
         }
     }
@@ -137,8 +138,8 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         sendError(it);
     }
     getLocationAndMethod(it);
-    std::cout << "Location: " << it->_conf.location << std::endl;
-    std::cout << "Method: " << it->_request->_method << std::endl;
+  //  std::cout << "Location: " << it->_conf.location << std::endl;
+  //  std::cout << "Method: " << it->_request->_method << std::endl;
     if (it->_conf.method.find(it->_request->_method) == std::string::npos)
 	{
 		it->setStatus("405 Not Allowed");
@@ -153,7 +154,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     else if (it->_request->_method == "PUT")
         responsePut(it);
 
-    std::cout << "status: " << it->_status << std::endl;
+  //  std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
         sendError(it);
     createHeader(it);   // FD_SET(it->_fd, _writeSet);

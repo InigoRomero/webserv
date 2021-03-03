@@ -60,11 +60,8 @@ int init(std::vector<Server> servers)
                     FD_SET(it2->_fd, &readSet);
                 if (FD_ISSET(it2->_fd, &readSet))
                 {
-                    if (!it->readRequest(it2)) 
-                    {
-                        FD_CLR(it2->_fd, &readSet);
+                    if (!it->readRequest(it2))
                         it->proccessRequest(it2);
-                    }
                 }
                 if (FD_ISSET(it2->_fd, &writeSet))
                 {   
@@ -87,6 +84,7 @@ int init(std::vector<Server> servers)
                 //check timeout to close connection
                 if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10) || kick == true)
                 {
+
 			        it->_clients.erase(it2);
                     std::cout << "Bye client" << std::endl;
                 }
