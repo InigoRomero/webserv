@@ -79,6 +79,11 @@ int init(std::vector<Server> servers)
                     it2->readFd();
                     close(it2->_read_fd);
                 }
+                if (it2->_write_fd != -1)
+                {
+                    it2->writeFd();
+                    close(it2->_write_fd);
+                }
                 //check timeout to close connection
                 if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10) || kick == true)
                 {

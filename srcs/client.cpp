@@ -50,9 +50,9 @@ void Client::readFd()
 void Client::writeFd()
 {
      int ret = 0;
-
-     ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].length()); // .size()??
-     
+     _request->_headers["body"] = _request->_headers["body"].substr(_request->_headers["body"].find("\r\n") + 2, std::string::npos);
+     ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size() - 7);
+     _chunkDone = true;
 }
 
 void Client::setStatus(std::string status)

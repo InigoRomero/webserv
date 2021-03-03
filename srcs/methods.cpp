@@ -53,8 +53,6 @@ void responsePut(std::vector<Client>::iterator client)
 	if ((open(path.c_str(), O_RDONLY)) == -1)
 		client->setStatus("201 OK");
 	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
-	if (client->_status.find("OK") != std::string::npos)
-		client->_chunkDone = true;
 }
 
 void createHeader(std::vector<Client>::iterator client)

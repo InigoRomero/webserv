@@ -42,12 +42,14 @@ int Request::parseRequest()
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
     std::cout << "request:\n*****\n" << _req << "\n*****\n";
+    _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
+    _req = _req.substr(0, _req.find("\r\n\r\n"));
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
         _req = _req.substr(pos+1);
 	}
-    if (_req != "\r")
-        lines.push_back(_req);
+  //  if (_req != "\r")
+    //    lines.push_back(_req);
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos
     while (isspace(*it))
@@ -71,8 +73,6 @@ int Request::parseRequest()
     _version = fline[2];
     if (_avMethods.find(_method) == std::string::npos)
         return 0;
-    if (_method == "POST" || _method == "PUT")
-        lines.push_back(_req.substr(0, std::string::npos));
     //take all the headers we have to take
     for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
     {
@@ -85,7 +85,7 @@ int Request::parseRequest()
             }
         }
     }
-    _headers["body"] = lines.back();
+    std::cout << "bodyman:" << _headers["body"] << std::endl;
     return (1);
 }
 
