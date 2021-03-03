@@ -92,32 +92,34 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
             perror("read");
             exit(1);
         }
-        
-        if (strstr(it->_request->_rBuf , "\r\n\r\n") != NULL || numbytes <= 0)
+        it->_request->_rBuf [numbytes + bytes] = '\0';
+        if ((strstr(it->_request->_rBuf , "\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") == NULL) || (strstr(it->_request->_rBuf , "0\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") != NULL))
         {
-            it->_request->_rBuf [numbytes + bytes] = '\0';
             std::string str1 = it->_request->_rBuf;
             it->_request->setRequest(str1);
             std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
-            memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-            free(it->_request->_rBuf);
-            it->_request->_rBuf = NULL;
-            return (0);
+            return(0);
         }
     }
-    return(1);
+    return (1);
  }
 
 int  Server::writeResponse(std::vector<Client>::iterator it)
 {
     unsigned long	bytes;
 
+    it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
+    if (it->_chuckBody.size() > 0)
+        it->_sendInfo += it->_chuckBody;
     std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
     else
     {
+        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+        free(it->_request->_rBuf);
+        it->_request->_rBuf = NULL;
         it->_sendInfo.clear();
         delete it->_request;
     }
@@ -148,9 +150,12 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         responseGet(it);
     else if (it->_request->_method == "POST")
         responsePost(it, (*this));
+    else if (it->_request->_method == "PUT")
+        responsePut(it);
+
     std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
-        sendError(it);    
+        sendError(it);
     createHeader(it);   // FD_SET(it->_fd, _writeSet);
     return 0;
 }

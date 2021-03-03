@@ -10,6 +10,7 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
 {
 	_ip = inet_ntoa(client_addr.sin_addr);
 	_port = htons(client_addr.sin_port);
+     _contentLength = 0;
      //fcntl(_fd, F_SETFL, F_SETFL);
 }
 
@@ -37,8 +38,10 @@ void Client::readFd()
      ret = read(_read_fd, buffer, BUFFER_SIZE);
      buffer[ret] = '\0';
      //comproba
-     _sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";
-     _sendInfo += buffer;
+     _contentLength = strlen(buffer);
+     _chuckBody = buffer;
+     //_sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";
+     //_sendInfo += buffer;
      close(_read_fd);
      _chunkDone = true;
      setReadFd(-1);

@@ -60,7 +60,7 @@ int init(std::vector<Server> servers)
                     FD_SET(it2->_fd, &readSet);
                 if (FD_ISSET(it2->_fd, &readSet))
                 {
-                    if (!it->readRequest(it2))
+                    if (!it->readRequest(it2)) 
                     {
                         FD_CLR(it2->_fd, &readSet);
                         it->proccessRequest(it2);

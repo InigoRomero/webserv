@@ -44,6 +44,18 @@ void responsePost(std::vector<Client>::iterator client, Server serv)
 	//FD_SET(client->_fd, client->_wSet);
 }
 
+void responsePut(std::vector<Client>::iterator client)
+{
+	std::string	path;
+
+	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
+	if ((open(path.c_str(), O_RDONLY)) == -1)
+		client->setStatus("201 OK");
+	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+	if (client->_status.find("OK") != std::string::npos)
+		client->_chunkDone = true;
+}
 
 void createHeader(std::vector<Client>::iterator client)
 {
@@ -53,10 +65,10 @@ void createHeader(std::vector<Client>::iterator client)
 	if (client->_status == "405 Not Allowed")
 		response = response + "Allow: " + client->_conf.method + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";
-	response = response + "Date: " + get_date() + "\r\n";
+	response = response + "Date: " + get_date() + "\r\n";  
 	response = response + "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
 	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
-	client->setSendInfo(response);
+	client->setSendInfo(response); 	
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
 }
 
