@@ -22,7 +22,6 @@ int init(std::vector<Server> servers)
 	fd_set					rSet;
 	fd_set					wSet;
     struct timeval			timeout;
-    bool                    kick;
 
 	signal(SIGINT, exit);
 	FD_ZERO(&rSet);
@@ -45,23 +44,19 @@ int init(std::vector<Server> servers)
         select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
-           // std::cout << "CLIENTS NUMBER: " << it->_clients.size() << std::endl;
             if (FD_ISSET((*it)._sockfd, &readSet))
                 (*it).acceptNewClient(&readSet, &writeSet);   
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
-                kick = false;
-                if (it2->_chunkDone) // check if request is done
-                {
+                if (!it2->_chunkDone && !FD_ISSET(it2->_fd, &readSet) && it2->_read_fd == -1 && it2->_write_fd == -1)
+                    FD_SET(it2->_fd, it2->_rSet);
+                if (it2->_chunkDone)
                     FD_SET(it2->_fd, &writeSet);
-                    it2->_chunkDone = false;
-                }
-                else
-                    FD_SET(it2->_fd, &readSet);
                 if (FD_ISSET(it2->_fd, &readSet))
                 {
                     if (!it->readRequest(it2))
                         it->proccessRequest(it2);
+                    break ;
                 }
                 if (FD_ISSET(it2->_fd, &writeSet))
                 {   
@@ -69,7 +64,8 @@ int init(std::vector<Server> servers)
                     FD_CLR(it2->_fd, &writeSet);
                     FD_CLR(it2->_fd, &readSet);
                     close(it2->_fd);
-                    kick = true;
+                    it->_clients.erase(it2);
+                    break ;
                 }
                 if (it2->_read_fd != -1)
                 {
@@ -82,7 +78,7 @@ int init(std::vector<Server> servers)
                     close(it2->_write_fd);
                 }
                 //check timeout to close connection
-                if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10) || kick == true)
+                if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
                 {
 
 			        it->_clients.erase(it2);

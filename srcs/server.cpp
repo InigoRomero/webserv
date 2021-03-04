@@ -73,7 +73,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
 
     _clients.push_back(newClient);
-    FD_SET(accept_fd, readSet);
+   // FD_SET(accept_fd, readSet);
     //FD_CLR(accept_fd, readSet);
    // std::cout << "new Client accepted\n";
 
@@ -85,22 +85,20 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     ssize_t             numbytes;
     int bytes;
 
-    while (42)
+    numbytes = 0;
+    bytes = strlen(it->_request->_rBuf);
+    if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
+        perror("read");
+        exit(1);
+    }
+    it->_request->_rBuf [numbytes + bytes] = '\0';
+    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+    if ((strstr(it->_request->_rBuf , "\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") == NULL) || (strstr(it->_request->_rBuf , "0\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") != NULL))
     {
-        numbytes = 0;
-        bytes = strlen(it->_request->_rBuf);
-        if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
-            perror("read");
-            exit(1);
-        }
-        it->_request->_rBuf [numbytes + bytes] = '\0';
-        if ((strstr(it->_request->_rBuf , "\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") == NULL) || (strstr(it->_request->_rBuf , "0\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") != NULL))
-        {
-            std::string str1 = it->_request->_rBuf;
-            it->_request->setRequest(str1);
-          //  std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
-            return(0);
-        }
+        std::string str1 = it->_request->_rBuf;
+        it->_request->setRequest(str1);
+        //  std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
+        return(0);
     }
     return (1);
  }
@@ -112,7 +110,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
     if (it->_chuckBody.size() > 0)
         it->_sendInfo += it->_chuckBody;
-    std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
+  //  std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
