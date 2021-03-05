@@ -13,7 +13,7 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
      _contentLength = 0;
      fcntl(_fd, F_SETFL, O_NONBLOCK);
      FD_SET(fd, _rSet);
-	FD_SET(fd, _wSet);
+//	FD_SET(fd, _wSet);
 }
 
 Client::~Client()

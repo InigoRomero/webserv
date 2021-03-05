@@ -116,7 +116,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
     if (it->_chuckBody.size() > 0)
         it->_sendInfo += it->_chuckBody;
-  //  std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
+    std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
@@ -127,6 +127,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
         it->_request->_rBuf = NULL;
         it->_sendInfo.clear();
         delete it->_request;
+        it->_request = new Request();
     }
     it->_lastDate = get_date();
     return(1);
@@ -140,6 +141,9 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     {
         it->setStatus("400 Bad Request");
         sendError(it);
+        createHeader(it);
+        FD_SET(it->_fd, _wSet);
+		return (0);
     }
     getLocationAndMethod(it);
   //  std::cout << "Location: " << it->_conf.location << std::endl;
@@ -148,7 +152,8 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 	{
 		it->setStatus("405 Not Allowed");
         sendError(it);
-        createHeader(it); 
+        createHeader(it);
+        FD_SET(it->_fd, _wSet);
 		return (0);
 	}
     if (it->_request->_method == "GET")
@@ -161,8 +166,9 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
   //  std::cout << "status: " << it->_status << std::endl;
     if (it->_status != "200 OK")
         sendError(it);
-    createHeader(it);   // FD_SET(it->_fd, _writeSet);
-    FD_CLR(it->_fd, _rSet);
+    createHeader(it);
+    FD_SET(it->_fd, _wSet);
+    //FD_CLR(it->_fd, _rSet);
     return 0;
 }
 

@@ -34,57 +34,51 @@ int init(std::vector<Server> servers)
 		if(!(it->start(&readSet, &writeSet, &rSet, &wSet)))
             perror("start");
     std::cout << "Server waiting for connections..." << std::endl;
-    int i = 0;
     for(;;)
     {
         readSet = rSet; //reset fds
 		writeSet = wSet;
-        i++;
-		std::cout << "HAGO SELECT " << i << std::endl;
         select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
-            std::cout << "SERVER FD" << it->_sockfd << std::endl;
             if (FD_ISSET((*it)._sockfd, &readSet))
                 (*it).acceptNewClient();
-            else
+            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
-                for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
+                std::cout << "client fd: " << it2->_fd << std::endl;
+                if (it2->_read_fd != -1)
                 {
-                    if (FD_ISSET(it2->_fd, &readSet))
-                    {
-                        if (!it->readRequest(it2))
-                            it->proccessRequest(it2);
-                        break ;
-                    }
-                    if (FD_ISSET(it2->_fd, &writeSet))
-                    {   
-                        it->writeResponse(it2);
-                        FD_CLR(it2->_fd, it2->_wSet);
-                        close(it2->_fd);
-                        it->_clients.erase(it2);
-                        break ;
-                    }
-                    if (it2->_read_fd != -1)
-                    {
-                        it2->readFd();
-                        close(it2->_read_fd);
-                    }
-                    if (it2->_write_fd != -1)
-                    {
-                        it2->writeFd();
-                        close(it2->_write_fd);
-                    }
-                    //check timeout to close connection
-                    if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
-                    {
-
-                        it->_clients.erase(it2);
-                        std::cout << "Bye client" << std::endl;
-                    }
-                    else
-                        it2++;
+                    it2->readFd();
+                    close(it2->_read_fd);
                 }
+                if (it2->_write_fd != -1)
+                {
+                    it2->writeFd();
+                    close(it2->_write_fd);
+                }
+                if (FD_ISSET(it2->_fd, &writeSet))
+                {   
+                    it->writeResponse(it2);
+                    FD_CLR(it2->_fd, it2->_wSet);
+                    break ;
+                }
+                if (FD_ISSET(it2->_fd, &readSet))
+                {
+                    if (!it->readRequest(it2))
+                        it->proccessRequest(it2);
+                  //  break ;
+                }
+                //check timeout to close connection
+                if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
+                {
+                    free(it2->_request->_rBuf);
+                    FD_CLR(it2->_fd, it2->_rSet);
+                    close(it2->_fd);
+                    it->_clients.erase(it2);
+                    std::cout << "Bye client" << std::endl;
+                }
+                else
+                    it2++;
             }
         }
     }
