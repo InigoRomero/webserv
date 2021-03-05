@@ -45,19 +45,21 @@ int init(std::vector<Server> servers)
                 (*it).acceptNewClient();
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
             {
-                std::cout << "client fd: " << it2->_fd << std::endl;
                 if (it2->_read_fd != -1)
                 {
                     it2->readFd();
                     close(it2->_read_fd);
+                    break ;
                 }
                 if (it2->_write_fd != -1)
                 {
                     it2->writeFd();
                     close(it2->_write_fd);
+                    break ;
                 }
                 if (FD_ISSET(it2->_fd, &writeSet))
                 {   
+                    std::cout << "Hola3 "<< std::endl;
                     it->writeResponse(it2);
                     FD_CLR(it2->_fd, it2->_wSet);
                     break ;
@@ -66,7 +68,6 @@ int init(std::vector<Server> servers)
                 {
                     if (!it->readRequest(it2))
                         it->proccessRequest(it2);
-                  //  break ;
                 }
                 //check timeout to close connection
                 if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))

@@ -103,9 +103,10 @@ int Server::acceptNewClient()
     {
         std::string str1 = it->_request->_rBuf;
         it->_request->setRequest(str1);
-        //  std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
         return(0);
     }
+    if (numbytes <= 0)
+        FD_CLR(it->_fd, _rSet);
     return (1);
  }
 
