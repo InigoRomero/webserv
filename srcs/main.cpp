@@ -31,26 +31,26 @@ int init(std::vector<Server> servers)
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
-		if(!(it->start(&rSet, &wSet, &readSet, &writeSet)))
+		if(!(it->start(&readSet, &writeSet, &rSet, &wSet)))
             perror("start");
     std::cout << "Server waiting for connections..." << std::endl;
+    int i = 0;
     for(;;)
     {
         readSet = rSet; //reset fds
 		writeSet = wSet;
+        i++;
+		std::cout << "HAGO SELECT " << i << std::endl;
         select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
+            std::cout << "SERVER FD" << it->_sockfd << std::endl;
             if (FD_ISSET((*it)._sockfd, &readSet))
-                (*it).acceptNewClient(&readSet, &writeSet);
+                (*it).acceptNewClient();
             else
             {
                 for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
                 {
-                    if (!it2->_chunkDone && !FD_ISSET(it2->_fd, &readSet) && it2->_read_fd == -1 && it2->_write_fd == -1)
-                        FD_SET(it2->_fd, it2->_rSet);
-                    if (it2->_chunkDone)
-                        FD_SET(it2->_fd, &writeSet);
                     if (FD_ISSET(it2->_fd, &readSet))
                     {
                         if (!it->readRequest(it2))
@@ -60,7 +60,7 @@ int init(std::vector<Server> servers)
                     if (FD_ISSET(it2->_fd, &writeSet))
                     {   
                         it->writeResponse(it2);
-                        FD_CLR(it2->_fd, &writeSet);
+                        FD_CLR(it2->_fd, it2->_wSet);
                         close(it2->_fd);
                         it->_clients.erase(it2);
                         break ;

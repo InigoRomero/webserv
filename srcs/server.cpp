@@ -53,12 +53,12 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 		perror("fcntl");
         return (0);
     }
-    FD_SET(_sockfd, _readSet);
+    FD_SET(_sockfd, _rSet);
     _maxFd = _sockfd;
     return (1);
 }
 
-int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
+int Server::acceptNewClient()
 {
     int                 accept_fd = 0;
     struct sockaddr_in  client_addr;
@@ -67,6 +67,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
 
     memset(&client_addr, 0, sizeof(struct sockaddr));
     addrlen = sizeof(client_addr);
+    std::cout << "SERVER FD IN ACEPT" << _sockfd << std::endl;
     if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &addrlen)) < 0)
     {
         perror("In accept");
@@ -74,7 +75,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     }
     if (accept_fd > _maxFd)
 		_maxFd = accept_fd;
-    Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
+    Client newClient = Client(accept_fd, _rSet, _wSet, client_addr);
 
     _clients.push_back(newClient);
    // FD_SET(accept_fd, readSet);
@@ -161,6 +162,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     if (it->_status != "200 OK")
         sendError(it);
     createHeader(it);   // FD_SET(it->_fd, _writeSet);
+    FD_CLR(it->_fd, _rSet);
     return 0;
 }
 
