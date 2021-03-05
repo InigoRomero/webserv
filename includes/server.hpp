@@ -37,6 +37,7 @@ class Server
         std::string                 _name;
         std::string                 _host;
         std::string                 _conf;
+        int                         _maxFd;
         int                         _sockfd;
 		fd_set					    *_readSet;
 		fd_set					    *_writeSet;
@@ -68,6 +69,7 @@ class Server
         int     proccessRequest(std::vector<Client>::iterator it);
         void    sendError(std::vector<Client>::iterator it);
         void    getLocationAndMethod(std::vector<Client>::iterator it);
+        int     getMaxFd();
 };
 
 #endif

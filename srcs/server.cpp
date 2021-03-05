@@ -48,11 +48,13 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         perror("listen");
         return(0);
     }
-   /* if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
+    if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
         return (0);
-    }*/
+    }
+    FD_SET(_sockfd, _readSet);
+    _maxFd = _sockfd;
     return (1);
 }
 
@@ -70,6 +72,8 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
         perror("In accept");
         exit(0);
     }
+    if (accept_fd > _maxFd)
+		_maxFd = accept_fd;
     Client newClient = Client(accept_fd, readSet, writeSet, client_addr);
 
     _clients.push_back(newClient);
@@ -86,6 +90,7 @@ int Server::acceptNewClient(fd_set *readSet, fd_set *writeSet)
     int bytes;
 
     numbytes = 0;
+    std::cout << "Entro a leer" << std::endl;
     bytes = strlen(it->_request->_rBuf);
     if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
         perror("read");
@@ -189,6 +194,18 @@ void Server::sendError(std::vector<Client>::iterator it)
 	it->setReadFd(open(path.c_str(), O_RDONLY));
    // std::cout << "readfd: " << it->_read_fd << std::endl;
     //std::cout << "path: " << path << std::endl;
+}
+
+int		Server::getMaxFd()
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (it->_fd > _maxFd)
+			_maxFd = it->_fd;
+		if (it->_write_fd > _maxFd)
+			_maxFd = it->_write_fd;
+	}
+	return (_maxFd);
 }
 
 //seters

@@ -8,7 +8,7 @@ int max_fd(std::vector<Server> servers)
 
     for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
     {
-        fd = it->_sockfd;
+        fd = it->getMaxFd();
         if (fd > max)
             max = fd;
     }
@@ -31,11 +31,8 @@ int init(std::vector<Server> servers)
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
-    {
 		if(!(it->start(&rSet, &wSet, &readSet, &writeSet)))
             perror("start");
-		FD_SET(it->_sockfd, &rSet);
-    }
     std::cout << "Server waiting for connections..." << std::endl;
     for(;;)
     {
@@ -45,47 +42,49 @@ int init(std::vector<Server> servers)
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))
-                (*it).acceptNewClient(&readSet, &writeSet);   
-            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
+                (*it).acceptNewClient(&readSet, &writeSet);
+            else
             {
-                if (!it2->_chunkDone && !FD_ISSET(it2->_fd, &readSet) && it2->_read_fd == -1 && it2->_write_fd == -1)
-                    FD_SET(it2->_fd, it2->_rSet);
-                if (it2->_chunkDone)
-                    FD_SET(it2->_fd, &writeSet);
-                if (FD_ISSET(it2->_fd, &readSet))
+                for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); /*it2++*/)
                 {
-                    if (!it->readRequest(it2))
-                        it->proccessRequest(it2);
-                    break ;
-                }
-                if (FD_ISSET(it2->_fd, &writeSet))
-                {   
-                    it->writeResponse(it2);
-                    FD_CLR(it2->_fd, &writeSet);
-                    FD_CLR(it2->_fd, &readSet);
-                    close(it2->_fd);
-                    it->_clients.erase(it2);
-                    break ;
-                }
-                if (it2->_read_fd != -1)
-                {
-                    it2->readFd();
-                    close(it2->_read_fd);
-                }
-                if (it2->_write_fd != -1)
-                {
-                    it2->writeFd();
-                    close(it2->_write_fd);
-                }
-                //check timeout to close connection
-                if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
-                {
+                    if (!it2->_chunkDone && !FD_ISSET(it2->_fd, &readSet) && it2->_read_fd == -1 && it2->_write_fd == -1)
+                        FD_SET(it2->_fd, it2->_rSet);
+                    if (it2->_chunkDone)
+                        FD_SET(it2->_fd, &writeSet);
+                    if (FD_ISSET(it2->_fd, &readSet))
+                    {
+                        if (!it->readRequest(it2))
+                            it->proccessRequest(it2);
+                        break ;
+                    }
+                    if (FD_ISSET(it2->_fd, &writeSet))
+                    {   
+                        it->writeResponse(it2);
+                        FD_CLR(it2->_fd, &writeSet);
+                        close(it2->_fd);
+                        it->_clients.erase(it2);
+                        break ;
+                    }
+                    if (it2->_read_fd != -1)
+                    {
+                        it2->readFd();
+                        close(it2->_read_fd);
+                    }
+                    if (it2->_write_fd != -1)
+                    {
+                        it2->writeFd();
+                        close(it2->_write_fd);
+                    }
+                    //check timeout to close connection
+                    if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
+                    {
 
-			        it->_clients.erase(it2);
-                    std::cout << "Bye client" << std::endl;
+                        it->_clients.erase(it2);
+                        std::cout << "Bye client" << std::endl;
+                    }
+                    else
+                        it2++;
                 }
-                else
-                    it2++;
             }
         }
     }
