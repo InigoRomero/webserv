@@ -91,22 +91,21 @@ int Server::acceptNewClient()
     int bytes;
 
     numbytes = 0;
-    std::cout << "Entro a leer" << std::endl;
     bytes = strlen(it->_request->_rBuf);
     if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
         perror("read");
         exit(1);
     }
     it->_request->_rBuf [numbytes + bytes] = '\0';
-    std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
     if ((strstr(it->_request->_rBuf , "\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") == NULL) || (strstr(it->_request->_rBuf , "0\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") != NULL))
     {
+        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
         std::string str1 = it->_request->_rBuf;
         it->_request->setRequest(str1);
         return(0);
     }
-    if (numbytes <= 0)
-        FD_CLR(it->_fd, _rSet);
+    if (numbytes > 0)
+        it->_lastDate = get_date();
     return (1);
  }
 
