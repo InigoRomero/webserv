@@ -75,7 +75,6 @@ int Server::acceptNewClient()
     if (accept_fd > _maxFd)
 		_maxFd = accept_fd;
     Client newClient = Client(accept_fd, _rSet, _wSet, client_addr);
-
     _clients.push_back(newClient);
    // FD_SET(accept_fd, readSet);
     //FD_CLR(accept_fd, readSet);
@@ -95,17 +94,23 @@ int Server::acceptNewClient()
         perror("read");
         exit(1);
     }
-    it->_request->_rBuf [numbytes + bytes] = '\0';
-    if ((strstr(it->_request->_rBuf , "\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") == NULL) || (strstr(it->_request->_rBuf , "0\r\n\r\n") != NULL && strstr(it->_request->_rBuf , "chunked") != NULL))
-    {
-        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
-        std::string str1 = it->_request->_rBuf;
-        it->_request->setRequest(str1);
-        proccessRequest(it);
-        return(0);
-    }
     if (numbytes > 0)
+    {
+        it->_request->_rBuf [numbytes + bytes] = '\0';
+        std::string str = it->_request->_rBuf;
+        /*if (strstr(it->_request->_req.c_str() , "chunked") && (strstr(str.c_str()  , "\r\n\r\n") != NULL) && strstr(str.c_str()  , "0\r\n\r\n") == NULL && strstr(it->_request->_req.c_str()  , "\r\n\r\n"))
+        {
+            str = str.substr(6, std::string::npos);
+            str = str.substr(str.find("\n") + 1, std::string::npos);
+        }*/
+        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str << "\n*****\n" << std::endl;
+        it->_request->_req += str;
+        if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
+            proccessRequest(it);
+        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
         it->_lastDate = get_date();
+        return (0);
+    }
     return (1);
  }
 
@@ -116,7 +121,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
     if (it->_chuckBody.size() > 0)
         it->_sendInfo += it->_chuckBody;
-    std::cout << "\n\nSend info: \n" << it->_sendInfo << std::endl;
+    std::cout << it->_fd << "\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);

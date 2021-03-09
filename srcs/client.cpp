@@ -13,7 +13,7 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
      _contentLength = 0;
      fcntl(_fd, F_SETFL, O_NONBLOCK);
      FD_SET(fd, _rSet);
-//	FD_SET(fd, _wSet);
+	//FD_SET(fd, _wSet);
 }
 
 Client::~Client()
@@ -39,11 +39,8 @@ void Client::readFd()
 
      ret = read(_read_fd, buffer, BUFFER_SIZE);
      buffer[ret] = '\0';
-     //comproba
      _contentLength = strlen(buffer);
      _chuckBody = buffer;
-     //_sendInfo += "Content-Length: " + std::to_string(strlen(buffer)) + "\r\n\r\n";
-     //_sendInfo += buffer;
      close(_read_fd);
      _chunkDone = true;
      setReadFd(-1);
@@ -55,6 +52,7 @@ void Client::writeFd()
      _request->_headers["body"] = _request->_headers["body"].substr(_request->_headers["body"].find("\r\n") + 2, std::string::npos);
      ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size() - 7);
      _write_fd = -1;
+     close(_write_fd);
      _chunkDone = true;
 }
 

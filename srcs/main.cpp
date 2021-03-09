@@ -48,19 +48,17 @@ int init(std::vector<Server> servers)
                 if (it2->_read_fd != -1)
                 {
                     it2->readFd();
-                    close(it2->_read_fd);
                     it2->_lastDate = get_date();
                     break ;
                 }
                 if (it2->_write_fd != -1)
                 {
                     it2->writeFd();
-                    close(it2->_write_fd);
                     it2->_lastDate = get_date();
                     break ;
                 }
                 if (FD_ISSET(it2->_fd, &writeSet))
-                {;
+                {
                     it->writeResponse(it2);
                     FD_CLR(it2->_fd, it2->_wSet);
                     break ;
@@ -144,4 +142,5 @@ case Client::STANDBY:
 
 
            //Entran dos clientes en el get que devolvemos un 405
-           //Cuando estamos leyendo el put de 1000000 bytes le echamos por que no guardamos bien el tiempo
+           //PUT CONCATENAR BIEN EL BODY
+           //Cuando se queda sin clienets sigue intentando leer

@@ -23,6 +23,7 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
 Request::Request(std::string req): _req(req)
@@ -40,7 +41,7 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    std::cout << "request:\n*****\n" << _req << "\n*****\n";
+    //std::cout << "request:\n*****\n" << _req << "\n*****\n";
     _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
     _req = _req.substr(0, _req.find("\r\n\r\n"));
 	while ((pos = _req.find('\n')) != std::string::npos) {
