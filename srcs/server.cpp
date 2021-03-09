@@ -146,25 +146,26 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 		return (0);
     }
     getLocationAndMethod(it);
-    std::cout << "Location: " << it->_conf.location << std::endl;
-  //  std::cout << "Method: " << it->_request->_method << std::endl;
-    if (it->_conf.method.find(it->_request->_method) == std::string::npos)
-	{
-		it->setStatus("405 Not Allowed");
-        sendError(it);
-        createHeader(it);
-        FD_SET(it->_fd, _wSet);
-		return (0);
-	}
-    if (it->_request->_method == "GET")
-        responseGet(it);
-    else if (it->_request->_method == "POST")
-        responsePost(it, (*this));
-    else if (it->_request->_method == "PUT")
-        responsePut(it);
-
-  //  std::cout << "status: " << it->_status << std::endl;
-    if (it->_status != "200 OK")
+    if (it->_status == "200 OK")
+    {
+        std::cout << "Location: " << it->_conf.location << std::endl;
+        std::cout << "Method: " << it->_request->_method << std::endl;
+        if (it->_conf.method.find(it->_request->_method) == std::string::npos)
+        {
+            it->setStatus("405 Not Allowed");
+            sendError(it);
+            createHeader(it);
+            FD_SET(it->_fd, _wSet);
+            return (0);
+        }
+        if (it->_request->_method == "GET")
+            responseGet(it);
+        else if (it->_request->_method == "POST")
+            responsePost(it, (*this));
+        else if (it->_request->_method == "PUT")
+            responsePut(it);
+    }
+    else
         sendError(it);
     createHeader(it);
     FD_SET(it->_fd, _wSet);
@@ -195,7 +196,7 @@ void Server::getLocationAndMethod(std::vector<Client>::iterator it)
             return ;
         }
     }
-    it->setStatus("400 Bad Request");
+    it->setStatus("404  Not Found");
 }
 
 void Server::sendError(std::vector<Client>::iterator it)
@@ -205,8 +206,6 @@ void Server::sendError(std::vector<Client>::iterator it)
     path = _error + "/" + it->_status.substr(0, 3) + ".html";
     it->setPath(path.c_str());
 	it->setReadFd(open(path.c_str(), O_RDONLY));
-   // std::cout << "readfd: " << it->_read_fd << std::endl;
-    //std::cout << "path: " << path << std::endl;
 }
 
 int		Server::getMaxFd()

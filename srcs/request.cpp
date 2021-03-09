@@ -55,7 +55,7 @@ int Request::parseRequest()
             _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
 	}
     _headers["body"] = aux;
-    std::cout << "Body:" << _headers["body"] <<  std::endl;  
+    //std::cout << "Body:" << _headers["body"] <<  std::endl;  
     _req = _req.substr(0, _req.find("\r\n\r\n"));
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));
