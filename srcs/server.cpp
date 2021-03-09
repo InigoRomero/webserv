@@ -146,7 +146,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 		return (0);
     }
     getLocationAndMethod(it);
-  //  std::cout << "Location: " << it->_conf.location << std::endl;
+    std::cout << "Location: " << it->_conf.location << std::endl;
   //  std::cout << "Method: " << it->_request->_method << std::endl;
     if (it->_conf.method.find(it->_request->_method) == std::string::npos)
 	{
@@ -174,13 +174,18 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 
 void Server::getLocationAndMethod(std::vector<Client>::iterator it)
 {
-    std::string aux;
+    std::string aux, aux2;
 
     aux = it->_request->_uri;
     if (aux.size() > 1)
     {
-       aux = aux.substr(1);
-        aux = aux.substr(0, aux.find("/"));
+        aux2 = aux.substr(1);
+        if (aux2.find("/") != std::string::npos)
+            aux = aux2.substr(0, aux2.find("/"));
+        else if (aux2.find(".") != std::string::npos)
+            aux = aux.substr(0, 1);
+        else
+            aux = aux2;
     }
     for (std::vector<struct location>::iterator it2 = _locations.begin(); it2 != _locations.end(); it2++)
     {
