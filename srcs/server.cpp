@@ -98,12 +98,7 @@ int Server::acceptNewClient()
     {
         it->_request->_rBuf [numbytes + bytes] = '\0';
         std::string str = it->_request->_rBuf;
-        /*if (strstr(it->_request->_req.c_str() , "chunked") && (strstr(str.c_str()  , "\r\n\r\n") != NULL) && strstr(str.c_str()  , "0\r\n\r\n") == NULL && strstr(it->_request->_req.c_str()  , "\r\n\r\n"))
-        {
-            str = str.substr(6, std::string::npos);
-            str = str.substr(str.find("\n") + 1, std::string::npos);
-        }*/
-        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str << "\n*****\n" << std::endl;
+       // std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str << "\n*****\n" << std::endl;
         it->_request->_req += str;
         if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
             proccessRequest(it);

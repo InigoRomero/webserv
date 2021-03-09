@@ -43,6 +43,22 @@ int Request::parseRequest()
 	size_t pos = 0, found = 0;
     //std::cout << "request:\n*****\n" << _req << "\n*****\n";
     _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
+    std::cout << "Body:" << _headers["body"] <<  std::endl;  
+
+    //std::cout << "Body:" << _headers["body"] <<  std::endl;
+    std::string aux;
+    if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
+        _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
+	while ((pos = _headers["body"].find("\r\n")) != std::string::npos) {
+
+        aux += _headers["body"].substr(0, pos);
+        _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
+        if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
+            _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
+	}
+    _headers["body"] = aux;
+    std::cout << "hola\n";
+    std::cout << "Body:" << _headers["body"] <<  std::endl;  
     _req = _req.substr(0, _req.find("\r\n\r\n"));
 	while ((pos = _req.find('\n')) != std::string::npos) {
     	lines.push_back(_req.substr(0, pos));

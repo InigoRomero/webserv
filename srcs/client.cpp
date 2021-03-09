@@ -49,8 +49,7 @@ void Client::readFd()
 void Client::writeFd()
 {
      int ret = 0;
-     _request->_headers["body"] = _request->_headers["body"].substr(_request->_headers["body"].find("\r\n") + 2, std::string::npos);
-     ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size() - 7);
+     ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size());
      _write_fd = -1;
      close(_write_fd);
      _chunkDone = true;

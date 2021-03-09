@@ -142,5 +142,4 @@ case Client::STANDBY:
 
 
            //Entran dos clientes en el get que devolvemos un 405
-           //PUT CONCATENAR BIEN EL BODY
            //Cuando se queda sin clienets sigue intentando leer
