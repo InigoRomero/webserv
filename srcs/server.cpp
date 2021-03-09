@@ -67,7 +67,6 @@ int Server::acceptNewClient()
 
     memset(&client_addr, 0, sizeof(struct sockaddr));
     addrlen = sizeof(client_addr);
-    std::cout << "SERVER FD IN ACEPT" << _sockfd << std::endl;
     if ((accept_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &addrlen)) < 0)
     {
         perror("In accept");
@@ -80,7 +79,7 @@ int Server::acceptNewClient()
     _clients.push_back(newClient);
    // FD_SET(accept_fd, readSet);
     //FD_CLR(accept_fd, readSet);
-   // std::cout << "new Client accepted\n";
+    std::cout << "new Client accepted\n FD : " << accept_fd << std::endl;
 
     return (1);
 }
@@ -102,6 +101,7 @@ int Server::acceptNewClient()
         std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_request->_rBuf << "\n*****\n" << std::endl;
         std::string str1 = it->_request->_rBuf;
         it->_request->setRequest(str1);
+        proccessRequest(it);
         return(0);
     }
     if (numbytes > 0)
