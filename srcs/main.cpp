@@ -38,13 +38,22 @@ int init(std::vector<Server> servers)
     {
         readSet = rSet; //reset fds
 		writeSet = wSet;
-        select(max_fd(servers) + 1, &readSet, &writeSet, NULL, &timeout);
+        int maxFD = max_fd(servers);
+        select(maxFD + 1, &readSet, &writeSet, NULL, &timeout);
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
         {
+
             if (FD_ISSET((*it)._sockfd, &readSet))
-                (*it).acceptNewClient();
+            {
+                if (it->_sockfd > maxFD)
+						(*it).refuseConnection();
+					else
+                        (*it).acceptNewClient();
+            }
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
+                //std::cout << "Server FD: " << it->_sockfd << std::endl;
+                //std::cout << "Cliente FD: " << it2->_fd << std::endl;
                 if (it2->_read_fd != -1)
                 {
                     it2->readFd();
@@ -72,8 +81,9 @@ int init(std::vector<Server> servers)
                         free(it2->_request->_rBuf);
                         FD_CLR(it2->_fd, it2->_rSet);
                         close(it2->_fd);
-                        it->_clients.erase(it2);
+                        it2 = it->_clients.erase(it2);
                         std::cout << "Bye client" << std::endl;
+                        break ;
                     }
                 }
             }
@@ -142,4 +152,3 @@ case Client::STANDBY:
 
 
            //Entran dos clientes en el get que devolvemos un 405
-           //Cuando se queda sin clienets sigue intentando leer

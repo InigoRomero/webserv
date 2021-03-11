@@ -76,11 +76,14 @@ int Server::acceptNewClient()
 		_maxFd = accept_fd;
     Client newClient = Client(accept_fd, _rSet, _wSet, client_addr);
     _clients.push_back(newClient);
-   // FD_SET(accept_fd, readSet);
-    //FD_CLR(accept_fd, readSet);
     std::cout << "new Client accepted\n FD : " << accept_fd << std::endl;
 
     return (1);
+}
+
+int Server::refuseConnection()
+{
+    return (0);
 }
 
  int  Server::readRequest(std::vector<Client>::iterator it)
