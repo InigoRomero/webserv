@@ -81,6 +81,21 @@ int Server::acceptNewClient()
     return (1);
 }
 
+int		Server::getOpenFd()
+{
+	int 	nb = 0;
+
+	for (std::vector<Client>::iterator it(_clients.begin()); it != _clients.end(); ++it)
+	{
+		nb += 1;
+		if (it->_read_fd != -1)
+			nb += 1;
+		if (it->_write_fd != -1)
+			nb += 1;
+	}
+	return (nb);
+}
+
 int Server::refuseConnection()
 {
     return (0);
@@ -97,11 +112,12 @@ int Server::refuseConnection()
         perror("read");
         exit(1);
     }
+   
     if (numbytes > 0)
     {
         it->_request->_rBuf [numbytes + bytes] = '\0';
         std::string str = it->_request->_rBuf;
-       // std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << str << "\n*****\n" << std::endl;
+        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << str << "\n*****\n" << std::endl;
         it->_request->_req += str;
         if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
             proccessRequest(it);
@@ -117,7 +133,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     unsigned long	bytes;
 
     it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
-    if (it->_chuckBody.size() > 0)
+    if (it->_chuckBody.size() > 0 && it->_request->_method != "HEAD")
         it->_sendInfo += it->_chuckBody;
     std::cout << it->_fd << "\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());

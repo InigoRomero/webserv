@@ -50,3 +50,15 @@ void initMethods(struct location *methods)
     methods->auto_index = -1;
     methods->auth = "";
 }
+
+int	getOpenFd(std::vector<Server> &servers)
+{
+	int		nb = 0;
+
+	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
+	{
+		nb += 1;
+		nb += it->getOpenFd();
+	}
+	return (nb);
+}

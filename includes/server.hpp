@@ -71,6 +71,7 @@ class Server
         void    sendError(std::vector<Client>::iterator it);
         void    getLocationAndMethod(std::vector<Client>::iterator it);
         int     getMaxFd();
+        int		getOpenFd();
 };
 
 #endif
