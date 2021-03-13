@@ -204,8 +204,7 @@ void Request::setRbuf(char *req)
 
 void Request::execCGI(Client &client)
 {
-    (void)client;
- /*   char **args = NULL;
+    char **args = NULL;
     char **env = NULL;
     int ret;
     int fd[2];
@@ -227,7 +226,7 @@ void Request::execCGI(Client &client)
         dup2(fd[0], 0);  //why
         dup2(tmp_fd, 1);
         errno = 0;
-		if ((ret = execve(path.c_str(), args, env)) == -1)
+		if ((ret = execve(client._conf.cgi_path.c_str(), args, env)) == -1)
 		{
 			std::cerr << "Error with CGI: " << strerror(errno) << std::endl;
 			exit(1);
@@ -238,6 +237,6 @@ void Request::execCGI(Client &client)
         wait(NULL);
         close(fd[0]);
         client._write_fd = fd[1];
-        client.__read_fd = open("./www/temp_file", O_RDONLY);
-    }*/
+        client._read_fd = open("./www/temp_file", O_RDONLY);
+    }
 }

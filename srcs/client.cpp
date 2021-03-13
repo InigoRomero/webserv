@@ -53,6 +53,7 @@ void Client::readFd()
 void Client::writeFd()
 {
      int ret = 0;
+
      ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size());
      _write_fd = -1;
      close(_write_fd);

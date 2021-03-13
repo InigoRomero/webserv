@@ -167,7 +167,6 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         FD_SET(it->_fd, _wSet);
 		return (0);
     }
-    std::cout << "hola\n";
     getLocationAndMethod(it);
     if (it->_status == "200 OK")
     {
@@ -184,7 +183,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         if (it->_request->_method == "GET")
             responseGet(it);
         else if (it->_request->_method == "POST")
-            responsePost(it, (*this));
+            responsePost(it);
         else if (it->_request->_method == "PUT")
             responsePut(it);
     }
