@@ -33,12 +33,19 @@ void responseGet(std::vector<Client>::iterator client)
 void responsePost(std::vector<Client>::iterator client, Server serv)
 {
 	(void)serv;
-	client->_request->parseBody((*client));
+	//client->_request->parseBody((*client));
 	//If en la conf hay que ejecutar cgi ?
 	//client->_request->execCGI((*client));
 	//else
-	if (client->_status == "200 OK")
-		client->_chunkDone = true;
+	std::string	path;
+
+	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	std::cout << "llego\n";
+	if ((open(path.c_str(), O_RDONLY)) == -1)
+		client->setStatus("201 OK");
+	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+	//if (client->_status == "200 OK")
+	//	client->_chunkDone = true;
 		//FD_SET(client->_fd, client->_wSet);
     //client->_chunkDone = true;
 	//FD_SET(client->_fd, client->_wSet);

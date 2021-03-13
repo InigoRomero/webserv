@@ -41,7 +41,7 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    std::cout << "request:\n*****\n" << _req << "\n*****\n";
+    //std::cout << "request:\n*****\n" << _req << "\n*****\n";
     _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
     //std::cout << "Body:" << _headers["body"] <<  std::endl;
     std::string aux;

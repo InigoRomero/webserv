@@ -117,7 +117,7 @@ int Server::refuseConnection()
     {
         it->_request->_rBuf [numbytes + bytes] = '\0';
         std::string str = it->_request->_rBuf;
-        std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << str << "\n*****\n" << std::endl;
+        //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << str << "\n*****\n" << std::endl;
         it->_request->_req += str;
         if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
             proccessRequest(it);
@@ -135,7 +135,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
     it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
     if (it->_chuckBody.size() > 0 && it->_request->_method != "HEAD")
         it->_sendInfo += it->_chuckBody;
-    std::cout << it->_fd << "\nSend info: \n" << it->_sendInfo << std::endl;
+    //std::cout << it->_fd << "\nSend info: \n" << it->_sendInfo << std::endl;
     bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
     if (bytes < it->_sendInfo.size())
         it->_sendInfo = it->_sendInfo.substr(bytes);
@@ -147,6 +147,7 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
         it->_sendInfo.clear();
         delete it->_request;
         it->_request = new Request();
+        it->_chuckBody = "";
     }
     it->_lastDate = get_date();
     return(1);
@@ -164,6 +165,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
         FD_SET(it->_fd, _wSet);
 		return (0);
     }
+    std::cout << "hola\n";
     getLocationAndMethod(it);
     if (it->_status == "200 OK")
     {
