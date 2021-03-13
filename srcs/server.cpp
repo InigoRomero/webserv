@@ -147,7 +147,9 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
         it->_sendInfo.clear();
         delete it->_request;
         it->_request = new Request();
+        it->_chuckBody.clear();
         it->_chuckBody = "";
+        it->_contentLength = 0;
     }
     it->_lastDate = get_date();
     return(1);
@@ -226,6 +228,7 @@ void Server::sendError(std::vector<Client>::iterator it)
 
     path = _error + "/" + it->_status.substr(0, 3) + ".html";
     it->setPath(path.c_str());
+    it->_rFile = ".html";
 	it->setReadFd(open(path.c_str(), O_RDONLY));
 }
 
