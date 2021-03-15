@@ -39,6 +39,8 @@ class Request
         void fillBody(Client &client);
         int  findLen(Client &client);
         void parseBody(Client &client);
+        char **setEnv(Client &client);
+        void parseCGIResult(Client &client);
 };
 
 #endif

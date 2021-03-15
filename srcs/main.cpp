@@ -52,16 +52,16 @@ int init(std::vector<Server> servers)
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
-              //  std::cout << "Cliente FD: " << it2->_fd << std::endl;
-                if (it2->_read_fd != -1)
-                {
-                    it2->readFd();
-                    it2->_lastDate = get_date();
-                    break ;
-                }
+                //std::cout << "Cliente FD: " << it2->_fd << std::endl;
                 if (it2->_write_fd != -1)
                 {
                     it2->writeFd();
+                    it2->_lastDate = get_date();
+                    break ;
+                }
+                if (it2->_read_fd != -1)
+                {
+                    it2->readFd();
                     it2->_lastDate = get_date();
                     break ;
                 }

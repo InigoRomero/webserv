@@ -2,24 +2,24 @@
 
 Request::Request(): _req("")
 {
-    _headers.insert(std::pair<std::string,std::string>("Accept-Charsets:", "" ));
-    _headers.insert(std::pair<std::string,std::string>("Accept-Language:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Allow:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Authorization:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Content-Language:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Content-Length:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Content-Location:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Content-Type:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Date:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Host:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Last-Modified:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Location:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Referer:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Retry-After:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Server:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Transfer-Encoding:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("User-Agent:", "")); 
-    _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate:", ""));
+    _headers.insert(std::pair<std::string,std::string>("Accept-Charsets", "" ));
+    _headers.insert(std::pair<std::string,std::string>("Accept-Language", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Allow", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Authorization", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Content-Language", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Content-Length", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Content-Location", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Content-Type", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Date", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Host", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Last-Modified", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Location", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Referer", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Retry-After", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Server", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Transfer-Encoding", "")); 
+    _headers.insert(std::pair<std::string,std::string>("User-Agent", "")); 
+    _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate", ""));
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -48,13 +48,14 @@ int Request::parseRequest()
     if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
         _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
 	while ((pos = _headers["body"].find("\r\n")) != std::string::npos) {
-
         aux += _headers["body"].substr(0, pos);
         _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
         if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
             _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
 	}
-    _headers["body"] = aux;
+    if (aux != "")
+        _headers["body"] = aux;
+    //std::cout << "Body2:" << _headers["body"] <<  std::endl;
     //std::cout << "Body:" << _headers["body"] <<  std::endl;  
     _req = _req.substr(0, _req.find("\r\n\r\n"));
 	while ((pos = _req.find('\n')) != std::string::npos) {
@@ -208,23 +209,34 @@ void Request::execCGI(Client &client)
     char **env = NULL;
     int ret;
     int fd[2];
-    int tmp_fd;
+    std::string path;
 
     close(client._read_fd); //why
     client._read_fd = -1; //idk
     //cond
     if (!(args = (char**)malloc(sizeof(char *) * 3)))
         return ;
+    if (client._conf.location.size() < client._request->_uri.size())
+	{
+		if (client._request->_uri.find(".") == std::string::npos)
+			path =  client._conf.root + "/"+ client._request->_uri.substr(client._conf.location.size(), std::string::npos) + "/" + client._conf.index;
+		else
+			path =  client._conf.root + "/"+ client._request->_uri.substr(client._conf.location.size(), std::string::npos);
+	}
+	else
+		path = client._conf.root + "/"+ client._conf.index;
     args[0] = strdup(client._conf.cgi_path.c_str()); // req->location->cgi_root || php_root // cgi path del requested location
-    args[1] = strdup(client._request->_uri.c_str()); // req->file
+    args[1] = strdup(path.c_str()); // req->file
     args[2] = NULL;
-    tmp_fd = open("./www/temp_file", O_WRONLY | O_CREAT, 0666);
+    env = setEnv(client);
+
+    client._tmp_fd = open("./www/temp_file", O_WRONLY | O_CREAT, 0666);
     pipe(fd);
     if (!(client._cgi_pid = fork()))
     {
         close(fd[1]);
         dup2(fd[0], 0);  //why
-        dup2(tmp_fd, 1);
+        dup2(client._tmp_fd, 1);
         errno = 0;
 		if ((ret = execve(client._conf.cgi_path.c_str(), args, env)) == -1)
 		{
@@ -234,9 +246,133 @@ void Request::execCGI(Client &client)
     }
     else
     {
-        wait(NULL);
         close(fd[0]);
         client._write_fd = fd[1];
         client._read_fd = open("./www/temp_file", O_RDONLY);
     }
+    free(args[0]);
+    free(args[1]);
+    free(args);
+    int i = 0;
+    while (env[i])
+    {
+        free(env[i]);
+        ++i;
+    }
+    free(env);
+}
+
+char			**Request::setEnv(Client &client)
+{
+	char	**env;
+    std::map<std::string, std::string> 				envMap;
+	size_t											pos;
+
+	envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
+	envMap["SERVER_PROTOCOL"] = "HTTP/1.1";
+	envMap["SERVER_SOFTWARE"] = "webserv";
+	envMap["REQUEST_URI"] = client._request->_uri;
+	envMap["REQUEST_METHOD"] = client._request->_method;
+	envMap["REMOTE_ADDR"] = client._ip;
+	envMap["PATH_INFO"] = client._request->_uri;
+	envMap["PATH_TRANSLATED"] = client._conf.cgi_path;
+	envMap["CONTENT_LENGTH"] = std::to_string(_headers["body"].size());
+
+	if (client._request->_uri.find('?') != std::string::npos)
+		envMap["QUERY_STRING"] = client._request->_uri.substr(client._request->_uri.find('?') + 1);
+	else
+		envMap["QUERY_STRING"];
+	if (client._request->_headers.find("Content-Type") != client._request->_headers.end())
+		envMap["CONTENT_TYPE"] = client._request->_headers["Content-Type"];
+	//if (client._conf.exe != client.conf.end())
+//		envMap["SCRIPT_NAME"] = client.conf["exec"];
+//	else
+	envMap["SCRIPT_NAME"] = client._conf.cgi_path;
+	/*if (client._port)
+	{
+		envMap["SERVER_NAME"] = "webserv";
+		envMap["SERVER_PORT"] = client._port;
+	}
+	else*/
+	envMap["SERVER_PORT"] = "80";
+	if (client._request->_headers.find("Authorization") != client._request->_headers.end())
+	{
+		pos = client._request->_headers["Authorization"].find(" ");
+		envMap["AUTH_TYPE"] = client._request->_headers["Authorization"].substr(0, pos);
+		envMap["REMOTE_USER"] = client._request->_headers["Authorization"].substr(pos + 1);
+		envMap["REMOTE_IDENT"] = client._request->_headers["Authorization"].substr(pos + 1);
+	}
+	//if (client._conf.find("php") != client.conf.end() && client._request->.uri.find(".php") != std::string::npos)
+	//	envMap["REDIRECT_STATUS"] = "200";
+
+	std::map<std::string, std::string>::iterator b = client._request->_headers.begin();
+	while (b != client._request->_headers.end())
+	{
+        if(b->second.size() > 0 && b->first != "body")
+		    envMap["HTTP_" + b->first] = b->second;
+		++b;
+	}
+	env = (char **)malloc(sizeof(char *) * (envMap.size() + 1));
+	std::map<std::string, std::string>::iterator it = envMap.begin();
+	int i = 0;
+    //std::cout << "ENV" << std::endl;
+	while (it != envMap.end())
+	{
+		env[i] = strdup((it->first + "=" + it->second).c_str());
+       // std::cout << env[i] << std::endl;
+		++i;
+		++it;
+	}
+	env[i] = NULL;
+	return (env);
+}
+
+void		Request::parseCGIResult(Client &client)
+{
+    (void)client;
+    /*
+	size_t			pos;
+	std::string		headers;
+	std::string		key;
+	std::string		value;
+
+	if (client.res.body.find("\r\n\r\n") == std::string::npos)
+		return ;
+	headers = client.res.body.substr(0, client.res.body.find("\r\n\r\n") + 1);
+	pos = headers.find("Status");
+	if (pos != std::string::npos)
+	{
+		client.res.status_code.clear();
+		pos += 8;
+		while (headers[pos] != '\r')
+		{
+			client.res.status_code += headers[pos];
+			pos++;
+		}
+	}
+	pos = 0;
+	while (headers[pos])
+	{
+		while (headers[pos] && headers[pos] != ':')
+		{
+			key += headers[pos];
+			++pos;
+		}
+		++pos;
+		while (headers[pos] && headers[pos] != '\r')
+		{
+			value += headers[pos];
+			++pos;
+		}
+		client.res.headers[key] = value;
+		key.clear();
+		value.clear();
+		if (headers[pos] == '\r')
+			pos++;
+		if (headers[pos] == '\n')
+			pos++;
+	}
+	pos = client.res.body.find("\r\n\r\n") + 4;
+	client.res.body = client.res.body.substr(pos);
+	client.res.headers["Content-Length"] = std::to_string(client.res.body.size());*/
 }

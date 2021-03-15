@@ -43,6 +43,7 @@ class Client
         int                 _contentLength;
         Request             *_request;
         std::string         _status;
+        int                 _tmp_fd;
         pid_t               _cgi_pid;
         bool                _chunkDone;
         bool                _chunkFound;
