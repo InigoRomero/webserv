@@ -52,7 +52,7 @@ int init(std::vector<Server> servers)
             for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
-                //std::cout << "Cliente FD: " << it2->_fd << std::endl;
+               // std::cout << "Cliente FD: " << it2->_fd << std::endl;
                 if (it2->_write_fd != -1)
                 {
                     it2->writeFd();

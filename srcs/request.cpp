@@ -41,7 +41,6 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    //std::cout << "request:\n*****\n" << _req << "\n*****\n";
     _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
     //std::cout << "Body:" << _headers["body"] <<  std::endl;
     std::string aux;
@@ -73,6 +72,7 @@ int Request::parseRequest()
         else
             it++;
     }
+    
     std::vector<std::string> fline;
 	while ((pos = lines[0].find(' ')) != std::string::npos) {
     	fline.push_back(lines[0].substr(0, pos));
@@ -83,6 +83,8 @@ int Request::parseRequest()
     //std::cout << "Method of the client: " << _method << std::endl;
     _uri = fline[1];
     _version = fline[2];
+    std::cout << "_avMethods: " << _avMethods << std::endl;
+    //std::cout << "_method " << _method << std::endl;
     if (_avMethods.find(_method) == std::string::npos)
         return 0;
     //take all the headers we have to take
@@ -256,6 +258,7 @@ void Request::execCGI(Client &client)
     int i = 0;
     while (env[i])
     {
+        memset(env[i], '\0', strlen(env[i]));
         free(env[i]);
         ++i;
     }
@@ -288,12 +291,12 @@ char			**Request::setEnv(Client &client)
 //		envMap["SCRIPT_NAME"] = client.conf["exec"];
 //	else
 	envMap["SCRIPT_NAME"] = client._conf.cgi_path;
-	/*if (client._port)
-	{
-		envMap["SERVER_NAME"] = "webserv";
-		envMap["SERVER_PORT"] = client._port;
-	}
-	else*/
+	//if (client._port)
+	//{
+	envMap["SERVER_NAME"] = "webserv";
+	    //envMap["SERVER_PORT"] = client._port;
+	//}
+	//else*/
 	envMap["SERVER_PORT"] = "80";
 	if (client._request->_headers.find("Authorization") != client._request->_headers.end())
 	{
@@ -330,23 +333,22 @@ char			**Request::setEnv(Client &client)
 void		Request::parseCGIResult(Client &client)
 {
     (void)client;
-    /*
 	size_t			pos;
 	std::string		headers;
 	std::string		key;
 	std::string		value;
 
-	if (client.res.body.find("\r\n\r\n") == std::string::npos)
+	if (client._chuckBody.find("\r\n\r\n") == std::string::npos)
 		return ;
-	headers = client.res.body.substr(0, client.res.body.find("\r\n\r\n") + 1);
+	headers = client._chuckBody.substr(0, client._chuckBody.find("\r\n\r\n") + 1);
 	pos = headers.find("Status");
 	if (pos != std::string::npos)
 	{
-		client.res.status_code.clear();
+        client._status.clear();
 		pos += 8;
 		while (headers[pos] != '\r')
 		{
-			client.res.status_code += headers[pos];
+			client.setStatus(client._status + &headers[pos]);
 			pos++;
 		}
 	}
@@ -364,7 +366,7 @@ void		Request::parseCGIResult(Client &client)
 			value += headers[pos];
 			++pos;
 		}
-		client.res.headers[key] = value;
+		client._request->_headers[key] = value;
 		key.clear();
 		value.clear();
 		if (headers[pos] == '\r')
@@ -372,7 +374,7 @@ void		Request::parseCGIResult(Client &client)
 		if (headers[pos] == '\n')
 			pos++;
 	}
-	pos = client.res.body.find("\r\n\r\n") + 4;
-	client.res.body = client.res.body.substr(pos);
-	client.res.headers["Content-Length"] = std::to_string(client.res.body.size());*/
+	pos = client._chuckBody.find("\r\n\r\n") + 4;
+	client._chuckBody = client._chuckBody.substr(pos);
+	client._contentLength = client._chuckBody.size();
 }

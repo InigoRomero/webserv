@@ -108,16 +108,12 @@ int Server::refuseConnection()
 
     numbytes = 0;
     bytes = strlen(it->_request->_rBuf);
-    if ((numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes)) == -1) {
-        perror("read");
-        exit(1);
-    }
-   
+    numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes);
     if (numbytes > 0)
     {
         it->_request->_rBuf [numbytes + bytes] = '\0';
         std::string str = it->_request->_rBuf;
-        //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << str << "\n*****\n" << std::endl;
+        //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << it->_request->_rBuf << "\n*****\n" << std::endl;
         it->_request->_req += str;
         if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
             proccessRequest(it);
@@ -171,7 +167,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     if (it->_status == "200 OK")
     {
         std::cout << "Location: " << it->_conf.location << std::endl;
-        std::cout << "Method: " << it->_request->_method << std::endl;
+        //std::cout << "Method: " << it->_request->_method << std::endl;
         if (it->_conf.method.find(it->_request->_method) == std::string::npos)
         {
             it->setStatus("405 Not Allowed");

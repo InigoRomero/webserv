@@ -35,8 +35,7 @@ void Client::setReadFd(int fd)
 void Client::readFd()
 {
      char			buffer[BUFFER_SIZE + 1];
-     int ret = 0;
-     int				status = 0;
+     int ret = 0,   status = 0;
 
      if (_cgi_pid != -1)
 	{
@@ -64,6 +63,7 @@ void Client::readFd()
      if (ret == 0)
 	{
           close(_read_fd);
+          unlink("./www/temp_file");
           _contentLength = _chuckBody.size();
           setReadFd(-1);
           if (_cgi_pid != -1)
