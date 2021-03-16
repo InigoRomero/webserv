@@ -166,7 +166,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
     getLocationAndMethod(it);
     if (it->_status == "200 OK")
     {
-        std::cout << "Location: " << it->_conf.location << std::endl;
+        //std::cout << "Location: " << it->_conf.location << std::endl;
         //std::cout << "Method: " << it->_request->_method << std::endl;
         if (it->_conf.method.find(it->_request->_method) == std::string::npos)
         {

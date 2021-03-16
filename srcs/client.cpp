@@ -60,6 +60,7 @@ void Client::readFd()
      std::string	tmp(buffer, ret);
     // std::cout << "HE lido de archivo: " << tmp << std::endl;
      _chuckBody += tmp;
+     memset(buffer, '\0', sizeof(char)*BUFFER_SIZE );
      if (ret == 0)
 	{
           close(_read_fd);
@@ -67,7 +68,12 @@ void Client::readFd()
           _contentLength = _chuckBody.size();
           setReadFd(-1);
           if (_cgi_pid != -1)
+          {
+               close(_tmp_fd);
+               _tmp_fd = -1;
+               _cgi_pid = -1;
                _request->parseCGIResult(*this);
+          }
      }
 }
 

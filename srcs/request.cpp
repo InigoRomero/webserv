@@ -80,10 +80,10 @@ int Request::parseRequest()
 	}
     fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
     _method = fline[0];
-    //std::cout << "Method of the client: " << _method << std::endl;
+    std::cout << "Method of the client: " << _method << std::endl;
     _uri = fline[1];
     _version = fline[2];
-    std::cout << "_avMethods: " << _avMethods << std::endl;
+    //std::cout << "_avMethods: " << _avMethods << std::endl;
     //std::cout << "_method " << _method << std::endl;
     if (_avMethods.find(_method) == std::string::npos)
         return 0;
