@@ -23,7 +23,7 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-    memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+    //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
 Request::Request(std::string req): _req(req)
@@ -33,7 +33,9 @@ Request::Request(std::string req): _req(req)
 
 Request::~Request()
 {
-  
+    //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+    free(_rBuf);
+    _rBuf = NULL; 
 }
 
 int Request::parseRequest()
@@ -54,13 +56,18 @@ int Request::parseRequest()
 	}
     if (aux != "")
         _headers["body"] = aux;
+    std::cout << "holi\n";
     //std::cout << "Body2:" << _headers["body"] <<  std::endl;
     //std::cout << "Body:" << _headers["body"] <<  std::endl;  
     _req = _req.substr(0, _req.find("\r\n\r\n"));
+    std::cout << "req:" << _req <<  std::endl;  
 	while ((pos = _req.find('\n')) != std::string::npos) {
+        std::cout << "inigo cabron\n";
     	lines.push_back(_req.substr(0, pos));
         _req = _req.substr(pos+1);
 	}
+        std::cout << "holi1\n";
+    std::cout << lines[0] << std::endl;
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos
     while (isspace(*it))
@@ -72,7 +79,7 @@ int Request::parseRequest()
         else
             it++;
     }
-    
+        std::cout << "holi3\n";
     std::vector<std::string> fline;
 	while ((pos = lines[0].find(' ')) != std::string::npos) {
     	fline.push_back(lines[0].substr(0, pos));
@@ -83,6 +90,7 @@ int Request::parseRequest()
     std::cout << "Method of the client: " << _method << std::endl;
     _uri = fline[1];
     _version = fline[2];
+    std::cout << "holi4\n";
     //std::cout << "_avMethods: " << _avMethods << std::endl;
     //std::cout << "_method " << _method << std::endl;
     if (_avMethods.find(_method) == std::string::npos)

@@ -111,13 +111,18 @@ int Server::refuseConnection()
     numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes);
     if (numbytes > 0)
     {
+        std::cout << "mamasita rosalia\n";
         it->_request->_rBuf [numbytes + bytes] = '\0';
         std::string str = it->_request->_rBuf;
         //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << it->_request->_rBuf << "\n*****\n" << std::endl;
         it->_request->_req += str;
+        memset(it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE);
         if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) || (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL))
+        {
+            std::cout << "_req" << it->_request->_req << std::endl;
             proccessRequest(it);
-        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+        }
+        std::cout << "hello\n";
         it->_lastDate = get_date();
         return (0);
     }
@@ -137,15 +142,14 @@ int  Server::writeResponse(std::vector<Client>::iterator it)
         it->_sendInfo = it->_sendInfo.substr(bytes);
     else
     {
-        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-        free(it->_request->_rBuf);
-        it->_request->_rBuf = NULL;
         it->_sendInfo.clear();
         delete it->_request;
         it->_request = new Request();
+        std::cout << "hello2\n";
         it->_chuckBody.clear();
         it->_chuckBody = "";
         it->_contentLength = 0;
+        //system("leaks webserv");
     }
     it->_lastDate = get_date();
     return(1);
@@ -155,6 +159,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1");
     it->setStatus("200 OK");
+    std::cout << "nepe\n";
     if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
         it->setStatus("400 Bad Request");
@@ -182,6 +187,7 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
             responsePost(it);
         else if (it->_request->_method == "PUT")
             responsePut(it);
+                        std::cout << "HOLA5\n";
     }
     else
         sendError(it);
