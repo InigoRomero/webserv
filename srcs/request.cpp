@@ -38,6 +38,16 @@ Request::~Request()
     _rBuf = NULL; 
 }
 
+
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
 int Request::parseRequest()
 {
 
@@ -45,17 +55,9 @@ int Request::parseRequest()
 	size_t pos = 0, found = 0;
     _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
     //std::cout << "Body:" << _headers["body"] <<  std::endl;
-    std::string aux;
-    if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
-        _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
-	while ((pos = _headers["body"].find("\r\n")) != std::string::npos) {
-        aux += _headers["body"].substr(0, pos);
-        _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
-        if ((pos = _headers["body"].find("\r\n")) != std::string::npos)
-            _headers["body"] = _headers["body"].substr(pos+2, std::string::npos);
-	}
-    if (aux != "")
-        _headers["body"] = aux;
+    _headers["body"] = ReplaceAll(_headers["body"], std::string("\r\n"), std::string(""));
+    //_headers["body"].replace(_headers["body"].begin(),_headers["body"].end(), "\r\n", "");
+    _headers["body"] += "\r\n\r\n";
     std::cout << "BODY leng" <<  _headers["body"].size() << std::endl;
     //std::cout << "Body2:" << _headers["body"] <<  std::endl;
     //std::cout << "Body:" << _headers["body"] <<  std::endl;  

@@ -104,14 +104,12 @@ int Server::refuseConnection()
  int  Server::readRequest(std::vector<Client>::iterator it)
  {
     ssize_t             numbytes;
-    int bytes;
 
     numbytes = 0;
-    bytes = strlen(it->_request->_rBuf);
-    numbytes = read(it->_fd, it->_request->_rBuf  + bytes, BUFFER_SIZE - bytes);
+    numbytes = read(it->_fd, it->_request->_rBuf, BUFFER_SIZE);
     if (numbytes > 0)
     {
-        it->_request->_rBuf [numbytes + bytes] = '\0';
+        it->_request->_rBuf [numbytes] = '\0';
         //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << it->_request->_rBuf << "\n*****\n" << std::endl;
         it->_request->_req += it->_request->_rBuf;
         if (((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) ||
