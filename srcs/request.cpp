@@ -56,18 +56,15 @@ int Request::parseRequest()
 	}
     if (aux != "")
         _headers["body"] = aux;
-    std::cout << "holi\n";
+    std::cout << "BODY leng" <<  _headers["body"].size() << std::endl;
     //std::cout << "Body2:" << _headers["body"] <<  std::endl;
     //std::cout << "Body:" << _headers["body"] <<  std::endl;  
     _req = _req.substr(0, _req.find("\r\n\r\n"));
-    std::cout << "req:" << _req <<  std::endl;  
+    //std::cout << "req:" << _req <<  std::endl;  
 	while ((pos = _req.find('\n')) != std::string::npos) {
-        std::cout << "inigo cabron\n";
     	lines.push_back(_req.substr(0, pos));
         _req = _req.substr(pos+1);
 	}
-        std::cout << "holi1\n";
-    std::cout << lines[0] << std::endl;
     std::string::iterator it = lines[0].begin();
     //eliminar espacios repetidos
     while (isspace(*it))
@@ -79,7 +76,6 @@ int Request::parseRequest()
         else
             it++;
     }
-        std::cout << "holi3\n";
     std::vector<std::string> fline;
 	while ((pos = lines[0].find(' ')) != std::string::npos) {
     	fline.push_back(lines[0].substr(0, pos));
@@ -87,10 +83,9 @@ int Request::parseRequest()
 	}
     fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
     _method = fline[0];
-    std::cout << "Method of the client: " << _method << std::endl;
+    //std::cout << "Method of the client: " << _method << std::endl;
     _uri = fline[1];
     _version = fline[2];
-    std::cout << "holi4\n";
     //std::cout << "_avMethods: " << _avMethods << std::endl;
     //std::cout << "_method " << _method << std::endl;
     if (_avMethods.find(_method) == std::string::npos)
