@@ -114,7 +114,8 @@ int Server::refuseConnection()
         it->_request->_rBuf [numbytes + bytes] = '\0';
         //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << it->_request->_rBuf << "\n*****\n" << std::endl;
         it->_request->_req += it->_request->_rBuf;
-        if ((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL || strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL) && numbytes < BUFFER_SIZE)
+        if (((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) ||
+        (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL)) && numbytes < BUFFER_SIZE)
             proccessRequest(it);
         it->_request->_rBuf[0] = '\0';
         it->_lastDate = get_date();
