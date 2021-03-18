@@ -67,7 +67,7 @@ int Request::parseRequest()
         if (len > 0)
             _headers["body"] = _headers["body"].substr(0, len - 1);
         //std::cout << "Body2:" << _headers["body"] <<  std::endl;
-        //std::cout << "Body:" << _headers["body"] <<  std::endl;  
+        //std::cout << "Body:" << _headers["body"] <<  std::endl; 
     }
     else
     {
@@ -120,6 +120,7 @@ int Request::parseRequest()
             _req.clear();
             return(0);
         }
+        std::cout <<  "que paso\n";
     }
     return (1);
 }

@@ -32,6 +32,7 @@ void responseGet(std::vector<Client>::iterator client)
 
 void responsePost(std::vector<Client>::iterator client)
 {
+    std::cout << "response Post" << std::endl;
 	size_t pos;
 	std::string ext;
 	std::string	path;

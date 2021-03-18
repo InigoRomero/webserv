@@ -118,19 +118,25 @@ int checkFinal(std::string req, bool body)
     return (0);
 }
 
- int  Server::readRequest(std::vector<Client>::iterator it)
+int  Server::readRequest(std::vector<Client>::iterator it)
  {
-    ssize_t             numbytes;
+    ssize_t             numbytes; 
+    char                *rbuf;
 
+    rbuf = it->_request->_rBuf;
     numbytes = 0;
-    numbytes = read(it->_fd, it->_request->_rBuf, BUFFER_SIZE);
+    numbytes = read(it->_fd, rbuf, BUFFER_SIZE);
+    //std::cout << "leo\n";
     if (numbytes > 0)
     {
-        it->_request->_rBuf[numbytes] = '\0';
-        it->_request->_req += it->_request->_rBuf;
+        rbuf[numbytes] = '\0';
+        it->_request->_req += rbuf;
         if (checkFinal(it->_request->_req, it->_request->_body) && numbytes < BUFFER_SIZE)
+        {
+            std::cout << "hola\n";
             proccessRequest(it);
-        it->_request->_rBuf[0] = '\0';
+        }
+        rbuf[0] = '\0';
         return (0);
     }
     return (1);
