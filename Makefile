@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mlaplana <mlaplana@student.42.fr>          +#+  +:+       +#+         #
+#    By: iromero- <iromero-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/09 12:32:45 by mlaplana          #+#    #+#              #
-#    Updated: 2021/03/18 20:09:06 by mlaplana         ###   ########.fr        #
+#    Updated: 2021/03/18 20:12:21 by iromero-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = webserv
 
 CC = clang++
 
-CC_FLAGS = -Wall -Wextra -Werror -O3
+CC_FLAGS = -Wall -Wextra -Werror
 
 RM = rm -rf
 
