@@ -23,6 +23,7 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    _body = false;
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
@@ -53,55 +54,71 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
-    _headers["body"] = _req.substr(_req.find("\r\n\r\n") + 4, std::string::npos);
-    //std::cout << "Body:" << _headers["body"] <<  std::endl;
-    _headers["body"] = ReplaceAll(_headers["body"], std::string("\r\n"), std::string(""));
-    //_headers["body"].replace(_headers["body"].begin(),_headers["body"].end(), "\r\n", "");
-    _headers["body"] += "\r\n\r\n";
-    std::cout << "BODY leng" <<  _headers["body"].size() << std::endl;
-    //std::cout << "Body2:" << _headers["body"] <<  std::endl;
-    //std::cout << "Body:" << _headers["body"] <<  std::endl;  
-    _req = _req.substr(0, _req.find("\r\n\r\n"));
-    //std::cout << "req:" << _req <<  std::endl;  
-	while ((pos = _req.find('\n')) != std::string::npos) {
-    	lines.push_back(_req.substr(0, pos));
-        _req = _req.substr(pos+1);
-	}
-    std::string::iterator it = lines[0].begin();
-    //eliminar espacios repetidos
-    while (isspace(*it))
-        it = lines[0].erase(it);
-    while (it != lines[0].end())
+
+    if (_body)
     {
-        if (isspace(*it) && isspace(*(std::next(it))))
-            it = lines[0].erase(it);
-        else
-            it++;
+        //std::cout << "req:" << _req <<  std::endl;
+        std::cout << "Empiezo a parsear body" <<  std::endl;
+        _headers["body"] = _req;
+        _headers["body"] = _headers["body"].substr(_headers["body"].find("\r\n"), std::string::npos);
+        //std::cout << "Body:" << _headers["body"] <<  std::endl;
+        _headers["body"] = ReplaceAll(_headers["body"], std::string("\r\n"), std::string(""));
+        size_t len = _headers["body"].size();
+        if (len > 0)
+            _headers["body"] = _headers["body"].substr(0, len - 1);
+        //std::cout << "Body2:" << _headers["body"] <<  std::endl;
+        //std::cout << "Body:" << _headers["body"] <<  std::endl;  
     }
-    std::vector<std::string> fline;
-	while ((pos = lines[0].find(' ')) != std::string::npos) {
-    	fline.push_back(lines[0].substr(0, pos));
-    	lines[0].erase(0, pos + 1);
-	}
-    fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
-    _method = fline[0];
-    //std::cout << "Method of the client: " << _method << std::endl;
-    _uri = fline[1];
-    _version = fline[2];
-    //std::cout << "_avMethods: " << _avMethods << std::endl;
-    //std::cout << "_method " << _method << std::endl;
-    if (_avMethods.find(_method) == std::string::npos)
-        return 0;
-    //take all the headers we have to take
-    for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
+    else
     {
-        for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
+        _req = _req.substr(0, _req.find("\r\n\r\n"));
+        //std::cout << "req:" << _req <<  std::endl;  
+        while ((pos = _req.find('\n')) != std::string::npos) {
+            lines.push_back(_req.substr(0, pos));
+            _req = _req.substr(pos+1);
+        }
+        std::string::iterator it = lines[0].begin();
+        //eliminar espacios repetidos
+        while (isspace(*it))
+            it = lines[0].erase(it);
+        while (it != lines[0].end())
         {
-            if ((found = (*it).find(it2->first)) != std::string::npos)
+            if (isspace(*it) && isspace(*(std::next(it))))
+                it = lines[0].erase(it);
+            else
+                it++;
+        }
+        std::vector<std::string> fline;
+        while ((pos = lines[0].find(' ')) != std::string::npos) {
+            fline.push_back(lines[0].substr(0, pos));
+            lines[0].erase(0, pos + 1);
+        }
+        fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
+        _method = fline[0];
+        //std::cout << "Method of the client: " << _method << std::endl;
+        _uri = fline[1];
+        _version = fline[2];
+        //std::cout << "_avMethods: " << _avMethods << std::endl;
+        //std::cout << "_method " << _method << std::endl;
+        if (_avMethods.find(_method) == std::string::npos)
+            return 0;
+        //take all the headers we have to take
+        for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
+        {
+            for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
-                it2->second = (*it).substr((*it).find(":") + 1, (*it).size());
-                break ;
+                if ((found = (*it).find(it2->first)) != std::string::npos)
+                {
+                    it2->second = (*it).substr((*it).find(":") + 1, (*it).size());
+                    break ;
+                }
             }
+        }
+        if (_method == "POST" || _method == "PUT")
+        {
+            _body = true;
+            _req.clear();
+            return(0);
         }
     }
     return (1);

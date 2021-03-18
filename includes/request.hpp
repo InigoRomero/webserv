@@ -28,6 +28,7 @@ class Request
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
         unsigned int                        _bodyLen;
+        bool                                _body;
 
         void setRequest(std::string req);
         int parseRequest();

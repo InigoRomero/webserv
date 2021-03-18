@@ -49,6 +49,12 @@ void responsePost(std::vector<Client>::iterator client)
 			client->setStatus("201 OK");
 		client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 	}
+
+	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
+	if ((open(path.c_str(), O_RDONLY)) == -1)
+		client->setStatus("201 OK");
+	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 }
 
 void responsePut(std::vector<Client>::iterator client)

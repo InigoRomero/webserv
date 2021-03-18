@@ -101,6 +101,23 @@ int Server::refuseConnection()
     return (0);
 }
 
+int checkFinal(std::string req, bool body)
+{
+    size_t len = req.size();
+    if (body && req[len - 5] == '0' &&
+        req[len - 4] == '\r' &&
+        req[len - 3] == '\n' &&
+        req[len - 2] == '\r' &&
+        req[len - 1] == '\n')
+        return (1);
+    if (!body && req[len - 4] == '\r' &&
+        req[len - 3] == '\n' &&
+        req[len - 2] == '\r' &&
+        req[len - 1] == '\n')
+        return (1);
+    return (0);
+}
+
  int  Server::readRequest(std::vector<Client>::iterator it)
  {
     ssize_t             numbytes;
@@ -109,14 +126,11 @@ int Server::refuseConnection()
     numbytes = read(it->_fd, it->_request->_rBuf, BUFFER_SIZE);
     if (numbytes > 0)
     {
-        it->_request->_rBuf [numbytes] = '\0';
-        //std::cout << "\nLEIDO DEL CLIENTE:\n*****\n" << it->_fd << it->_request->_rBuf << "\n*****\n" << std::endl;
+        it->_request->_rBuf[numbytes] = '\0';
         it->_request->_req += it->_request->_rBuf;
-        if (((strstr(it->_request->_req.c_str()  , "\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") == NULL) ||
-        (strstr(it->_request->_req.c_str() , "0\r\n\r\n") != NULL && strstr(it->_request->_req.c_str() , "chunked") != NULL)) && numbytes < BUFFER_SIZE)
+        if (checkFinal(it->_request->_req, it->_request->_body) && numbytes < BUFFER_SIZE)
             proccessRequest(it);
         it->_request->_rBuf[0] = '\0';
-        it->_lastDate = get_date();
         return (0);
     }
     return (1);
@@ -153,9 +167,12 @@ int  Server::proccessRequest(std::vector<Client>::iterator it)
 {
     it->setSendInfo("HTTP/1.1");
     it->setStatus("200 OK");
+    it->_lastDate = get_date();
     std::cout << "req leng" << it->_request->_req.size() << std::endl;
     if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
+        if (it->_request->_body)
+            return(0);
         it->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
