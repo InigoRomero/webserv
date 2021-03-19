@@ -1,7 +1,8 @@
 #include "methods.hpp"
 
-void responseGet(std::vector<Client>::iterator client)
+void responseGet(std::vector<Client*>::iterator it)
 {
+	Client		*client = *it;
 	std::string response = client->_request->_version;
 	std::string		path;
 	int ret = 0;
@@ -30,9 +31,10 @@ void responseGet(std::vector<Client>::iterator client)
 	client->setReadFd(ret);
 }
 
-void responsePost(std::vector<Client>::iterator client)
+void responsePost(std::vector<Client*>::iterator it)
 {
     std::cout << "response Post" << std::endl;
+	Client		*client = *it;
 	size_t pos;
 	std::string ext;
 	std::string	path;
@@ -42,7 +44,7 @@ void responsePost(std::vector<Client>::iterator client)
 		ext = path.substr(pos, std::string::npos);
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
-		client->_request->execCGI(*client);
+		client->_request->execCGI((Client &)client);
 	}
 	else
 	{
@@ -52,9 +54,10 @@ void responsePost(std::vector<Client>::iterator client)
 	}
 }
 
-void responsePut(std::vector<Client>::iterator client)
+void responsePut(std::vector<Client*>::iterator it)
 {
 	std::string	path;
+	Client		*client = *it;
 
 	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
@@ -63,8 +66,9 @@ void responsePut(std::vector<Client>::iterator client)
 	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 }
 
-void createHeader(std::vector<Client>::iterator client)
+void createHeader(std::vector<Client*>::iterator it)
 {
+	Client		*client = *it;
 	std::map<std::string, std::string> 	headers;
 	
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";

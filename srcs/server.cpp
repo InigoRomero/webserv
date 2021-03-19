@@ -74,7 +74,7 @@ int Server::acceptNewClient()
     }
     if (accept_fd > _maxFd)
 		_maxFd = accept_fd;
-    Client newClient = Client(accept_fd, _rSet, _wSet, client_addr);
+    Client *newClient = new Client(accept_fd, _rSet, _wSet, client_addr);
     _clients.push_back(newClient);
     std::cout << "new Client accepted\n FD : " << accept_fd << std::endl;
 
@@ -84,13 +84,15 @@ int Server::acceptNewClient()
 int		Server::getOpenFd()
 {
 	int 	nb = 0;
+    Client	*client;
 
-	for (std::vector<Client>::iterator it(_clients.begin()); it != _clients.end(); ++it)
+	for (std::vector<Client*>::iterator it(_clients.begin()); it != _clients.end(); ++it)
 	{
+        client = *it;
 		nb += 1;
-		if (it->_read_fd != -1)
+		if (client->_read_fd != -1)
 			nb += 1;
-		if (it->_write_fd != -1)
+		if (client->_write_fd != -1)
 			nb += 1;
 	}
 	return (nb);
@@ -101,16 +103,10 @@ int Server::refuseConnection()
     return (0);
 }
 
-int checkFinal(std::string req, bool body)
+int checkFinal(std::string req)
 {
     size_t len = req.size();
-    if (body && req[len - 5] == '0' &&
-        req[len - 4] == '\r' &&
-        req[len - 3] == '\n' &&
-        req[len - 2] == '\r' &&
-        req[len - 1] == '\n')
-        return (1);
-    if (!body && req[len - 4] == '\r' &&
+    if ( req[len - 4] == '\r' &&
         req[len - 3] == '\n' &&
         req[len - 2] == '\r' &&
         req[len - 1] == '\n')
@@ -118,106 +114,104 @@ int checkFinal(std::string req, bool body)
     return (0);
 }
 
-int  Server::readRequest(std::vector<Client>::iterator it)
+int  Server::readRequest(std::vector<Client*>::iterator it)
  {
-    ssize_t             numbytes; 
-    char                *rbuf;
+    Client		*client = *it;
+    char                *rbuf = client->_request->_rBuf;
+    ssize_t             numbytes = read(client->_fd, rbuf, BUFFER_SIZE); 
 
-    rbuf = it->_request->_rBuf;
-    numbytes = 0;
-    numbytes = read(it->_fd, rbuf, BUFFER_SIZE);
-    //std::cout << "leo\n";
+
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-        it->_request->_req += rbuf;
-        if (checkFinal(it->_request->_req, it->_request->_body) && numbytes < BUFFER_SIZE)
-        {
-            std::cout << "hola\n";
+        client->_request->_req += rbuf;
+            //std::cout << "leo " << client->_request->_req;
+        if (checkFinal(client->_request->_req) && numbytes < BUFFER_SIZE)
             proccessRequest(it);
-        }
         rbuf[0] = '\0';
         return (0);
     }
     return (1);
  }
 
-int  Server::writeResponse(std::vector<Client>::iterator it)
+int  Server::writeResponse(std::vector<Client*>::iterator it)
 {
     unsigned long	bytes;
-
-    it->_sendInfo += "Content-Length: " + std::to_string(it->_contentLength) + "\r\n\r\n";
-    if (it->_chuckBody.size() > 0 && it->_request->_method != "HEAD")
-        it->_sendInfo += it->_chuckBody;
-    //std::cout << it->_fd << "\nSend info: \n" << it->_sendInfo << std::endl;
-    bytes = write(it->_fd, it->_sendInfo.c_str(), it->_sendInfo.size());
-    if (bytes < it->_sendInfo.size())
-        it->_sendInfo = it->_sendInfo.substr(bytes);
+    Client		*client = *it;
+    client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
+    if (client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+        client->_sendInfo += client->_chuckBody;
+    // std::cout << "body response" << client->_chuckBody.size() << std::endl;
+    //std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
+    bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
+    if (bytes < client->_sendInfo.size())
+        client->_sendInfo = client->_sendInfo.substr(bytes);
     else
     {
-        memset( it->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-        free(it->_request->_rBuf);
-        it->_request->_rBuf = NULL;
-        it->_sendInfo.clear();
-        delete it->_request;
-        it->_request = new Request();
-        it->_chuckBody.clear();
-        it->_chuckBody = "";
-        it->_contentLength = 0;
+        memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+        free(client->_request->_rBuf);
+        client->_request->_rBuf = NULL;
+        client->_sendInfo.clear();
+        delete client->_request;
+        client->_request = new Request();
+        client->_chuckBody.clear();
+        client->_chuckBody = "";
+        client->_contentLength = 0;
     }
-    it->_lastDate = get_date();
+    client->_lastDate = get_date();
     return(1);
 }
 
-int  Server::proccessRequest(std::vector<Client>::iterator it)
+int  Server::proccessRequest(std::vector<Client*>::iterator it)
 {
-    it->setSendInfo("HTTP/1.1");
-    it->setStatus("200 OK");
-    it->_lastDate = get_date();
-    std::cout << "req leng" << it->_request->_req.size() << std::endl;
-    if(!it->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
+    Client		*client = *it;
+    client->setSendInfo("HTTP/1.1");
+    client->setStatus("200 OK");
+    client->_lastDate = get_date();
+    std::cout << "req leng" << client->_request->_req.size() << std::endl;
+    if(!client->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
-        if (it->_request->_body)
+        if (client->_request->_body)
             return(0);
-        it->setStatus("400 Bad Request");
+        client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
-        FD_SET(it->_fd, _wSet);
+        FD_SET(client->_fd, _wSet);
 		return (0);
     }
     getLocationAndMethod(it);
-    if (it->_status == "200 OK")
+    if (client->_status == "200 OK")
     {
-        //std::cout << "Location: " << it->_conf.location << std::endl;
-        //std::cout << "Method: " << it->_request->_method << std::endl;
-        if (it->_conf.method.find(it->_request->_method) == std::string::npos)
+        //std::cout << "Location: " << client->_conf.location << std::endl;
+        //std::cout << "Method: " << client->_request->_method << std::endl;
+        if (client->_conf.method.find(client->_request->_method) == std::string::npos)
         {
-            it->setStatus("405 Not Allowed");
+            client->setStatus("405 Not Allowed");
             sendError(it);
             createHeader(it);
-            FD_SET(it->_fd, _wSet);
+            FD_SET(client->_fd, _wSet);
             return (0);
         }
-        if (it->_request->_method == "GET")
+        if (client->_request->_method == "GET")
             responseGet(it);
-        else if (it->_request->_method == "POST")
+        else if (client->_request->_method == "POST")
             responsePost(it);
-        else if (it->_request->_method == "PUT")
+        else if (client->_request->_method == "PUT")
             responsePut(it);
     }
     else
         sendError(it);
     createHeader(it);
-    FD_SET(it->_fd, _wSet);
-    //FD_CLR(it->_fd, _rSet);
+    FD_SET(client->_fd, _wSet);
+    //FD_CLR(client->_fd, _rSet);
     return 0;
 }
 
-void Server::getLocationAndMethod(std::vector<Client>::iterator it)
+void Server::getLocationAndMethod(std::vector<Client*>::iterator it)
 {
     std::string aux, aux2;
-
-    aux = it->_request->_uri;
+    Client		*client = *it;
+    aux = client->_request->_uri;
     if (aux.size() > 1)
     {
         aux2 = aux.substr(1);
@@ -232,31 +226,34 @@ void Server::getLocationAndMethod(std::vector<Client>::iterator it)
     {
         if (it2->location.find(aux) != std::string::npos)
         {
-            it->_conf = *it2;
+            client->_conf = *it2;
             return ;
         }
     }
-    it->setStatus("404  Not Found");
+    client->setStatus("404  Not Found");
 }
 
-void Server::sendError(std::vector<Client>::iterator it)
+void Server::sendError(std::vector<Client*>::iterator it)
 {
     std::string		path;
-
-    path = _error + "/" + it->_status.substr(0, 3) + ".html";
-    it->setPath(path.c_str());
-    it->_rFile = ".html";
-	it->setReadFd(open(path.c_str(), O_RDONLY));
+    Client		*client = *it;  
+    path = _error + "/" + client->_status.substr(0, 3) + ".html";
+    client->setPath(path.c_str());
+    client->_rFile = ".html";
+	client->setReadFd(open(path.c_str(), O_RDONLY));
 }
 
 int		Server::getMaxFd()
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    Client *client;
+
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		if (it->_fd > _maxFd)
-			_maxFd = it->_fd;
-		if (it->_write_fd > _maxFd)
-			_maxFd = it->_write_fd;
+        client = *it;
+		if (client->_fd > _maxFd)
+			_maxFd = client->_fd;
+		if (client->_write_fd > _maxFd)
+			_maxFd = client->_write_fd;
 	}
 	return (_maxFd);
 }

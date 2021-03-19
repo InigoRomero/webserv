@@ -31,7 +31,7 @@ class Server
         struct sockaddr_in          _my_addr;
         std::vector<struct location> _locations;
         std::map<std::string, std::string> 	_headers;
-        std::vector<Client>         _clients;
+        std::vector<Client*>         _clients;
         int                         _port;
         std::string                 _error;
         std::string                 _name;
@@ -65,11 +65,11 @@ class Server
         void    setConf(const std::string &host);
         void    setPort(int port);
         void    setLocations(struct location methods);
-        int     readRequest(std::vector<Client>::iterator it);
-        int     writeResponse(std::vector<Client>::iterator it);
-        int     proccessRequest(std::vector<Client>::iterator it);
-        void    sendError(std::vector<Client>::iterator it);
-        void    getLocationAndMethod(std::vector<Client>::iterator it);
+        int     readRequest(std::vector<Client*>::iterator it);
+        int     writeResponse(std::vector<Client*>::iterator it);
+        int     proccessRequest(std::vector<Client*>::iterator it);
+        void    sendError(std::vector<Client*>::iterator it);
+        void    getLocationAndMethod(std::vector<Client*>::iterator it);
         int     getMaxFd();
         int		getOpenFd();
 };

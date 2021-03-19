@@ -75,6 +75,7 @@ void Client::readFd()
                _request->parseCGIResult(*this);
           }
      }
+     std::cout << "body response read" << _chuckBody.size() << std::endl;
 }
 
 void Client::writeFd()

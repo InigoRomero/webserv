@@ -22,6 +22,7 @@ int init(std::vector<Server> servers)
 	fd_set					rSet;
 	fd_set					wSet;
     struct timeval			timeout;
+    Client					*client;
 
 	signal(SIGINT, exit);
 	FD_ZERO(&rSet);
@@ -49,41 +50,42 @@ int init(std::vector<Server> servers)
 				else
                     (*it).acceptNewClient();
             }
-            for (std::vector<Client>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
+            for (std::vector<Client*>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
             {
+                client = *it2;
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
-               // std::cout << "Cliente FD: " << it2->_fd << std::endl;
-                if (FD_ISSET(it2->_fd, &writeSet))
+               // std::cout << "Cliente FD: " << client->_fd << std::endl;
+                if (client->_write_fd != -1)
                 {
-                    it->writeResponse(it2);
-                    FD_CLR(it2->_fd, it2->_wSet);
+                    client->writeFd();
+                    client->_lastDate = get_date();
                     break ;
                 }
-                if (FD_ISSET(it2->_fd, &readSet))                 
+                if (client->_read_fd != -1)
+                {
+                    client->readFd();
+                    client->_lastDate = get_date();
+                    break ;
+                }
+                if (FD_ISSET(client->_fd, &writeSet))
+                {
+                    it->writeResponse(it2);
+                    FD_CLR(client->_fd, client->_wSet);
+                    break ;
+                }
+                if (FD_ISSET(client->_fd, &readSet))                 
                 {
                     if (!it->readRequest(it2))
                         break ;
-                    if ((it2->_lastDate.size() != 0 && compareTime(it2->_lastDate) >= 10))
+                    if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10))
                     {
-                        free(it2->_request->_rBuf);
-                        close(it2->_fd);
-                        FD_CLR(it2->_fd, it2->_rSet);
-                        it2 = it->_clients.erase(it2);
+                        free(client->_request->_rBuf);
+                        close(client->_fd);
+                        FD_CLR(client->_fd, client->_rSet);
+                        //it2 = it->_clients.erase(client);
                         std::cout << "Bye client" << std::endl;
                         break ;
                     }
-                }
-                if (it2->_write_fd != -1)
-                {
-                    it2->writeFd();
-                    it2->_lastDate = get_date();
-                    break ;
-                }
-                if (it2->_read_fd != -1)
-                {
-                    it2->readFd();
-                    it2->_lastDate = get_date();
-                    break ;
                 }
             }
         }
