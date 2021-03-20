@@ -41,7 +41,7 @@ int init(std::vector<Server> servers)
 		writeSet = wSet;
         int maxFD = max_fd(servers);
         select(maxFD + 1, &readSet, &writeSet, NULL, &timeout);
-        for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
+        for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))
             {
@@ -50,29 +50,11 @@ int init(std::vector<Server> servers)
 				else
                     (*it).acceptNewClient();
             }
-            for (std::vector<Client*>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); it2++)
+            for (std::vector<Client*>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); ++it2)
             {
                 client = *it2;
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
                // std::cout << "Cliente FD: " << client->_fd << std::endl;
-                if (client->_write_fd != -1)
-                {
-                    client->writeFd();
-                    client->_lastDate = get_date();
-                    break ;
-                }
-                if (client->_read_fd != -1)
-                {
-                    client->readFd();
-                    client->_lastDate = get_date();
-                    break ;
-                }
-                if (FD_ISSET(client->_fd, &writeSet))
-                {
-                    it->writeResponse(it2);
-                    FD_CLR(client->_fd, client->_wSet);
-                    break ;
-                }
                 if (FD_ISSET(client->_fd, &readSet))                 
                 {
                     if (!it->readRequest(it2))
@@ -86,6 +68,24 @@ int init(std::vector<Server> servers)
                         std::cout << "Bye client" << std::endl;
                         break ;
                     }
+                }
+               if (FD_ISSET(client->_fd, &writeSet))
+                {
+                    it->writeResponse(it2);
+                    FD_CLR(client->_fd, client->_wSet);
+                    break ;
+                }
+                if (client->_write_fd != -1)
+                {
+                    client->writeFd();
+                    client->_lastDate = get_date();
+                    break ;
+                }
+                if (client->_read_fd != -1)
+                {
+                    client->readFd();
+                    client->_lastDate = get_date();
+                    break ;
                 }
             }
         }

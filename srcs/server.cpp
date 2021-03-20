@@ -106,7 +106,7 @@ int Server::refuseConnection()
 int checkFinal(std::string req)
 {
     size_t len = req.size();
-    if ( req[len - 4] == '\r' &&
+    if (req[len - 4] == '\r' &&
         req[len - 3] == '\n' &&
         req[len - 2] == '\r' &&
         req[len - 1] == '\n')

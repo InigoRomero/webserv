@@ -1,6 +1,6 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
-#define BUFFER_SIZE 32768
+#define BUFFER_SIZE 159744
 
 #include <iostream>
 #include <string.h>

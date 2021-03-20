@@ -1,8 +1,11 @@
 #ifndef METHODS_HPP
 #define METHODS_HPP
 
-#include "server.hpp"
-class Server;
+#include "client.hpp"
+#include "utils.hpp"
+
+class Client;
+class Helper;
 
 void            responseGet(std::vector<Client*>::iterator it); 
 void            responsePut(std::vector<Client*>::iterator it); 
