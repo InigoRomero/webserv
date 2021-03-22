@@ -103,15 +103,9 @@ int Server::refuseConnection()
     return (0);
 }
 
-int checkFinal(std::string req)
-{
-    size_t len = req.size();
-    if (req[len - 4] == '\r' &&
-        req[len - 3] == '\n' &&
-        req[len - 2] == '\r' &&
-        req[len - 1] == '\n')
-        return (1);
-    return (0);
+std::string tail(std::string const& source, size_t const length) {
+  if (length >= source.size()) { return source; }
+  return source.substr(source.size() - length);
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
@@ -126,7 +120,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         rbuf[numbytes] = '\0';
         client->_request->_req += rbuf;
             //std::cout << "leo " << client->_request->_req;
-        if (checkFinal(client->_request->_req) && numbytes < BUFFER_SIZE)
+        if ((tail(client->_request->_req, 4) == "\r\n\r\n") && numbytes < BUFFER_SIZE)
             proccessRequest(it);
         rbuf[0] = '\0';
         return (0);
