@@ -69,22 +69,20 @@ int init(std::vector<Server> servers)
                         break ;
                     }
                 }
-               if (FD_ISSET(client->_fd, &writeSet))
-                {
-                    it->writeResponse(it2);
-                    FD_CLR(client->_fd, client->_wSet);
-                    break ;
-                }
                 if (client->_write_fd != -1)
                 {
                     client->writeFd();
                     client->_lastDate = get_date();
-                    break ;
                 }
                 if (client->_read_fd != -1)
                 {
                     client->readFd();
                     client->_lastDate = get_date();
+                }
+                if (FD_ISSET(client->_fd, &writeSet))
+                {
+                    it->writeResponse(it2);
+                    FD_CLR(client->_fd, client->_wSet);
                     break ;
                 }
             }

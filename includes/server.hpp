@@ -4,6 +4,7 @@
 #define UNAVAILABLE_TIME  20
 
 #include "methods.hpp"
+#include "get_next_line.hpp"
 
 class Server
 {

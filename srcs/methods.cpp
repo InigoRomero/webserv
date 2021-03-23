@@ -44,7 +44,7 @@ void responsePost(std::vector<Client*>::iterator it)
 		ext = path.substr(pos, std::string::npos);
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
-		client->_request->execCGI((Client &)client);
+		client->_request->execCGI(*client);
 	}
 	else
 	{

@@ -24,6 +24,7 @@ Request::Request(): _req("")
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
     _body = false;
+    _chucklen = 0;
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
@@ -58,6 +59,7 @@ int Request::parseRequest()
     if (_body)
     {
         //std::cout << "req:" << _req <<  std::endl;
+
         std::cout << "Empiezo a parsear body" <<  std::endl;
         _headers["body"] = _req;
         _headers["body"] = _headers["body"].substr(_headers["body"].find("\r\n"), std::string::npos);
@@ -400,4 +402,5 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
+    std::cout << "qundqe" << std::endl;
 }

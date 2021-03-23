@@ -1,6 +1,6 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
-#define BUFFER_SIZE 159744
+#define BUFFER_SIZE 32768
 
 #include <iostream>
 #include <string.h>
@@ -28,6 +28,7 @@ class Request
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
         unsigned int                        _bodyLen;
+        unsigned int                        _chucklen;
         bool                                _body;
 
         void setRequest(std::string req);

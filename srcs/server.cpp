@@ -108,22 +108,99 @@ std::string tail(std::string const& source, size_t const length) {
   return source.substr(source.size() - length);
 }
 
+static	int		getpower(int nb, int power)
+	{
+		if (power < 0)
+			return (0);
+		if (power == 0)
+			return (1);
+		return (nb * getpower(nb, power - 1));
+	}
+
+static int	fromHexa(const char *nb)
+{
+	char	base[17] = "0123456789abcdef";
+	char	base2[17] = "0123456789ABCDEF";
+	int		result = 0;
+	int		i;
+	int		index;
+
+	i = 0;
+	while (nb[i])
+	{
+		int j = 0;
+		while (base[j])
+		{
+			if (nb[i] == base[j])
+			{
+				index = j;
+				break ;
+			}
+			j++;
+		}
+		if (j == 16)
+		{
+			j = 0;
+			while (base2[j])
+			{
+				if (nb[i] == base2[j])
+				{
+					index = j;
+					break ;
+				}
+				j++;
+			}
+		}
+		result += index * getpower(16, (strlen(nb) - 1) - i);
+		i++;
+	}
+	return (result);
+}
+
 int  Server::readRequest(std::vector<Client*>::iterator it)
  {
     Client		*client = *it;
-    char                *rbuf = client->_request->_rBuf;
-    ssize_t             numbytes = read(client->_fd, rbuf, BUFFER_SIZE); 
-
+    char        *rbuf = client->_request->_rBuf;
+    int         bytes = strlen(rbuf);
+    ssize_t     numbytes = read(client->_fd, rbuf + bytes, BUFFER_SIZE - bytes); 
+    numbytes += bytes;
 
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-        client->_request->_req += rbuf;
-            //std::cout << "leo " << client->_request->_req;
-        if ((tail(client->_request->_req, 4) == "\r\n\r\n") && numbytes < BUFFER_SIZE)
-            proccessRequest(it);
-        rbuf[0] = '\0';
-        return (0);
+        int i = 0;
+        if (client->_request->_body)
+        {
+            while (client->_request->_chucklen == 0 && ((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
+                i++;
+            if (i > 0)
+            {
+                char *aux = ft_substr(rbuf, 0, i);
+                client->_request->_chucklen = fromHexa(aux);
+                free(aux);
+            }
+            if (strlen(rbuf) >= client->_request->_chucklen)
+            {
+                std::string tmp = rbuf;
+                if ((tail(client->_request->_req, 4) == "\r\n\r\n"))
+                {
+                    tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
+                    client->_request->_req += tmp;
+                    proccessRequest(it);
+                }
+                tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
+                client->_request->_req += tmp;
+                rbuf[0] = '\0';
+            }
+        }
+        else
+        {
+            client->_request->_req += rbuf;
+            if ((tail(client->_request->_req, 4) == "\r\n\r\n"))
+                proccessRequest(it);
+            rbuf[0] = '\0';
+            return (0);
+        }
     }
     return (1);
  }

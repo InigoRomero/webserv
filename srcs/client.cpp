@@ -72,6 +72,7 @@ void Client::readFd()
                close(_tmp_fd);
                _tmp_fd = -1;
                _cgi_pid = -1;
+               std::cout<< "hola buenas" << std::endl;
                _request->parseCGIResult(*this);
           }
      }
