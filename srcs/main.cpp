@@ -73,11 +73,13 @@ int init(std::vector<Server> servers)
                 {
                     client->writeFd();
                     client->_lastDate = get_date();
+                    break ;
                 }
                 if (client->_read_fd != -1)
                 {
                     client->readFd();
                     client->_lastDate = get_date();
+                    break ;
                 }
                 if (FD_ISSET(client->_fd, &writeSet))
                 {

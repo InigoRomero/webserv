@@ -58,18 +58,8 @@ int Request::parseRequest()
 
     if (_body)
     {
-        //std::cout << "req:" << _req <<  std::endl;
-
         std::cout << "Empiezo a parsear body" <<  std::endl;
-        _headers["body"] = _req;
-        _headers["body"] = _headers["body"].substr(_headers["body"].find("\r\n"), std::string::npos);
-        //std::cout << "Body:" << _headers["body"] <<  std::endl;
-        _headers["body"] = ReplaceAll(_headers["body"], std::string("\r\n"), std::string(""));
-        size_t len = _headers["body"].size();
-        if (len > 0)
-            _headers["body"] = _headers["body"].substr(0, len - 1);
-        //std::cout << "Body2:" << _headers["body"] <<  std::endl;
-        //std::cout << "Body:" << _headers["body"] <<  std::endl; 
+        _headers["body"] = _req.substr(0, _req.size() - 4);
     }
     else
     {

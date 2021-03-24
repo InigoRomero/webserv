@@ -163,14 +163,17 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, BUFFER_SIZE - bytes); 
+    //ssize_t     numbytes = read(client->_fd, rbuf, BUFFER_SIZE); 
     numbytes += bytes;
 
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
         int i = 0;
+        //std::cout << "rbuf" << rbuf << std::endl;
         if (client->_request->_body)
         {
+            //std::cout << "rbuf" << rbuf << std::endl;
             while (client->_request->_chucklen == 0 && ((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
                 i++;
             if (i > 0)
@@ -179,19 +182,26 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
                 client->_request->_chucklen = fromHexa(aux);
                 free(aux);
             }
-            if (strlen(rbuf) >= client->_request->_chucklen)
+            std::string tmp = rbuf;
+            std::cout << "client->_request->_chucklen" << client->_request->_chucklen << std::endl;
+            std::cout << "len" << strlen(rbuf) << std::endl;
+            if (strlen(tmp.find("\r\n") + 2 + rbuf) >= client->_request->_chucklen)
             {
-                std::string tmp = rbuf;
-                if ((tail(client->_request->_req, 4) == "\r\n\r\n"))
+                if ((tail(tmp, 4) == "\r\n\r\n"))
                 {
+                    std::cout << "HOLA?" << std::endl;
                     tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
                     client->_request->_req += tmp;
+                    std::cout << "req" << client->_request->_req << std::endl;
                     proccessRequest(it);
                 }
                 tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
                 client->_request->_req += tmp;
-                rbuf[0] = '\0';
+                if (client->_request->_chucklen != 0)
+                    rbuf[0] = '\0';
+                client->_request->_chucklen = 0;
             }
+            return (0);
         }
         else
         {
