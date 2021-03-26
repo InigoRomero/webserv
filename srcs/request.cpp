@@ -59,8 +59,7 @@ int Request::parseRequest()
 
     if (_body)
     {
-        std::cout << "Empiezo a parsear body" <<  std::endl;
-        _headers["body"] = _req.substr(0, _req.size() - 4);
+        _headers["body"] = _req;
     }
     else
     {

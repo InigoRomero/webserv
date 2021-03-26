@@ -163,19 +163,22 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
-    if (client->_request->_chucklen != 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont)
+    if (client->_request->_chucklen > 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont + 2)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
+    std::cout << "bytesToRead" << bytesToRead << std::endl;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
 
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
+        std::cout << "rbuf [" << rbuf << "]"<< std::endl;
         int i = 0;
         if (client->_request->_body)
         {
             while (client->_request->_chucklen == 0 && ((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
                 i++;
+            std::string tmp2 = rbuf;
             if (i > 0)
             {
                 char *aux = ft_substr(rbuf, 0, i);
@@ -183,37 +186,41 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
                 if (client->_request->_chucklen != 0)
                 {
                     char *tmp = ft_substr(rbuf, i + 3, strlen(rbuf));
-                    memcpy(client->_request->_rBuf, tmp, strlen(client->_request->_rBuf));
+                    memcpy(client->_request->_rBuf, tmp, strlen(tmp));
                     rbuf = client->_request->_rBuf;
                     free(tmp);
                 }
                 free(aux);
             }
+            std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
             std::string tmp = rbuf;
-            std::cout << "client->_request->_chucklen " << client->_request->_chucklen << std::endl;
-            std::cout << "len " << client->_request->_chuckCont << std::endl;
-            std::cout << "rbuf " << tmp.substr(0, 10) << std::endl;
-            //std::cout << "req " << client->_request->_req << std::endl;
-            if ((tail(tmp, 4) == "\r\n\r\n"))
+            if ((tail(tmp, 5) == "0\r\n\r\n"))
             {
-                    tmp = tmp.substr(0, tmp.size() - 2);
                     client->_request->_req += tmp;
+                    //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
                     proccessRequest(it);
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                    client->_request->_chucklen = 0;
+                    client->_request->_chuckCont = 0;
+                    return (0);
             }
-            if (strlen(rbuf) == BUFFER_SIZE && client->_request->_chucklen > client->_request->_chuckCont)
-            {
-                client->_request->_req += tmp;
-                rbuf[0] = '\0';
-            }
-            client->_request->_chuckCont += strlen(rbuf);
+            if (tmp.find("\r\n") != std::string::npos)
+                tmp = tmp.substr(0, tmp.find("\r\n"));
+            if (client->_request->_chucklen > 0)
+                client->_request->_chuckCont += tmp.size();
+            std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
             if ((client->_request->_chuckCont >= client->_request->_chucklen && client->_request->_chucklen != 0))
             {
-                tmp = tmp.substr(0, tmp.find("\r\n") - 2);
-                client->_request->_req += tmp;
+                client->_request->_req += tmp.substr(0, bytesToRead);
                 if (client->_request->_chucklen != 0)
-                    rbuf[0] = '\0';
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
                 client->_request->_chucklen = 0;
                 client->_request->_chuckCont = 0;
+            }
+            else if (strlen(rbuf) == BUFFER_SIZE)
+            {
+                client->_request->_req += tmp;
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
             return (0);
         }
