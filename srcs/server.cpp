@@ -162,44 +162,58 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     Client		*client = *it;
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
-    ssize_t     numbytes = read(client->_fd, rbuf + bytes, BUFFER_SIZE - bytes); 
-    //ssize_t     numbytes = read(client->_fd, rbuf, BUFFER_SIZE); 
+    size_t bytesToRead = BUFFER_SIZE - bytes;
+    if (client->_request->_chucklen != 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont)
+        bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
+    ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
 
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
         int i = 0;
-        //std::cout << "rbuf" << rbuf << std::endl;
         if (client->_request->_body)
         {
-            //std::cout << "rbuf" << rbuf << std::endl;
             while (client->_request->_chucklen == 0 && ((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
                 i++;
             if (i > 0)
             {
                 char *aux = ft_substr(rbuf, 0, i);
                 client->_request->_chucklen = fromHexa(aux);
+                if (client->_request->_chucklen != 0)
+                {
+                    char *tmp = ft_substr(rbuf, i + 3, strlen(rbuf));
+                    memcpy(client->_request->_rBuf, tmp, strlen(client->_request->_rBuf));
+                    rbuf = client->_request->_rBuf;
+                    free(tmp);
+                }
                 free(aux);
             }
             std::string tmp = rbuf;
-            std::cout << "client->_request->_chucklen" << client->_request->_chucklen << std::endl;
-            std::cout << "len" << strlen(rbuf) << std::endl;
-            if (strlen(tmp.find("\r\n") + 2 + rbuf) >= client->_request->_chucklen)
+            std::cout << "client->_request->_chucklen " << client->_request->_chucklen << std::endl;
+            std::cout << "len " << client->_request->_chuckCont << std::endl;
+            std::cout << "rbuf " << tmp.substr(0, 10) << std::endl;
+            //std::cout << "req " << client->_request->_req << std::endl;
+            if ((tail(tmp, 4) == "\r\n\r\n"))
             {
-                if ((tail(tmp, 4) == "\r\n\r\n"))
-                {
-                    std::cout << "HOLA?" << std::endl;
-                    tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
+                    tmp = tmp.substr(0, tmp.size() - 2);
                     client->_request->_req += tmp;
-                    std::cout << "req" << client->_request->_req << std::endl;
                     proccessRequest(it);
-                }
-                tmp = tmp.substr(tmp.find("\r\n") + 2, tmp.size() - 2);
+            }
+            if (strlen(rbuf) == BUFFER_SIZE && client->_request->_chucklen > client->_request->_chuckCont)
+            {
+                client->_request->_req += tmp;
+                rbuf[0] = '\0';
+            }
+            client->_request->_chuckCont += strlen(rbuf);
+            if ((client->_request->_chuckCont >= client->_request->_chucklen && client->_request->_chucklen != 0))
+            {
+                tmp = tmp.substr(0, tmp.find("\r\n") - 2);
                 client->_request->_req += tmp;
                 if (client->_request->_chucklen != 0)
                     rbuf[0] = '\0';
                 client->_request->_chucklen = 0;
+                client->_request->_chuckCont = 0;
             }
             return (0);
         }
