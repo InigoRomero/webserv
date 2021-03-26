@@ -117,57 +117,6 @@ int Request::parseRequest()
     return (1);
 }
 
-void Request::parseBody(Client &client)
-{
-    //std::cout << "rbuf: \n" << client._request->_rBuf << std::endl;
-    if (client._request->_headers.find("Content-Length") != client._request->_headers.end())
-    {   
-        // GET BODY
-        unsigned int	bytes;
-        // if the llega el content Length
-        client._request->_bodyLen = atoi(client._request->_headers["Content-Length:"].c_str());
-        if (client._request->_bodyLen < 0)
-        {
-            client.setSendInfo("400 Bad Request Error");
-            return ;
-        }
-        bytes = strlen(client._request->_req.c_str()); // creo que _req se queda vacio al leerla y hacerle substr
-        if (bytes >= client._request->_bodyLen)
-        {
-            memset(client._request->_rBuf+ client._request->_bodyLen , 0, BUFFER_SIZE - client._request->_bodyLen);
-            client._sendInfo += client._request->_rBuf;
-            client._request->_bodyLen = 0;
-        }
-        else
-            client.setStatus("400 Bad Request");
-    }
-    if(client._request->_headers["Transfer-Encoding:"].find("chunked") != std::string::npos)
-    {
-        //std::cout << "Estoy en DECHUNKBODY" << std::endl;
-        //DECHUNKBODY
-        if (strstr(client._request->_req.c_str(), "\r\n")  && client._chunkFound == false)
-        {
-            client._request->_bodyLen = findLen(client);
-            if (client._request->_bodyLen == 0)
-		        client._chunkDone = true;
-		    else
-			    client._chunkFound = true;
-        }
-        if (client._chunkFound == true)
-		    fillBody(client);
-        if (client._chunkDone)
-        {
-            memset(client._request->_rBuf, 0, BUFFER_SIZE + 1);
-            client._chunkDone = false;
-            client._chunkFound = false;
-            return ;
-        }
-    }
-    else
-        client.setStatus("400 Bad Request");
-    
-}
-
 void			Request::fillBody(Client &client)
 {
 	std::string		tmp;
