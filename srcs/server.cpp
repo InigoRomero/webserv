@@ -165,20 +165,17 @@ static void getNumber(std::vector<Client*>::iterator it, char *rbuf)
     while (((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
         i++;
     std::string tmp2 = rbuf;
-    if (i > 0 && tmp2.find("0\r\n") == std::string::npos && tmp2.find("\r\n") != std::string::npos)
+    if (i > 0 && tmp2.find("\r\n") != std::string::npos)
     {
         char *aux = ft_substr(rbuf, 0, i);
         client->_request->_chucklen = fromHexa(aux);
         if (client->_request->_chucklen != 0)
         {
-          //  std::cout << "rbuf [" << rbuf << "]"<< std::endl;
             char *tmp = ft_substr(rbuf, i + 2, strlen(rbuf));
-             std::cout << "tmp [" << tmp << "]"<< std::endl;
              memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             memcpy(client->_request->_rBuf, tmp, strlen(tmp));
             rbuf = client->_request->_rBuf;
             free(tmp);
-           // std::cout << "rbuf [" << rbuf << "]"<< std::endl;
         }
         free(aux);
     }
@@ -188,23 +185,18 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
 {
     std::string tmp =   rbuf;
     Client		        *client = *it;
-
+    (void)bytesToRead;
     if ((tail(tmp, 5) != "0\r\n\r\n"))
     {
         if (tmp.find("\r\n") != std::string::npos)
             tmp = tmp.substr(0, tmp.find("\r\n"));
-        //if (client->_request->_chucklen > 0)
-        //    client->_request->_chuckCont += tmp.size();
-        std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
-        //std::cout << "tmp: [" << tmp << "]" << std::endl;
-        if ((client->_request->_chuckCont >= client->_request->_chucklen || tmp.size() > client->_request->_chucklen) && client->_request->_chucklen != 0 )
+        if ((client->_request->_chuckCont + tmp.size() >= client->_request->_chucklen || tmp.size() > client->_request->_chucklen) && client->_request->_chucklen != 0 )
         {
             client->_request->_req += tmp;
             if (client->_request->_chucklen != 0)
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             client->_request->_chucklen = 0;
             client->_request->_chuckCont = 0;
-           // std::cout << "REQ len1: [" << client->_request->_req.size() << "]" << std::endl;
         }
         else if (strlen(rbuf) == BUFFER_SIZE)
         {
@@ -212,12 +204,11 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             client->_request->_chuckCont += tmp.size();
         }
+        //std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
     }
     else
     {
-        std::cout << "bytesToRead" << bytesToRead << std::endl;
         client->_request->_req += tmp;
-       // std::cout << "REQ len: [" << client->_request->_req << "]" << std::endl;
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -236,16 +227,20 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
-
+    //std::cout << "bytesToRead [" << bytesToRead  << "]"<< std::endl;
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
         if (client->_request->_body)
         {
+            //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
             if(client->_request->_chucklen == 0)
                 getNumber(it, rbuf);
             std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
             parseBody(it, rbuf, bytesToRead);
+             std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
+          //  if (client->_request->_req.size() > 33100)
+            //    exit (0);
             return (0);
         }
         else
