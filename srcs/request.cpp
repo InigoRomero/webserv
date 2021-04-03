@@ -59,7 +59,8 @@ int Request::parseRequest()
 
     if (_body)
     {
-        _headers["body"] = _req;
+        _req = ReplaceAll(_req, std::string("\r\n"), std::string(""));
+        _headers["body"] = _req.substr(0, _req.size() - 1);
     }
     else
     {

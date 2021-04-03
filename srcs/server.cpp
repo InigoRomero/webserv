@@ -165,16 +165,20 @@ static void getNumber(std::vector<Client*>::iterator it, char *rbuf)
     while (((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
         i++;
     std::string tmp2 = rbuf;
-    if (i > 0)
+    if (i > 0 && tmp2.find("0\r\n") == std::string::npos && tmp2.find("\r\n") != std::string::npos)
     {
         char *aux = ft_substr(rbuf, 0, i);
         client->_request->_chucklen = fromHexa(aux);
         if (client->_request->_chucklen != 0)
         {
-            char *tmp = ft_substr(rbuf, i + 3, strlen(rbuf));
+            std::cout << "rbuf [" << rbuf << "]"<< std::endl;
+            char *tmp = ft_substr(rbuf, i + 2, strlen(rbuf));
+             std::cout << "tmp [" << tmp << "]"<< std::endl;
+             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             memcpy(client->_request->_rBuf, tmp, strlen(tmp));
             rbuf = client->_request->_rBuf;
             free(tmp);
+            std::cout << "rbuf [" << rbuf << "]"<< std::endl;
         }
         free(aux);
     }
@@ -185,36 +189,41 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     std::string tmp =   rbuf;
     Client		        *client = *it;
 
-    if ((tail(tmp, 5) == "0\r\n\r\n"))
-    {
-        client->_request->_req += tmp;
-        //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
-        proccessRequest(it);
-        memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-        client->_request->_chucklen = 0;
-        client->_request->_chuckCont = 0;
-    }
-    else
+    if ((tail(tmp, 5) != "0\r\n\r\n"))
     {
         if (tmp.find("\r\n") != std::string::npos)
             tmp = tmp.substr(0, tmp.find("\r\n"));
-        if (client->_request->_chucklen > 0)
-            client->_request->_chuckCont += tmp.size();
+        //if (client->_request->_chucklen > 0)
+        //    client->_request->_chuckCont += tmp.size();
         std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
-        if ((client->_request->_chuckCont >= client->_request->_chucklen && client->_request->_chucklen != 0))
+        std::cout << "tmp: [" << tmp << "]" << std::endl;
+        if ((client->_request->_chuckCont >= client->_request->_chucklen || tmp.size() > client->_request->_chucklen) && client->_request->_chucklen != 0 )
         {
-            client->_request->_req += tmp.substr(0, bytesToRead);
+            client->_request->_req += tmp;
             if (client->_request->_chucklen != 0)
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             client->_request->_chucklen = 0;
             client->_request->_chuckCont = 0;
+           // std::cout << "REQ len1: [" << client->_request->_req.size() << "]" << std::endl;
         }
         else if (strlen(rbuf) == BUFFER_SIZE)
         {
             client->_request->_req += tmp;
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            client->_request->_chuckCont += tmp.size();
         }
     }
+    else
+    {
+        std::cout << "bytesToRead" << bytesToRead << std::endl;
+        client->_request->_req += tmp;
+        std::cout << "REQ len: [" << client->_request->_req << "]" << std::endl;
+        proccessRequest(it);
+        memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+        client->_request->_chucklen = 0;
+        client->_request->_chuckCont = 0;
+    }
+    //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
@@ -225,14 +234,12 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     size_t bytesToRead = BUFFER_SIZE - bytes;
     if (client->_request->_chucklen > 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont + 2)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
-    std::cout << "bytesToRead" << bytesToRead << std::endl;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
 
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-        //std::cout << "rbuf [" << rbuf << "]"<< std::endl;
         if (client->_request->_body)
         {
             if(client->_request->_chucklen == 0)
