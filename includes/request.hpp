@@ -31,6 +31,7 @@ class Request
         unsigned int                        _chucklen;
         unsigned int                        _chuckCont;
         bool                                _body;
+        bool                                _bodyIn;
 
         void setRequest(std::string req);
         int parseRequest();

@@ -83,8 +83,8 @@ int init(std::vector<Server> servers)
                 }
                 if (FD_ISSET(client->_fd, &writeSet))
                 {
+                    std::cout << "HOLA1" << std::endl;
                     it->writeResponse(it2);
-                    FD_CLR(client->_fd, client->_wSet);
                     break ;
                 }
             }

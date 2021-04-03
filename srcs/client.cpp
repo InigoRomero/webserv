@@ -34,7 +34,7 @@ void Client::setReadFd(int fd)
 
 void Client::readFd()
 {
-     char			buffer[BUFFER_SIZE + 1];
+     char			buffer[32678 + 1];
      int ret = 0,   status = 0;
 
      if (_cgi_pid != -1)
@@ -54,13 +54,13 @@ void Client::readFd()
                return ;
 		}
 	}
-     ret = read(_read_fd, buffer, BUFFER_SIZE);
+     ret = read(_read_fd, buffer, 32678);
      if (ret >= 0)
 		buffer[ret] = '\0';
      std::string	tmp(buffer, ret);
     // std::cout << "HE lido de archivo: " << tmp << std::endl;
      _chuckBody += tmp;
-     memset(buffer, '\0', sizeof(char)*BUFFER_SIZE );
+     memset(buffer, '\0', sizeof(char)*32678 );
      if (ret == 0)
 	{
           close(_read_fd);

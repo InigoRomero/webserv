@@ -260,10 +260,13 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     unsigned long	bytes;
     Client		*client = *it;
     client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
-    if (client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+    if (!client->_request->_bodyIn && client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+    {
+        client->_request->_bodyIn = true;
         client->_sendInfo += client->_chuckBody;
-    // std::cout << "body response" << client->_chuckBody.size() << std::endl;
-    //std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
+    }
+    std::cout << "response size" << client->_sendInfo.size() << std::endl;
+    std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
     bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
     if (bytes < client->_sendInfo.size())
         client->_sendInfo = client->_sendInfo.substr(bytes);
@@ -278,6 +281,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         client->_chuckBody.clear();
         client->_chuckBody = "";
         client->_contentLength = 0;
+        FD_CLR(client->_fd, client->_wSet);
     }
     client->_lastDate = get_date();
     return(1);
