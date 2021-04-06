@@ -223,6 +223,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
+    std::cout << "HOLA JAJA"<< std::endl;
     if (client->_request->_chucklen > 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont + 2)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
@@ -259,31 +260,34 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
 {
     unsigned long	bytes;
     Client		*client = *it;
-    client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
-    if (!client->_request->_bodyIn && client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+
+    if (client->_sendInfo.size() > 0)
     {
-        client->_request->_bodyIn = true;
-        client->_sendInfo += client->_chuckBody;
+        client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
+        if (!client->_request->_bodyIn && client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+        {
+            client->_request->_bodyIn = true;
+            client->_sendInfo += client->_chuckBody;
+        }
+        std::cout << "response size" << client->_sendInfo.size() << std::endl;
+        std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
+        bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
+        if (bytes < client->_sendInfo.size())
+            client->_sendInfo = client->_sendInfo.substr(bytes);
+        else
+        {
+            memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+            free(client->_request->_rBuf);
+            client->_request->_rBuf = NULL;
+            client->_sendInfo.clear();
+            delete client->_request;
+            client->_request = new Request();
+            client->_chuckBody.clear();
+            client->_chuckBody = "";
+            client->_contentLength = 0;
+        }
+        client->_lastDate = get_date();
     }
-    std::cout << "response size" << client->_sendInfo.size() << std::endl;
-    std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
-    bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
-    if (bytes < client->_sendInfo.size())
-        client->_sendInfo = client->_sendInfo.substr(bytes);
-    else
-    {
-        memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-        free(client->_request->_rBuf);
-        client->_request->_rBuf = NULL;
-        client->_sendInfo.clear();
-        delete client->_request;
-        client->_request = new Request();
-        client->_chuckBody.clear();
-        client->_chuckBody = "";
-        client->_contentLength = 0;
-        FD_CLR(client->_fd, client->_wSet);
-    }
-    client->_lastDate = get_date();
     return(1);
 }
 

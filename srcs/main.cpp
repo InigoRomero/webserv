@@ -54,7 +54,7 @@ int init(std::vector<Server> servers)
             {
                 client = *it2;
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
-               // std::cout << "Cliente FD: " << client->_fd << std::endl;
+                std::cout << "Cliente FD: " << client->_fd << std::endl;
                 if (FD_ISSET(client->_fd, &readSet))                 
                 {
                     if (!it->readRequest(it2))
