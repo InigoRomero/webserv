@@ -223,7 +223,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
-    std::cout << "HOLA JAJA"<< std::endl;
+   // std::cout << "HOLA CARACULO"<< std::endl;
     if (client->_request->_chucklen > 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont + 2)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
@@ -232,7 +232,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-        if (client->_request->_body)
+        if (client->_request->_body && client->_status == "200 OK")
         {
             //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
             if(client->_request->_chucklen == 0)
@@ -240,8 +240,6 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
             parseBody(it, rbuf, bytesToRead);
              std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
-          //  if (client->_request->_req.size() > 33100)
-            //    exit (0);
             return (0);
         }
         else
@@ -252,6 +250,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             rbuf[0] = '\0';
             return (0);
         }
+        client->_lastDate = get_date();
     }
     return (1);
  }
@@ -261,7 +260,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     unsigned long	bytes;
     Client		*client = *it;
 
-    if (client->_sendInfo.size() > 0)
+    if (client->_chunkDone/*client->_sendInfo.size() > 10 && client->_write_fd == -1 && client->_read_fd == -1*/)
     {
         client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
         if (!client->_request->_bodyIn && client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
@@ -280,6 +279,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             free(client->_request->_rBuf);
             client->_request->_rBuf = NULL;
             client->_sendInfo.clear();
+                FD_CLR(client->_fd, _wSet);
             delete client->_request;
             client->_request = new Request();
             client->_chuckBody.clear();
@@ -287,7 +287,11 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_contentLength = 0;
         }
         client->_lastDate = get_date();
+        return (0);
     }
+    std::cout << "HOLA¿\n";
+    //if (client->_write_fd == -1 && client->_read_fd == -1)
+    //FD_SET(client->_fd, _rSet);
     return(1);
 }
 

@@ -43,6 +43,7 @@ void Client::readFd()
 			return ;
 		else if (WEXITSTATUS(status) == 1)
 		{
+               std::cout << "HOLA BB\n";
                close(_tmp_fd);
                _tmp_fd = -1;
                _cgi_pid = -1;
@@ -51,6 +52,7 @@ void Client::readFd()
                _contentLength = _chuckBody.size();
                setReadFd(-1);
                _request->_headers["body"] = "Error with cgi\n";
+               _chunkDone = true;
                return ;
 		}
 	}
@@ -67,6 +69,7 @@ void Client::readFd()
           unlink("./www/temp_file");
           _contentLength = _chuckBody.size();
           setReadFd(-1);
+          _chunkDone = true;
           if (_cgi_pid != -1)
           {
                close(_tmp_fd);

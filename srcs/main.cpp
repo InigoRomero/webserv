@@ -54,7 +54,7 @@ int init(std::vector<Server> servers)
             {
                 client = *it2;
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
-                std::cout << "Cliente FD: " << client->_fd << std::endl;
+                //std::cout << "Cliente FD: " << client->_fd << std::endl;
                 if (FD_ISSET(client->_fd, &readSet))                 
                 {
                     if (!it->readRequest(it2))
@@ -64,28 +64,26 @@ int init(std::vector<Server> servers)
                         free(client->_request->_rBuf);
                         close(client->_fd);
                         FD_CLR(client->_fd, client->_rSet);
+                        FD_CLR(client->_fd, client->_wSet);
                         //it2 = it->_clients.erase(client);
                         std::cout << "Bye client" << std::endl;
                         break ;
                     }
                 }
+                if (FD_ISSET(client->_fd, &writeSet))
+                {
+                    if (!it->writeResponse(it2))
+                        break ;
+                }
                 if (client->_write_fd != -1)
                 {
                     client->writeFd();
                     client->_lastDate = get_date();
-                    break ;
                 }
                 if (client->_read_fd != -1)
                 {
                     client->readFd();
                     client->_lastDate = get_date();
-                    break ;
-                }
-                if (FD_ISSET(client->_fd, &writeSet))
-                {
-                    std::cout << "HOLA1" << std::endl;
-                    it->writeResponse(it2);
-                    break ;
                 }
             }
         }
