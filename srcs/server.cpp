@@ -260,6 +260,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     unsigned long	bytes;
     Client		*client = *it;
 
+    
     if (client->_chunkDone/*client->_sendInfo.size() > 10 && client->_write_fd == -1 && client->_read_fd == -1*/)
     {
         client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
@@ -269,7 +270,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_sendInfo += client->_chuckBody;
         }
         std::cout << "response size" << client->_sendInfo.size() << std::endl;
-        std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
+        //std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);

@@ -90,7 +90,8 @@ void Client::writeFd()
      //std::cout << "HE escrito en el cgi: " << _request->_headers["body"] << std::endl;
      _write_fd = -1;
      close(_write_fd);
-     _chunkDone = true;
+     if (_cgi_pid != -1)
+          _chunkDone = true;
 }
 
 void Client::setStatus(std::string status)

@@ -70,11 +70,6 @@ int init(std::vector<Server> servers)
                         break ;
                     }
                 }
-                if (FD_ISSET(client->_fd, &writeSet))
-                {
-                    if (!it->writeResponse(it2))
-                        break ;
-                }
                 if (client->_write_fd != -1)
                 {
                     client->writeFd();
@@ -84,6 +79,11 @@ int init(std::vector<Server> servers)
                 {
                     client->readFd();
                     client->_lastDate = get_date();
+                }
+                if (FD_ISSET(client->_fd, &writeSet))
+                {
+                    if (!it->writeResponse(it2))
+                        break ;
                 }
             }
         }
