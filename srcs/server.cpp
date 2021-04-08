@@ -260,17 +260,16 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     unsigned long	bytes;
     Client		*client = *it;
 
-    
-    if (client->_chunkDone/*client->_sendInfo.size() > 10 && client->_write_fd == -1 && client->_read_fd == -1*/)
+    if (client->_chunkDone)
     {
-        client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
-        if (!client->_request->_bodyIn && client->_chuckBody.size() > 0 && client->_request->_method != "HEAD")
+        if (!client->_request->_bodyIn)
+            client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
+        if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
         std::cout << "response size" << client->_sendInfo.size() << std::endl;
-        //std::cout << client->_fd << "\nSend info: \n" << client->_sendInfo << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
@@ -290,15 +289,14 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         client->_lastDate = get_date();
         return (0);
     }
-    std::cout << "HOLA¿\n";
-    //if (client->_write_fd == -1 && client->_read_fd == -1)
-    //FD_SET(client->_fd, _rSet);
     return(1);
 }
 
 int  Server::proccessRequest(std::vector<Client*>::iterator it)
 {
     Client		*client = *it;
+
+    client->_chunkDone = false;
     client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");
     client->_lastDate = get_date();
@@ -311,6 +309,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         sendError(it);
         createHeader(it);
         FD_SET(client->_fd, _wSet);
+        client->_chunkDone = true;
 		return (0);
     }
     getLocationAndMethod(it);
@@ -324,6 +323,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             sendError(it);
             createHeader(it);
             FD_SET(client->_fd, _wSet);
+            client->_chunkDone = true;
             return (0);
         }
         if (client->_request->_method == "GET")

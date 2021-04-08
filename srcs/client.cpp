@@ -52,7 +52,7 @@ void Client::readFd()
                _contentLength = _chuckBody.size();
                setReadFd(-1);
                _request->_headers["body"] = "Error with cgi\n";
-               _chunkDone = true;
+               //_chunkDone = true;
                return ;
 		}
 	}
@@ -70,12 +70,12 @@ void Client::readFd()
           _contentLength = _chuckBody.size();
           setReadFd(-1);
           _chunkDone = true;
+          std::cout<< "hola buenas" << std::endl;
           if (_cgi_pid != -1)
           {
                close(_tmp_fd);
                _tmp_fd = -1;
                _cgi_pid = -1;
-               std::cout<< "hola buenas" << std::endl;
                _request->parseCGIResult(*this);
           }
      }
@@ -85,12 +85,12 @@ void Client::readFd()
 void Client::writeFd()
 {
      int ret = 0;
+     //std::cout << "HE escrito en el cgi: " << _request->_headers["body"].substr(0, 100) << std::endl;
 
      ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size());
-     //std::cout << "HE escrito en el cgi: " << _request->_headers["body"] << std::endl;
      _write_fd = -1;
      close(_write_fd);
-     if (_cgi_pid != -1)
+     if (_cgi_pid == -1)
           _chunkDone = true;
 }
 

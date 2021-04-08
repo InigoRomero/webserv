@@ -23,6 +23,7 @@ void responseGet(std::vector<Client*>::iterator it)
 	std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
+		client->_chunkDone = true;
 		client->setStatus("404 Not Found");
 		return ;
 	}

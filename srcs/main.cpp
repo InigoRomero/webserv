@@ -83,7 +83,10 @@ int init(std::vector<Server> servers)
                 if (FD_ISSET(client->_fd, &writeSet))
                 {
                     if (!it->writeResponse(it2))
+                    {
+                        client->_lastDate = get_date();
                         break ;
+                    }
                 }
             }
         }

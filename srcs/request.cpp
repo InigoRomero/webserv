@@ -26,6 +26,7 @@ Request::Request(): _req("")
     _body = false;
     _chucklen = 0;
     _chuckCont = 0;
+    _bodyIn = false;
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
