@@ -107,7 +107,7 @@ std::string tail(std::string const& source, size_t const length) {
   if (length >= source.size()) { return source; }
   return source.substr(source.size() - length);
 }
-
+/*
 static	int		getpower(int nb, int power)
 	{
 		if (power < 0)
@@ -126,8 +126,9 @@ static int	fromHexa(const char *nb)
 	int		index;
 
 	i = 0;
-	while (nb[i])
+	while (nb[i] && ((nb[i] >= '0' && nb[i] <= '9') || (nb[i] >= 'a' && nb[i] <= 'f')))
 	{
+        std::cout << "nb [" << nb[i] << "]"<< std::endl;
 		int j = 0;
 		while (base[j])
 		{
@@ -154,31 +155,97 @@ static int	fromHexa(const char *nb)
 		result += index * getpower(16, (strlen(nb) - 1) - i);
 		i++;
 	}
+    std::cout << "result [" << result << "]"<< std::endl;
 	return (result);
+}*/
+int		ft_iswhitespace(char const c)
+{
+	if (c == ' ' || c == '\n' || c == '\t' || c == '\v'
+		|| c == '\r' || c == '\f')
+		return (1);
+	return (0);
 }
 
+int	base(int c, int base)
+{
+	char	str[17] = "0123456789abcdef";
+	char	str2[17] = "0123456789ABCDEF";
+	int  i = 0;
+
+	while (i < base)
+	{
+		if (c == str[i] || c == str2[i])
+			return (i);
+		i++;
+	}
+	return (-1);
+}
+
+int ft_atoi_base(const char *str, int str_base)
+{
+	int nb = 0;
+	int negatif = 0;
+	int	i = 0;
+    std::cout << "str [" << str << "]"<< std::endl;
+	while (ft_iswhitespace(str[i]))
+		i++;
+	if (str[i] == '+' || str[i] == '-')
+	{
+		if (str[i] == '-')
+			negatif = 1;
+		i++;
+	}
+	while (base(str[i], str_base) != -1)
+	{
+		nb = nb * str_base;
+		nb = nb + base(str[i], str_base);
+		i++;
+	}
+	if (negatif)
+		return (-nb);
+    std::cout << "nb [" << nb << "]"<< std::endl;
+	return (nb);
+}
+
+std::string ReplaceAll2(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
 static void getNumber(std::vector<Client*>::iterator it, char *rbuf)
 {
     Client		*client = *it;
-    int         i = 0;
+    int         i = 0, n = 0;
 
-    while (((rbuf[i] >= '0' && rbuf[i] <= '9') || (rbuf[i] >= 'a' && rbuf[i] <= 'f')))
+    while (rbuf[n] == '\r' || rbuf[n] == '\n' )
+        n++;
+    while (((rbuf[i + n] >= '0' && rbuf[i + n] <= '9') || (rbuf[i + n] >= 'a' && rbuf[i + n] <= 'f')))
         i++;
+    std::cout << "i [" << i << "]"<< std::endl;
+    std::cout << "n [" << n << "]"<< std::endl;
     std::string tmp2 = rbuf;
+        std::cout << "rbuf [" << tmp2.substr(0,10)  << "]"<< std::endl;
     if (i > 0 && tmp2.find("\r\n") != std::string::npos)
     {
-        char *aux = ft_substr(rbuf, 0, i);
-        client->_request->_chucklen = fromHexa(aux);
+        std::string aux =   rbuf;
+        if (n > 0)
+            aux = aux.substr(n, i + n - 1);
+        else
+            aux = aux.substr(n, i);
+        client->_request->_chucklen = ft_atoi_base(aux.c_str(), 16);
         if (client->_request->_chucklen != 0)
         {
-            char *tmp = ft_substr(rbuf, i + 2, strlen(rbuf));
-             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-            memcpy(client->_request->_rBuf, tmp, strlen(tmp));
-            rbuf = client->_request->_rBuf;
-            free(tmp);
+            std::string tmp =   rbuf;
+            tmp = tmp.substr(i + n + 2, strlen(rbuf)); 
+            tmp = ReplaceAll2(tmp, std::string("\n"), std::string(""));
+            memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            memcpy(client->_request->_rBuf, tmp.c_str(), tmp.size());
         }
-        free(aux);
     }
+    //std::cout << "_chucklen [" << client->_request->_chucklen  << "]"<< std::endl;
 }
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
@@ -206,7 +273,7 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
         }
         //std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
     }
-    else
+    else if(tail(tmp, 5) == "0\r\n\r\n")
     {
         client->_request->_req += tmp;
         proccessRequest(it);
@@ -232,14 +299,22 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-        if (client->_request->_body && client->_status == "200 OK")
+        if (client->_request->_body)
         {
-            //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
+           // std::cout << "rbuf [" << ft_substr(rbuf, 0, 7)  << "]"<< std::endl;
+           // if (client->_request->_req.size() > 10)
+          //      std::cout << "req [" <<   client->_request->_req.substr(client->_request->_req.size() - 10, client->_request->_req.size()) << "]"<< std::endl;
             if(client->_request->_chucklen == 0)
                 getNumber(it, rbuf);
-            std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
+        //  std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
+        std::cout << "_chucklen [" << client->_request->_chucklen  << "]"<< std::endl;
+           if ((client->_request->_chucklen == 0 || client->_request->_chucklen > 33000 ) && client->_request->_req.size() > 1001 && strlen(rbuf) > 5)
+            {
+               // std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
+                exit(0);
+            }
             parseBody(it, rbuf, bytesToRead);
-             std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
+            std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
             return (0);
         }
         else
@@ -269,7 +344,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
-        std::cout << "response size" << client->_sendInfo.size() << std::endl;
+        //std::cout << "response size" << client->_sendInfo.size() << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
