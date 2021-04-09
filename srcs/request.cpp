@@ -65,6 +65,7 @@ int Request::parseRequest()
     }
     else
     {
+        std::cout << "req:\n" << _req << std::endl;
         _req = _req.substr(0, _req.find("\r\n\r\n"));
         //std::cout << "req:" << _req <<  std::endl;  
         while ((pos = _req.find('\n')) != std::string::npos) {
@@ -91,7 +92,7 @@ int Request::parseRequest()
         _method = fline[0];
         //std::cout << "Method of the client: " << _method << std::endl;
         _uri = fline[1];
-        _version = fline[2];
+        _version = fline[2].substr(0, fline[2].size() - 1);
         //std::cout << "_avMethods: " << _avMethods << std::endl;
         //std::cout << "_method " << _method << std::endl;
         if (_avMethods.find(_method) == std::string::npos)
@@ -99,11 +100,15 @@ int Request::parseRequest()
         //take all the headers we have to take
         for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
         {
+            size_t pos2 = 0;
             for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
                 if ((found = (*it).find(it2->first)) != std::string::npos)
                 {
-                    it2->second = (*it).substr((*it).find(":") + 1, (*it).size());
+                    pos2 = (*it).find(":") + 1;
+                    while (isspace((*it)[pos2]))
+                        pos2++;
+                    it2->second = (*it).substr(pos2, (*it).size() - pos2 - 1);
                     break ;
                 }
             }
@@ -114,7 +119,6 @@ int Request::parseRequest()
             _req.clear();
             return(0);
         }
-        std::cout <<  "que paso\n";
     }
     return (1);
 }

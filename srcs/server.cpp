@@ -181,7 +181,7 @@ static void getNumber(std::vector<Client*>::iterator it, char *rbuf)
     }
 }
 
-void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
+/*void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
 {
     std::string tmp =   rbuf;
     Client		        *client = *it;
@@ -215,7 +215,60 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
         client->_request->_chuckCont = 0;
     }
     //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
+}*/
+
+void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
+{
+    Client		*client = *it;
+    std::cout << "hola:" << client->_request->_headers["Transfer-Encoding"] << std::endl;
+    if (client->_request->_headers["Content-Length"] != "")
+        std::cout << "content legnth:" << client->_request->_headers["Content-Length"] << std::endl;
+    else if (client->_request->_headers["Transfer-Encoding"] == "chunked")
+    {
+        if(client->_request->_chucklen == 0)
+            getNumber(it, rbuf);
+        std::cout << "aqui entro?\n";
+        std::string tmp =   rbuf;
+        if ((tail(tmp, 5) != "0\r\n\r\n"))
+        {
+            if (tmp.find("\r\n") != std::string::npos)
+                tmp = tmp.substr(0, tmp.find("\r\n"));
+            if ((client->_request->_chuckCont + tmp.size() >= client->_request->_chucklen || tmp.size() > client->_request->_chucklen) && client->_request->_chucklen != 0 )
+            {
+                client->_request->_req += tmp;
+                if (client->_request->_chucklen != 0)
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                client->_request->_chucklen = 0;
+                client->_request->_chuckCont = 0;
+            }
+            else if (strlen(rbuf) == BUFFER_SIZE)
+            {
+                client->_request->_req += tmp;
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                client->_request->_chuckCont += tmp.size();
+            }
+            //std::cout << "_chuckCont: [" << client->_request->_chuckCont << "]" << std::endl;
+        }
+        else
+        {
+            client->_request->_req += tmp;
+            proccessRequest(it);
+            memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            client->_request->_chucklen = 0;
+            client->_request->_chuckCont = 0;
+        }
+    }
+    else 
+    {
+        std::cout << "loll\n";
+        client->setStatus("400 Bad Request");
+        sendError(it);
+        createHeader(it);
+        FD_SET(client->_fd, _wSet);
+        client->_chunkDone = true;
+    }
 }
+
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
  {
@@ -223,7 +276,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
-   // std::cout << "HOLA CARACULO"<< std::endl;
+
     if (client->_request->_chucklen > 0 && bytesToRead > client->_request->_chucklen - client->_request->_chuckCont + 2)
         bytesToRead = client->_request->_chucklen - client->_request->_chuckCont + 2;
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
@@ -235,12 +288,13 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         if (client->_request->_body && client->_status == "200 OK")
         {
             //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
-            if(client->_request->_chucklen == 0)
-                getNumber(it, rbuf);
-            std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
+            parseBody(it, rbuf);
+            //if(client->_request->_chucklen == 0)
+            //    getNumber(it, rbuf);
+            /*std::cout << "client->_request->_chucklen: " << client->_request->_chucklen << std::endl;
             parseBody(it, rbuf, bytesToRead);
              std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
-            return (0);
+            return (0);*/
         }
         else
         {
