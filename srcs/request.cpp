@@ -54,7 +54,7 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 int Request::parseRequest()
 {
-
+    //std::cout << "parseRequest\n";
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
 
@@ -65,7 +65,7 @@ int Request::parseRequest()
     }
     else
     {
-        std::cout << "req:\n" << _req << std::endl;
+        //std::cout << "req:\n" << _req << std::endl;
         _req = _req.substr(0, _req.find("\r\n\r\n"));
         //std::cout << "req:" << _req <<  std::endl;  
         while ((pos = _req.find('\n')) != std::string::npos) {
@@ -123,7 +123,7 @@ int Request::parseRequest()
     return (1);
 }
 
-void			Request::fillBody(Client &client)
+/*void			Request::fillBody(Client &client)
 {
 	std::string		tmp;
 
@@ -143,7 +143,7 @@ void			Request::fillBody(Client &client)
 		client._request->_bodyLen -= tmp.size();
 		memset(client._request->_rBuf, 0, BUFFER_SIZE + 1);
 	}
-}
+}*/
 
 
 int				Request::findLen(Client &client)
@@ -347,5 +347,5 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
-    std::cout << "qundqe" << std::endl;
+    //std::cout << "qundqe" << std::endl;
 }

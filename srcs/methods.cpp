@@ -21,7 +21,7 @@ void responseGet(std::vector<Client*>::iterator it)
 		client->setRFile(path.substr(pos, std::string::npos));
 	
 	
-	std::cout << "PATH: " << path << std::endl;
+	//std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
 		client->_chunkDone = true;
@@ -35,7 +35,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-    std::cout << "response Post" << std::endl;
+    //std::cout << "response Post" << std::endl;
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;

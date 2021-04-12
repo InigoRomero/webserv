@@ -34,7 +34,7 @@ void Client::setReadFd(int fd)
 
 void Client::readFd()
 {
-     char			buffer[32678 + 1];
+     char			buffer[BUFFER_SIZE + 1];
      int ret = 0,   status = 0;
 
      if (_cgi_pid != -1)
@@ -52,17 +52,17 @@ void Client::readFd()
                _contentLength = _chuckBody.size();
                setReadFd(-1);
                _request->_headers["body"] = "Error with cgi\n";
-               //_chunkDone = true;
+               _chunkDone = true;
                return ;
 		}
 	}
-     ret = read(_read_fd, buffer, 32678);
+     ret = read(_read_fd, buffer, BUFFER_SIZE);
      if (ret >= 0)
 		buffer[ret] = '\0';
      std::string	tmp(buffer, ret);
     // std::cout << "HE lido de archivo: " << tmp << std::endl;
      _chuckBody += tmp;
-     memset(buffer, '\0', sizeof(char)*32678 );
+     memset(buffer, '\0', sizeof(char)*BUFFER_SIZE );
      if (ret == 0)
 	{
           close(_read_fd);
@@ -70,16 +70,17 @@ void Client::readFd()
           _contentLength = _chuckBody.size();
           setReadFd(-1);
           _chunkDone = true;
-          std::cout<< "hola buenas" << std::endl;
+          //std::cout<< "hola buenas" << std::endl;
           if (_cgi_pid != -1)
           {
                close(_tmp_fd);
                _tmp_fd = -1;
                _cgi_pid = -1;
+               //std::cout<< "hola q tal" << std::endl;
                _request->parseCGIResult(*this);
           }
      }
-     std::cout << "body response read" << _chuckBody.size() << std::endl;
+     //std::cout << "body response read" << _chuckBody.size() << std::endl;
 }
 
 void Client::writeFd()
