@@ -50,7 +50,6 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     }
     return str;
 }
-
 int Request::parseRequest()
 {
 

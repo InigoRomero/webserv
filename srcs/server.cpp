@@ -117,12 +117,11 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
     {
         if (client->_request->_req.size() > 0)
         {
-            //std::cout << "tmp [" << tmp  << "]"<< std::endl;
-           // std::cout << "tmp [" << tmp.size()  << "] " << std::endl;
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
             {
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
                 client->_request->_req += tmp;
+                std::cout << "HOLA [" << tmp.substr(0, 10) << "]"<< std::endl;
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
             else if (tmp.size() == BUFFER_SIZE)
@@ -140,7 +139,7 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         }
     }
-    else if (tmp.find("\n") == std::string::npos)
+    else if (tmp.find("\r\n") == std::string::npos)
     {
         client->_request->_req += tmp;
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
@@ -158,13 +157,13 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     if(tail(tmp, 5) == "0\r\n\r\n")
     {
         client->_request->_req += tmp;
+        if (client->_request->_req.find('\n') != std::string::npos)
+         std::cout << "TENGO SALTO"<< std::endl;
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
         client->_request->_chuckCont = 0;
-    }
-            if (client->_request->_req.find("\n") != std::string::npos)
-            std::cout << "tmp3 [" << tmp << "]"<< std::endl;
+    };
     //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
 }
 
@@ -174,7 +173,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
-   // std::cout << "HOLA CARACULO"<< std::endl;
+
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
     //std::cout << "bytesToRead [" << bytesToRead  << "]"<< std::endl;
@@ -185,7 +184,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         {
             //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
             parseBody(it, rbuf, bytesToRead);
-            //std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
+          // std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
             return (0);
         }
         else
@@ -246,6 +245,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");
     client->_lastDate = get_date();
+
     std::cout << "req leng" << client->_request->_req.size() << std::endl;
     if(!client->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
