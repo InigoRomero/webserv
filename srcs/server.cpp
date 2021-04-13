@@ -112,6 +112,7 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
 {
     size_t i = 0, n = 0;
     Client *client = *it;
+    
     if ((n = tmp.find("\r\n")) != std::string::npos)
     {
         if (client->_request->_req.size() > 0)
@@ -119,20 +120,31 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
             //std::cout << "tmp [" << tmp  << "]"<< std::endl;
            // std::cout << "tmp [" << tmp.size()  << "] " << std::endl;
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
-                tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
-            else
             {
-                std::cout << "tmp [" << tmp.substr(0, 20) << "] " << std::endl;
+                tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
+                client->_request->_req += tmp;
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            }
+            else if (tmp.size() == BUFFER_SIZE)
+            {
+               // std::cout << "tmp1 [" << tmp.substr(0, 10)  << "]"<< std::endl;
                 tmp.erase(tmp.begin(), tmp.begin() + n + 2);
-                std::cout << "tmp2 [" << tmp.substr(0, 20) << "] " << std::endl;
-                std::cout << "DELETED 2 [" << n + 2  << "] " << std::endl;
+                client->_request->_req += tmp;
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
         }
-        else if (tmp[0] != '0')
-            tmp = tmp.erase(0, n + 2);
+        else
+        {
+            tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+            client->_request->_req += tmp;
+            memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+        }
     }
-    client->_request->_req += tmp;
-    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+    else if (tmp.find("\n") == std::string::npos)
+    {
+        client->_request->_req += tmp;
+        memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+    }
 }
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
@@ -151,6 +163,8 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
         client->_request->_chucklen = 0;
         client->_request->_chuckCont = 0;
     }
+            if (client->_request->_req.find("\n") != std::string::npos)
+            std::cout << "tmp3 [" << tmp << "]"<< std::endl;
     //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
 }
 
