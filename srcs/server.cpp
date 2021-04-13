@@ -107,138 +107,34 @@ std::string tail(std::string const& source, size_t const length) {
   if (length >= source.size()) { return source; }
   return source.substr(source.size() - length);
 }
-/*
-static	int		getpower(int nb, int power)
-	{
-		if (power < 0)
-			return (0);
-		if (power == 0)
-			return (1);
-		return (nb * getpower(nb, power - 1));
-	}
 
-static int	fromHexa(const char *nb)
-{
-	char	base[17] = "0123456789abcdef";
-	char	base2[17] = "0123456789ABCDEF";
-	int		result = 0;
-	int		i;
-	int		index;
-
-	i = 0;
-	while (nb[i] && ((nb[i] >= '0' && nb[i] <= '9') || (nb[i] >= 'a' && nb[i] <= 'f')))
-	{
-        std::cout << "nb [" << nb[i] << "]"<< std::endl;
-		int j = 0;
-		while (base[j])
-		{
-			if (nb[i] == base[j])
-			{
-				index = j;
-				break ;
-			}
-			j++;
-		}
-		if (j == 16)
-		{
-			j = 0;
-			while (base2[j])
-			{
-				if (nb[i] == base2[j])
-				{
-					index = j;
-					break ;
-				}
-				j++;
-			}
-		}
-		result += index * getpower(16, (strlen(nb) - 1) - i);
-		i++;
-	}
-    std::cout << "result [" << result << "]"<< std::endl;
-	return (result);
-}*/
-int		ft_iswhitespace(char const c)
-{
-	if (c == ' ' || c == '\n' || c == '\t' || c == '\v'
-		|| c == '\r' || c == '\f')
-		return (1);
-	return (0);
-}
-
-int	base(int c, int base)
-{
-	char	str[17] = "0123456789abcdef";
-	char	str2[17] = "0123456789ABCDEF";
-	int  i = 0;
-
-	while (i < base)
-	{
-		if (c == str[i] || c == str2[i])
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-int ft_atoi_base(const char *str, int str_base)
-{
-	int nb = 0;
-	int negatif = 0;
-	int	i = 0;
-    std::cout << "str [" << str << "]"<< std::endl;
-	while (ft_iswhitespace(str[i]))
-		i++;
-	if (str[i] == '+' || str[i] == '-')
-	{
-		if (str[i] == '-')
-			negatif = 1;
-		i++;
-	}
-	while (base(str[i], str_base) != -1)
-	{
-		nb = nb * str_base;
-		nb = nb + base(str[i], str_base);
-		i++;
-	}
-	if (negatif)
-		return (-nb);
-    std::cout << "nb [" << nb << "]"<< std::endl;
-	return (nb);
-}
-
-std::string ReplaceAll2(std::string str, const std::string& from, const std::string& to) {
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-    }
-    return str;
-}
 static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
 {
-    int i = 0, n = 0;
+    size_t i = 0, n = 0;
     Client *client = *it;
-
-    while (tmp[n] == '\r' || tmp[n] == '\n' )
-        n++;
-    if (n == 0 && client->_request->_req.size() > 0)
-        n = tmp.find("\r\n") + 2;
-    if (tmp[i + n] != '0')
-        while (((tmp[i + n] >= '0' && tmp[i + n] <= '9') || (tmp[i + n] >= 'a' && tmp[i + n] <= 'f')))
-            i++;
-    std::cout << "i [" << i << "]"<< std::endl;
-    std::cout << "n [" << n << "]"<< std::endl;
-        std::cout << "tmp [" << tmp.substr(0, 10)  << "]"<< std::endl;
-    if (i > 0 && tmp[i + n] == '\r' && tmp.size() > 7)
+    if ((n = tmp.find("\r\n")) != std::string::npos)
     {
-        tmp = tmp.erase(0, i + 2);
-                std::cout << "tmp2 [" << tmp.substr(0, 10)  << "]"<< std::endl;
-        tmp = ReplaceAll2(tmp, std::string("\r\n"), std::string(""));
+        if (client->_request->_req.size() > 0)
+        {
+            //std::cout << "tmp [" << tmp  << "]"<< std::endl;
+            while (((tmp[i + n] >= '0' && tmp[i + n] <= '9') || (tmp[i + n] >= 'a' && tmp[i + n] <= 'f')) || tmp[i + n] == '\r' || tmp[i + n] == '\n')
+                i++;
+           // std::cout << "tmp [" << tmp.size()  << "] " << std::endl;
+            if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
+                tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
+            else
+            {
+                std::cout << "tmp [" << tmp.substr(0, 20) << "] " << std::endl;
+                tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+                std::cout << "tmp2 [" << tmp.substr(0, 20) << "] " << std::endl;
+                std::cout << "DELETED 2 [" << n + 2  << "] " << std::endl;
+            }
+        }
+        else if (tmp[0] != '0')
+            tmp = tmp.erase(0, n + 2);
     }
     client->_request->_req += tmp;
     memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-
 }
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
@@ -247,9 +143,9 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     Client		        *client = *it;
     (void)bytesToRead;
 
-    if ((tail(client->_request->_req, 5) != "0\r\n\r\n"))
+    if ((tail(tmp, 5) != "0\r\n\r\n") && tmp.size() > 7)
             getNumber(tmp, it);
-    if(tail(client->_request->_req, 5) == "0\r\n\r\n")
+    if(tail(tmp, 5) == "0\r\n\r\n")
     {
         client->_request->_req += tmp;
         proccessRequest(it);
@@ -275,9 +171,9 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         rbuf[numbytes] = '\0';
         if (client->_request->_body)
         {
-          //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
+            //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
             parseBody(it, rbuf, bytesToRead);
-            std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
+            //std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
             return (0);
         }
         else
