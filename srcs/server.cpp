@@ -117,8 +117,6 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
         if (client->_request->_req.size() > 0)
         {
             //std::cout << "tmp [" << tmp  << "]"<< std::endl;
-            while (((tmp[i + n] >= '0' && tmp[i + n] <= '9') || (tmp[i + n] >= 'a' && tmp[i + n] <= 'f')) || tmp[i + n] == '\r' || tmp[i + n] == '\n')
-                i++;
            // std::cout << "tmp [" << tmp.size()  << "] " << std::endl;
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
