@@ -173,7 +173,6 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
             {*/
             client->_request->_req += tmp;
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-            std::cout << "hola\n";
             std::cout << "req:" << client->_request->_req << std::endl;
                 //client->_request->_chuckCont += tmp.size();
             //}
