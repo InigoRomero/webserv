@@ -66,6 +66,11 @@ int Request::parseRequest()
     else
     {
         //std::cout << "req:\n" << _req << std::endl;
+        std::string tmp = _req;
+	    if (_req[0] == '\r')
+		    _req.erase(_req.begin());
+        if (_req[0] == '\n')
+            _req.erase(_req.begin());
         _req = _req.substr(0, _req.find("\r\n\r\n"));
         //std::cout << "req:" << _req <<  std::endl;  
         while ((pos = _req.find('\n')) != std::string::npos) {
@@ -113,6 +118,8 @@ int Request::parseRequest()
                 }
             }
         }
+	    tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
+	    strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
         {
             _body = true;
@@ -144,26 +151,6 @@ int Request::parseRequest()
 		memset(client._request->_rBuf, 0, BUFFER_SIZE + 1);
 	}
 }*/
-
-
-int				Request::findLen(Client &client)
-{
-	std::string		to_convert;
-	int				len;
-
-	to_convert = client._request->_req;
-	to_convert = to_convert.substr(0, to_convert.find("\r\n"));
-	while (to_convert[0] == '\n')
-		to_convert.erase(to_convert.begin());
-	if (to_convert.size() == 0)
-		len = 0;
-	else
-		len = strlen(to_convert.c_str());
-	len = strlen(to_convert.c_str());
-
-	return (len);
-}
-
 
 void Request::setRequest(std::string req)
 {

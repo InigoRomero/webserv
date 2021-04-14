@@ -1,7 +1,7 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
-#define BUFFER_SIZE 800
-//#define BUFFER_SIZE 32768
+//#define BUFFER_SIZE 800
+#define BUFFER_SIZE 32768
 
 #include <iostream>
 #include <string.h>
@@ -41,8 +41,6 @@ class Request
         void handleGet();
         void execCGI(Client &client);
         //void setRbuf(char *req);
-        void fillBody(Client &client);
-        int  findLen(Client &client);
         char **setEnv(Client &client);
         void parseCGIResult(Client &client);
 };
