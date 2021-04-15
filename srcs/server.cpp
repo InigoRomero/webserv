@@ -121,7 +121,6 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
 {
     size_t i = 0, n = 0;
     Client *client = *it;
-    
     if ((n = tmp.find("\r\n")) != std::string::npos)
     {
         if (client->_request->_req.size() > 0)
@@ -132,15 +131,10 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
                 client->_request->_req += tmp;
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
-            else if (tmp.size() == BUFFER_SIZE)
-            {
-                tmp.erase(tmp.begin(), tmp.begin() + n + 2);
-                client->_request->_req += tmp;
-                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-            }
         }
         else
         {
+            std::cout << "tmp [" << tmp.substr(0, 10) << "] \n";
             tmp.erase(tmp.begin(), tmp.begin() + n + 2);
             client->_request->_req += tmp;
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
@@ -151,22 +145,22 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
         client->_request->_req += tmp;
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
     }
-
 }
 
-void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
+void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
 {
-    std::string tmp =   rbuf;
-    size_t pos;
+    std::string         tmp = rbuf;
+    size_t              pos;
     Client		        *client = *it;
-    (void)bytesToRead;
-    
 
-    if( (pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos )
+    if((pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos)
     {
+        //std::cout << "_req SIZE 1 [" << client->_request->_req.size() << "] \n";
+       // std::cout << "tmp [" << tmp << "] \n";
         tmp.erase(tmp.begin() + pos, tmp.end());
         tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
+        std::cout << "_req SIZE 3 [" << client->_request->_req.size() << "] \n";
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -190,8 +184,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         rbuf[numbytes] = '\0';
         if (client->_request->_body)
         {
-            parseBody(it, rbuf, bytesToRead);
-        std::cout << "_req SIZE [" << client->_request->_req.size() << "] \n";
+            parseBody(it, rbuf);
             return (0);
         }
         else
@@ -200,7 +193,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             client->_request->_req += rbuf;
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
-            rbuf[0] = '\0';
+            memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             return (0);
         }
         client->_lastDate = get_date();

@@ -60,7 +60,7 @@ int init(std::vector<Server> servers)
                 {
                     if (!it->readRequest(it2))
                         break ;
-                   /* if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10))
+                    if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10))
                     {
                         free(client->_request->_rBuf);
                         close(client->_fd);
@@ -69,7 +69,7 @@ int init(std::vector<Server> servers)
                         //it2 = it->_clients.erase(client);
                         std::cout << "Bye client" << std::endl;
                         break ;
-                    }*/
+                    }
                 }
                 if (client->_write_fd != -1)
                 {

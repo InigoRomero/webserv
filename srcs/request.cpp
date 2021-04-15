@@ -38,6 +38,7 @@ Request::Request(std::string req): _req(req)
 Request::~Request()
 {
 	_req.clear();
+    _headers["body"].clear();
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
     free(_rBuf);
     _rBuf = NULL; 
@@ -55,6 +56,7 @@ int Request::parseRequest()
     }
     else
     {
+                    std::cout << "REQ H [" << _req << "] \n";
           //std::cout << "req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
@@ -303,5 +305,4 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
-    std::cout << "qundqe" << std::endl;
 }

@@ -70,7 +70,6 @@ void Client::readFd()
           _contentLength = _chuckBody.size();
           setReadFd(-1);
           _chunkDone = true;
-          std::cout<< "hola buenas" << std::endl;
           if (_cgi_pid != -1)
           {
                close(_tmp_fd);
