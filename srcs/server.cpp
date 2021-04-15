@@ -165,11 +165,8 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     if( (pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos )
     {
         tmp.erase(tmp.begin() + pos, tmp.end());
-       // std::cout << "tmp [" << tmp.size() << "]"<< std::endl;
-      //  std::cout << "req leng 1 [" << client->_request->_req.size()  << "]"<< std::endl;
         tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
-        //std::cout << "req leng 2[" << client->_request->_req.substr(client->_request->_req.size() - 5, client->_request->_req.size() )  << "]"<< std::endl;
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
