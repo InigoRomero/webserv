@@ -37,35 +37,25 @@ Request::Request(std::string req): _req(req)
 
 Request::~Request()
 {
+	_req.clear();
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
     free(_rBuf);
     _rBuf = NULL; 
 }
 
-
-std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-    }
-    return str;
-}
-
 int Request::parseRequest()
 {
-    //std::cout << "parseRequest\n";
+
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
 
     if (_body)
     {
-        _req = ReplaceAll(_req, std::string("\r\n"), std::string(""));
-        _headers["body"] = _req.substr(0, _req.size() - 1);
+        _headers["body"] = _req;
     }
     else
     {
-        //std::cout << "req:\n" << _req << std::endl;
+          //std::cout << "req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -99,7 +89,7 @@ int Request::parseRequest()
         _uri = fline[1];
         _version = fline[2].substr(0, fline[2].size() - 1);
         //std::cout << "_avMethods: " << _avMethods << std::endl;
-        //std::cout << "_method " << _method << std::endl;
+        std::cout << "_method " << _method << std::endl;
         if (_avMethods.find(_method) == std::string::npos)
             return 0;
         //take all the headers we have to take
@@ -118,10 +108,11 @@ int Request::parseRequest()
                 }
             }
         }
-	    tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
-	    strcpy(_rBuf, tmp.c_str());
+	   // tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
+	   // strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
         {
+            std::cout << "PONGO TRUE \n";
             _body = true;
             _req.clear();
             return(0);
@@ -129,28 +120,6 @@ int Request::parseRequest()
     }
     return (1);
 }
-
-/*void			Request::fillBody(Client &client)
-{
-	std::string		tmp;
-
-	tmp = client._request->_rBuf;
-	if (tmp.size() > client._request->_bodyLen)
-	{
-		client._sendInfo+= tmp.substr(0, client._request->_bodyLen);
-		tmp = tmp.substr(client._request->_bodyLen + 1);
-		memset(client._request->_rBuf, 0, BUFFER_SIZE + 1);
-		strcpy(client._request->_rBuf , tmp.c_str());
-		client._request->_bodyLen = 0;
-		client._chunkFound = false;
-	}
-	else
-	{
-		client._sendInfo += tmp;
-		client._request->_bodyLen -= tmp.size();
-		memset(client._request->_rBuf, 0, BUFFER_SIZE + 1);
-	}
-}*/
 
 void Request::setRequest(std::string req)
 {
@@ -334,5 +303,5 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
-    //std::cout << "qundqe" << std::endl;
+    std::cout << "qundqe" << std::endl;
 }

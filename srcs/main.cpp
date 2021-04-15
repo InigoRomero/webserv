@@ -41,6 +41,7 @@ int init(std::vector<Server> servers)
 		writeSet = wSet;
         int maxFD = max_fd(servers);
         select(maxFD + 1, &readSet, &writeSet, NULL, &timeout);
+       // std::cout << "Jaime"<< std::endl;
         for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))

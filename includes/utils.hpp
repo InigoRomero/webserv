@@ -17,4 +17,5 @@ int				compareTime(std::string start);
 void            initMethods(struct location *methods);
 int				getOpenFd(std::vector<Server> &servers);
 
+
 #endif
