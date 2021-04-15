@@ -91,7 +91,7 @@ int Request::parseRequest()
         _uri = fline[1];
         _version = fline[2].substr(0, fline[2].size() - 1);
         //std::cout << "_avMethods: " << _avMethods << std::endl;
-        std::cout << "_method " << _method << std::endl;
+       // std::cout << "_method " << _method << std::endl;
         if (_avMethods.find(_method) == std::string::npos)
             return 0;
         //take all the headers we have to take
@@ -114,7 +114,6 @@ int Request::parseRequest()
         strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
         {
-            std::cout << "PONGO TRUE \n";
             _body = true;
             _req.clear();
             return(0);
