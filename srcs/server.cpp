@@ -126,7 +126,6 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
     {
         if (client->_request->_req.size() > 0)
         {
-           // std::cout << "tmp1 [" << tmp << "]"<< std::endl;
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
             {
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
@@ -162,15 +161,15 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     Client		        *client = *it;
     (void)bytesToRead;
     
-   // std::cout << "req leng [" << client->_request->_req.size()  << "]"<< std::endl;
-    //std::cout << "tmp [" << tmp << "]"<< std::endl;
+
     if( (pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos )
     {
         tmp.erase(tmp.begin() + pos, tmp.end());
        // std::cout << "tmp [" << tmp.size() << "]"<< std::endl;
       //  std::cout << "req leng 1 [" << client->_request->_req.size()  << "]"<< std::endl;
+        tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
-       // std::cout << "req leng 2[" << client->_request->_req.substr(client->_request->_req.size() - 5, client->_request->_req.size() )  << "]"<< std::endl;
+        //std::cout << "req leng 2[" << client->_request->_req.substr(client->_request->_req.size() - 5, client->_request->_req.size() )  << "]"<< std::endl;
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -178,7 +177,6 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t byt
     }
     else if ((tail(tmp, 5) != "0\r\n\r\n") && tmp.size() > 7)
             getNumber(tmp, it);
-    //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
@@ -187,18 +185,15 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     char        *rbuf = client->_request->_rBuf;
     int         bytes = strlen(rbuf);
     size_t bytesToRead = BUFFER_SIZE - bytes;
-
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
-    //std::cout << "bytesToRead [" << bytesToRead  << "]"<< std::endl;
+
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
         if (client->_request->_body)
         {
-            //std::cout << "rbuf [" << rbuf  << "]"<< std::endl;
             parseBody(it, rbuf, bytesToRead);
-          // std::cout << "_req.size() [" << client->_request->_req.size()  << "]"<< std::endl;
             return (0);
         }
         else
