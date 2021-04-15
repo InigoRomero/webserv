@@ -193,7 +193,8 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             client->_request->_req += rbuf;
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
-            memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            if (!client->_request->_body)
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             return (0);
         }
         client->_lastDate = get_date();

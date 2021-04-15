@@ -27,7 +27,7 @@ Request::Request(): _req("")
     _chucklen = 0;
     _chuckCont = 0;
     _bodyIn = false;
-    //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+    memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
 
 Request::Request(std::string req): _req(req)
@@ -56,7 +56,7 @@ int Request::parseRequest()
     }
     else
     {
-                    std::cout << "REQ H [" << _req << "] \n";
+        // std::cout << "REQ H [" << _req << "] \n";
           //std::cout << "req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
@@ -110,8 +110,8 @@ int Request::parseRequest()
                 }
             }
         }
-	   // tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
-	   // strcpy(_rBuf, tmp.c_str());
+        tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
+        strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
         {
             std::cout << "PONGO TRUE \n";
