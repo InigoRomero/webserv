@@ -37,19 +37,12 @@ Request::Request(std::string req): _req(req)
 
 Request::~Request()
 {
+	_req.clear();
     //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
     free(_rBuf);
     _rBuf = NULL; 
 }
 
-std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-    }
-    return str;
-}
 int Request::parseRequest()
 {
 
@@ -58,8 +51,7 @@ int Request::parseRequest()
 
     if (_body)
     {
-        _req = ReplaceAll(_req, std::string("\r\n"), std::string(""));
-        _headers["body"] = _req.substr(0, _req.size() - 1);
+        _headers["body"] = _req;
     }
     else
     {

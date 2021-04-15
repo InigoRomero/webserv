@@ -108,6 +108,15 @@ std::string tail(std::string const& source, size_t const length) {
   return source.substr(source.size() - length);
 }
 
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
 static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
 {
     size_t i = 0, n = 0;
@@ -117,16 +126,15 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
     {
         if (client->_request->_req.size() > 0)
         {
+           // std::cout << "tmp1 [" << tmp << "]"<< std::endl;
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
             {
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
                 client->_request->_req += tmp;
-                std::cout << "HOLA [" << tmp.substr(0, 10) << "]"<< std::endl;
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
             else if (tmp.size() == BUFFER_SIZE)
             {
-               // std::cout << "tmp1 [" << tmp.substr(0, 10)  << "]"<< std::endl;
                 tmp.erase(tmp.begin(), tmp.begin() + n + 2);
                 client->_request->_req += tmp;
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
@@ -139,31 +147,37 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         }
     }
-    else if (tmp.find("\r\n") == std::string::npos)
+    else if (tmp.size() == BUFFER_SIZE)
     {
         client->_request->_req += tmp;
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
     }
+
 }
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf, size_t bytesToRead)
 {
     std::string tmp =   rbuf;
+    size_t pos;
     Client		        *client = *it;
     (void)bytesToRead;
-
-    if ((tail(tmp, 5) != "0\r\n\r\n") && tmp.size() > 7)
-            getNumber(tmp, it);
-    if(tail(tmp, 5) == "0\r\n\r\n")
+    
+   // std::cout << "req leng [" << client->_request->_req.size()  << "]"<< std::endl;
+    //std::cout << "tmp [" << tmp << "]"<< std::endl;
+    if( (pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos )
     {
+        tmp.erase(tmp.begin() + pos, tmp.end());
+       // std::cout << "tmp [" << tmp.size() << "]"<< std::endl;
+      //  std::cout << "req leng 1 [" << client->_request->_req.size()  << "]"<< std::endl;
         client->_request->_req += tmp;
-        if (client->_request->_req.find('\n') != std::string::npos)
-         std::cout << "TENGO SALTO"<< std::endl;
+       // std::cout << "req leng 2[" << client->_request->_req.substr(client->_request->_req.size() - 5, client->_request->_req.size() )  << "]"<< std::endl;
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
         client->_request->_chuckCont = 0;
-    };
+    }
+    else if ((tail(tmp, 5) != "0\r\n\r\n") && tmp.size() > 7)
+            getNumber(tmp, it);
     //std::cout << "req [" << client->_request->_req  << "]"<< std::endl;
 }
 
@@ -246,7 +260,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     client->setStatus("200 OK");
     client->_lastDate = get_date();
 
-    std::cout << "req leng" << client->_request->_req.size() << std::endl;
     if(!client->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
         if (client->_request->_body)
