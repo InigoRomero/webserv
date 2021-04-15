@@ -59,7 +59,10 @@ int init(std::vector<Server> servers)
                 if (FD_ISSET(client->_fd, &readSet))                 
                 {
                     if (!it->readRequest(it2))
+                    {
+                        client->_lastDate = get_date();
                         break ;
+                    }
                     if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10))
                     {
                         free(client->_request->_rBuf);

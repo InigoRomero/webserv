@@ -185,6 +185,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     ssize_t     numbytes = read(client->_fd, rbuf + bytes, bytesToRead);  
     numbytes += bytes;
 
+    //std::cout << "_req SIZE [" << client->_request->_req.size() << "] \n";
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
