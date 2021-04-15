@@ -188,16 +188,17 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     if (numbytes > 0)
     {
         rbuf[numbytes] = '\0';
-       // std::cout << "_req SIZE [" << client->_request->_req.size() << "] \n";
         if (client->_request->_body)
         {
             parseBody(it, rbuf, bytesToRead);
+        std::cout << "_req SIZE [" << client->_request->_req.size() << "] \n";
             return (0);
         }
         else
         {
+
             client->_request->_req += rbuf;
-            if ((tail(client->_request->_req, 4) == "\r\n\r\n"))
+            if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
             rbuf[0] = '\0';
             return (0);
