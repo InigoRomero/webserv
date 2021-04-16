@@ -227,7 +227,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
-        //std::cout << "response size" << client->_sendInfo.size() << std::endl;
+
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);

@@ -108,6 +108,13 @@ int Request::parseRequest()
                     it2->second = (*it).substr(pos2, (*it).size() - pos2 - 1);
                     break ;
                 }
+                else
+                {
+                    pos2 = (*it).find(":") + 1;
+                    while (isspace((*it)[pos2]))
+                        pos2++;
+                    _headers.insert(std::pair<std::string,std::string>((*it).substr(0, (*it).find(":")), (*it).substr(pos2, (*it).size() - pos2 - 1)));  
+                }
             }
         }
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
@@ -249,7 +256,7 @@ char			**Request::setEnv(Client &client)
 	while (it != envMap.end())
 	{
 		env[i] = strdup((it->first + "=" + it->second).c_str());
-       // std::cout << env[i] << std::endl;
+        std::cout << env[i] << std::endl;
 		++i;
 		++it;
 	}
