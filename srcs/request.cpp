@@ -256,7 +256,7 @@ char			**Request::setEnv(Client &client)
 	while (it != envMap.end())
 	{
 		env[i] = strdup((it->first + "=" + it->second).c_str());
-        std::cout << env[i] << std::endl;
+       // std::cout << env[i] << std::endl;
 		++i;
 		++it;
 	}
