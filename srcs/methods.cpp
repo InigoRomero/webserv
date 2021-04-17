@@ -38,7 +38,7 @@ void responsePost(std::vector<Client*>::iterator it)
 	size_t pos;
 	std::string ext;
 	std::string	path;
-
+	
 	if (client->_conf.location.size() < client->_request->_uri.size())
 	{
 		if (client->_request->_uri.find(".") == std::string::npos)

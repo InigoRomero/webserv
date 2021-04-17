@@ -167,10 +167,10 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
             else
                 tmp.erase(tmp.begin() + pos, tmp.end());
         }
-        //std::cout << "tmp [" << tmp.substr(0, 10) << "] \n";
+        std::cout << "tmp [" << tmp.substr(0, 10) << "] \n";
         tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
-       // std::cout << "_req [" << client->_request->_req.substr(0, 10) << "] \n";
+        std::cout << "_req [" << client->_request->_req.substr(0, 10) << "] \n";
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -222,7 +222,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
-          std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
+          //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
@@ -272,12 +272,19 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     getLocationAndMethod(it);
     if (client->_status == "200 OK")
     {
-        //std::cout << "Location: " << client->_conf.location << std::endl;
-        //std::cout << "Method: " << client->_request->_method << std::endl;
+        if (client->_request->_body && client->_conf.max_body > 0 && client->_conf.max_body < (int)client->_request->_headers["body"].size())
+        {
+            client->setStatus("413 Bad Request");
+            //sendError(it);
+            createHeader(it);
+            FD_SET(client->_fd, _wSet);
+            client->_chunkDone = true;
+            return (0);
+        }
         if (client->_conf.method.find(client->_request->_method) == std::string::npos)
         {
             client->setStatus("405 Not Allowed");
-            sendError(it);
+          //  sendError(it);
             createHeader(it);
             FD_SET(client->_fd, _wSet);
             client->_chunkDone = true;
