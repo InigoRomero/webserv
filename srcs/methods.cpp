@@ -39,7 +39,16 @@ void responsePost(std::vector<Client*>::iterator it)
 	std::string ext;
 	std::string	path;
 
-	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	if (client->_conf.location.size() < client->_request->_uri.size())
+	{
+		if (client->_request->_uri.find(".") == std::string::npos)
+			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
+		else
+			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+	}
+	else
+		path = client->_conf.root + "/"+ client->_conf.index;
+		
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		ext = path.substr(pos, std::string::npos);
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
@@ -51,7 +60,10 @@ void responsePost(std::vector<Client*>::iterator it)
 		if ((open(path.c_str(), O_RDONLY)) == -1)
 			client->setStatus("201 OK");
 		client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
-		//std::cout << "_reqSIZE [" << client->_request->_req.size() << "] \n";
+		/*std::cout << "Body size [" << client->_request->_headers["body"].size() << "] \n";
+		std::cout << "Write_fd [" << client->_write_fd << "] \n";
+		std::cout << "PATH [" << path << "] \n";
+		std::cout << "URI [" << client->_request->_uri << "] \n";*/
 		if (client->_request->_req.size() == 0)
 			client->_chunkDone = true;
 	}

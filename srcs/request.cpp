@@ -115,10 +115,14 @@ int Request::parseRequest()
                 }
             }
         }
+        //std::cout << "REQ [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
-        strcpy(_rBuf, tmp.c_str());
-        if (tmp.size() == 5 && tmp.find("0\r\n\r\n") != std::string::npos)
+        if (tmp.find("0\r\n\r\n") != std::string::npos)
+        {
+            std::cout << "tmp [" << tmp << "] \n";
             return (1);
+        }
+        strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
         {
             _body = true;
