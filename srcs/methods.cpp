@@ -58,8 +58,12 @@ void responsePost(std::vector<Client*>::iterator it)
 	else
 	{
 		if ((open(path.c_str(), O_RDONLY)) == -1)
+		{
+			client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 			client->setStatus("201 OK");
-		client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+		}
+		else
+			client->_write_fd = open(path.c_str(), O_APPEND|O_WRONLY|O_NONBLOCK, 0666);
 		/*std::cout << "Body size [" << client->_request->_headers["body"].size() << "] \n";
 		std::cout << "Write_fd [" << client->_write_fd << "] \n";
 		std::cout << "PATH [" << path << "] \n";

@@ -222,10 +222,10 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
+          std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
-
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
