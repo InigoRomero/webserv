@@ -34,7 +34,6 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-    std::cout << "response Post" << std::endl;
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -52,6 +51,9 @@ void responsePost(std::vector<Client*>::iterator it)
 		if ((open(path.c_str(), O_RDONLY)) == -1)
 			client->setStatus("201 OK");
 		client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+		//std::cout << "_reqSIZE [" << client->_request->_req.size() << "] \n";
+		if (client->_request->_req.size() == 0)
+			client->_chunkDone = true;
 	}
 }
 

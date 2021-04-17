@@ -159,7 +159,6 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
         {
             if ((i = tmp.find("\r\n", n + 2)) + 8 < tmp.size())
             {
-                std::cout << "_req SIZE 3 [" << client->_request->_req.size() << "] \n";
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
                 n = tmp.find("0\r\n\r\n");
                 tmp.erase(tmp.begin() + n, tmp.end());
@@ -168,10 +167,10 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
             else
                 tmp.erase(tmp.begin() + pos, tmp.end());
         }
-        //std::cout << "_req SIZE 1 [" << client->_request->_req.size() << "] \n";
+        //std::cout << "tmp [" << tmp.substr(0, 10) << "] \n";
         tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
-        std::cout << "_req SIZE [" << client->_request->_req.size() << "] \n";
+       // std::cout << "_req [" << client->_request->_req.substr(0, 10) << "] \n";
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -200,7 +199,6 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         }
         else
         {
-
             client->_request->_req += rbuf;
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
@@ -255,7 +253,8 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     Client		*client = *it;
 
     client->_chunkDone = false;
-    client->setSendInfo("HTTP/1.1");
+    if (!client->_sendInfo.size())
+        client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");
     client->_lastDate = get_date();
 

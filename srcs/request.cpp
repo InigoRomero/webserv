@@ -56,15 +56,13 @@ int Request::parseRequest()
     }
     else
     {
-        // std::cout << "REQ H [" << _req << "] \n";
-          //std::cout << "req:\n" << _req << std::endl;
+       // std::cout << "REQ H [" << _req.substr(0, 20) << "] \n";
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
         if (_req[0] == '\n')
             _req.erase(_req.begin());
-        _req = _req.substr(0, _req.find("\r\n\r\n"));
-        //std::cout << "req:" << _req <<  std::endl;  
+        _req = _req.substr(0, _req.find("\r\n\r\n") + 4);
         while ((pos = _req.find('\n')) != std::string::npos) {
             lines.push_back(_req.substr(0, pos));
             _req = _req.substr(pos+1);
@@ -87,9 +85,9 @@ int Request::parseRequest()
         }
         fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
         _method = fline[0];
-        //std::cout << "Method of the client: " << _method << std::endl;
         _uri = fline[1];
         _version = fline[2].substr(0, fline[2].size() - 1);
+        //std::cout << "Method of the client: " << _method << std::endl;
         //std::cout << "_avMethods: " << _avMethods << std::endl;
        // std::cout << "_method " << _method << std::endl;
         if (_avMethods.find(_method) == std::string::npos)
@@ -119,6 +117,8 @@ int Request::parseRequest()
         }
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
         strcpy(_rBuf, tmp.c_str());
+        if (tmp.size() == 5 && tmp.find("0\r\n\r\n") != std::string::npos)
+            return (1);
         if (_method == "POST" || _method == "PUT")
         {
             _body = true;

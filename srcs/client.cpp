@@ -84,7 +84,7 @@ void Client::readFd()
 void Client::writeFd()
 {
      int ret = 0;
-     //std::cout << "HE escrito en el cgi: " << _request->_headers["body"].substr(0, 100) << std::endl;
+     //std::cout << "HE escrito en el cgi: " << _request->_headers["body"].substr(0, 20) << std::endl;
 
      ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size());
      _write_fd = -1;
