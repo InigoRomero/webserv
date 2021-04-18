@@ -312,4 +312,5 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
+    std::cout << "cgi parsed\n";
 }

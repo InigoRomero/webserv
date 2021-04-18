@@ -34,6 +34,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
+	std::cout << "responsePost\n";
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;

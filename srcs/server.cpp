@@ -226,6 +226,8 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
+        std::cout << "holalol" << std::endl;
+        //std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
@@ -284,7 +286,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         if (client->_conf.method.find(client->_request->_method) == std::string::npos)
         {
             client->setStatus("405 Not Allowed");
-          //  sendError(it);
+            //sendError(it);
             createHeader(it);
             FD_SET(client->_fd, _wSet);
             client->_chunkDone = true;
