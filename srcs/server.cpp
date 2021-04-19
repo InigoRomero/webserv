@@ -219,14 +219,13 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     if (client->_chunkDone)
     {
         if (!client->_request->_bodyIn)
-            client->_sendInfo += "Content-Length: " + std::to_string(client->_contentLength) + "\r\n\r\n";
+            client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
           //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
-        std::cout << "holalol" << std::endl;
         //std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
@@ -277,7 +276,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         if (client->_request->_body && client->_conf.max_body > 0 && client->_conf.max_body < (int)client->_request->_headers["body"].size())
         {
             client->setStatus("413 Bad Request");
-            //sendError(it);
+            sendError(it);
             createHeader(it);
             FD_SET(client->_fd, _wSet);
             client->_chunkDone = true;
@@ -286,7 +285,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         if (client->_conf.method.find(client->_request->_method) == std::string::npos)
         {
             client->setStatus("405 Not Allowed");
-            //sendError(it);
+            sendError(it);
             createHeader(it);
             FD_SET(client->_fd, _wSet);
             client->_chunkDone = true;

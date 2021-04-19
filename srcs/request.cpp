@@ -115,7 +115,7 @@ int Request::parseRequest()
                 }
             }
         }
-        //std::cout << "REQ [" << tmp << "] \n";
+        std::cout << "tmp [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
         if (tmp.find("0\r\n\r\n") != std::string::npos)
             return (1);
@@ -148,6 +148,7 @@ void Request::execCGI(Client &client)
     int fd[2];
     std::string path;
 
+    std::cout << "execCGI\n";
     close(client._read_fd); //why
     client._read_fd = -1; //idk
     //cond

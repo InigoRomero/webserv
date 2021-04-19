@@ -98,7 +98,9 @@ void createHeader(std::vector<Client*>::iterator it)
 	response = response + "Date: " + get_date() + "\r\n";  
 	response = response + "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
 	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
-	client->setSendInfo(response); 	
+	client->setSendInfo(response);
+	std::cout << "sendinfo\n:" << response << std::endl;
+	response.clear();
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
 }
 
