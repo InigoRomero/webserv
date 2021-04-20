@@ -34,7 +34,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-	std::cout << "responsePost\n";
+	//std::cout << "responsePost\n";
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -99,7 +99,7 @@ void createHeader(std::vector<Client*>::iterator it)
 	response = response + "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
 	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
 	client->setSendInfo(response);
-	std::cout << "sendinfo\n:" << response << std::endl;
+	//std::cout << "sendinfo\n:" << response << std::endl;
 	response.clear();
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
 }

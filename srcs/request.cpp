@@ -115,7 +115,7 @@ int Request::parseRequest()
                 }
             }
         }
-        std::cout << "tmp [" << tmp << "] \n";
+       // std::cout << "tmp [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
         if (tmp.find("0\r\n\r\n") != std::string::npos)
             return (1);
