@@ -56,7 +56,7 @@ int Request::parseRequest()
     }
     else
     {
-       // std::cout << "REQ H [" << _req.substr(0, 20) << "] \n";
+        //std::cout << "REQ H [" << _req << "] \n";
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
