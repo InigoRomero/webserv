@@ -1,12 +1,13 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
-#define BUFFER_SIZE 22500
+#define BUFFER_SIZE 26500
 
 #include <iostream>
 #include <string.h>
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 #include "client.hpp"
 
 class Client;

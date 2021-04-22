@@ -119,14 +119,20 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
 
 static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
 {
-    size_t i = 0, n = 0;
+    size_t  i = 0, n = 0;
     Client *client = *it;
+    std::stringstream ss;
+
     if ((n = tmp.find("\r\n")) != std::string::npos)
     {
         if (client->_request->_req.size() > 0)
         {
             if ((i = tmp.find("\r\n", n + 2)) != std::string::npos)
             {
+                ss << std::hex << tmp.substr(n + 2, i);
+                ss >> client->_request->_chucklen;
+               // client->_request->_chucklen =  fromHexa(tmp.substr(n + 2, i).c_str());
+                client->_request->_chuckCont += client->_request->_chucklen;
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
                 client->_request->_req += tmp;
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
@@ -134,16 +140,22 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it)
         }
         else
         {
+            ss << std::hex << tmp.substr(0, n);
+            ss >> client->_request->_chucklen;
+            client->_request->_chuckCont += client->_request->_chucklen;
             tmp.erase(tmp.begin(), tmp.begin() + n + 2);
             client->_request->_req += tmp;
             memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         }
     }
-    else if (tmp.size() == BUFFER_SIZE)
+    if (tmp.size() == BUFFER_SIZE)
     {
+        if (tmp.find("\r\n") != std::string::npos)
+            client->_request->_req = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
     }
+
 }
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
@@ -151,28 +163,38 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
     std::string         tmp = rbuf;
     size_t              pos;
     Client		        *client = *it;
+    std::stringstream ss;
 
     if((pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos)
     {
         size_t i = 0, n = 0;
-        if ((n = tmp.find("\r\n")) != std::string::npos)
+        if ((n = tmp.substr(0, pos).find("\r\n")) != std::string::npos)
         {
-            if ((i = tmp.find("\r\n", n + 2)) + 8 < tmp.size())
+            if ((i = tmp.find("\r\n", n + 2))  < tmp.size())
             {
+                ss << std::hex << tmp.substr(n + 2, i);
+                ss >> client->_request->_chucklen;
+                client->_request->_chuckCont += client->_request->_chucklen;
                 tmp.erase(tmp.begin() + n, tmp.begin() + i + 2);
-                n = tmp.find("0\r\n\r\n");
-                tmp.erase(tmp.begin() + n, tmp.end());
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
             }
             else
-                tmp.erase(tmp.begin() + pos, tmp.end());
+            {
+                ss << std::hex << tmp.substr(0, n);
+                ss >> client->_request->_chucklen;
+                client->_request->_chuckCont += client->_request->_chucklen;
+                tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+            }
         }
-       // std::cout << "tmp [" << tmp.substr(0, 10) << "] \n";
-        tmp = ReplaceAll(tmp, "\r\n", "");
+        if((pos = tmp.find("0\r\n\r\n")) != std::string::npos || (pos = tmp.find("\r\n0\r\n")) != std::string::npos)
+            tmp.erase(tmp.begin() + pos, tmp.end());
+       // tmp = ReplaceAll(tmp, "\r\n", "");
         client->_request->_req += tmp;
         if (client->_request->_req.find("\r\n") != std::string::npos)
             client->_request->_req = ReplaceAll(client->_request->_req, "\r\n", "");
-        //std::cout << "_req [" << client->_request->_req.substr(0, 10) << "] \n";
+        std::cout << "ChunkCont [" << client->_request->_chuckCont << "] \n";
+        std::cout << "REQ SIZE [" << client->_request->_req.size() << "] \n";
         proccessRequest(it);
         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
         client->_request->_chucklen = 0;
@@ -180,6 +202,7 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
     }
     else if ((tail(tmp, 5) != "0\r\n\r\n") && tmp.size() > 7)
             getNumber(tmp, it);
+    //std::cout << "TMP SIZE [" << tmp.size() << "] \n";
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
