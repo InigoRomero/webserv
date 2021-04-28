@@ -53,6 +53,7 @@ int Request::parseRequest()
     if (_body)
     {
         _headers["body"] = _req;
+        std::cout << "BODY LEN [" << _headers["body"].size() << "]\n";
     }
     else
     {

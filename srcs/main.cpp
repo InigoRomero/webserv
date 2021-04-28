@@ -68,7 +68,6 @@ int init(std::vector<Server> servers)
                         FD_CLR(client->_fd, client->_rSet);
                         FD_CLR(client->_fd, client->_wSet);
                         //it2 = it->_clients.erase(client);
-                        std::cout << "Bye client" << std::endl;
                         break ;
                     }
                 }

@@ -121,21 +121,49 @@ static void getNumber(std::string tmp, std::vector<Client*>::iterator it, size_t
 {
     Client		*client = *it;
     std::stringstream ss;
+    size_t i;
 
-    ss << std::hex << tmp.substr(0, n);
-    ss >> client->_request->_chucklen;
-    tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+    if ((i = tmp.find("\r\n", n + 2)) != std::string::npos) //case other \r\n before number
+    {
+        ss << std::hex << tmp.substr(n + 2, i);
+        ss >> client->_request->_chucklen;
+        tmp.erase(tmp.begin(), tmp.begin() + i + 2);
+    }
+    else //case only one \r\n
+    {
+        ss << std::hex << tmp.substr(0, n);
+        ss >> client->_request->_chucklen;
+        tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+    }
     client->_request->_req += tmp;
     client->_request->_chuckCont = tmp.size();
-    std::cout << "ChunckLen [" << client->_request->_chucklen << "]\n";
+    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
 }
 
 static void deChuck(std::string tmp, std::vector<Client*>::iterator it, size_t n)
 {
     Client		*client = *it;
+    std::string sub;
+    std::stringstream ss;
 
-    client->_request->_req += tmp;
+    sub = tmp.substr(0, n);
+    tmp.erase(tmp.begin(), tmp.begin() + n + 2);
+    client->_request->_req += sub;
+    client->_request->_chuckCont += sub.size();
+    if (client->_request->_chuckCont >= client->_request->_chucklen)
+    {
+        client->_request->_chuckCont = 0;
+        client->_request->_chucklen = 0;
+    }
+    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+    memcpy(client->_request->_rBuf, tmp.c_str(), tmp.size());
+    /*if (tmp.size() == 1708)
+    {
+        std::cout << "_rBuf 1708[" << client->_request->_rBuf << "]\n";
+        std::cout << "_chucklen[" << client->_request->_chucklen << "]\n";
+    }*/
 }
+
 
 
 void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
@@ -143,15 +171,34 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
     Client		*client = *it;
     std::string tmp = rbuf;
     size_t n = tmp.find("\r\n");
-
-    if (tmp.find("\r\n\r\n") != std::string::npos)
+    size_t i = 0, x = 0;
+ x = 0;
+  //  std::cout << "TMP SIZE 2 [" << tmp.size() << "]\n";
+    std::cout << "RREQ SIZE[" << client->_request->_req.size() << "]\n";
+    if ((i = tmp.find("\r\n\r\n")) != std::string::npos)
     {
-
+     /*   if ((n = tmp.find("\r\n")) != i)
+        {
+            if ((x = tmp.find("\r\n", n + 2)) != i)
+                tmp.erase(tmp.begin() + n, tmp.begin() + x + 2);
+            else
+                tmp.erase(tmp.begin(), tmp.begin() + n);
+            tmp.erase(tmp.end() - 7, tmp.end());
+            client->_request->_req += tmp;
+        }*/
+        proccessRequest(it);
     }
-    else if (/*Is chunkked &&*/n != std::string::npos && client->_request->_chucklen == 0)
+    else if (/*Is chunkked &&*/n != std::string::npos && client->_request->_chucklen == 0 && tmp.size() > 5)
         getNumber(tmp, it, n);
-    else if (/*Is chunkked &&*/ n != std::string::npos && client->_request->_chucklen <= client->_request->_chuckCont)
+    else if (/*Is chunkked &&*/ n != std::string::npos && client->_request->_chucklen != 0)
         deChuck(tmp, it, n);
+    if(tmp.size() > 5 && tmp.find("\r") == std::string::npos)//add to body
+    {
+         client->_request->_req += tmp;
+         client->_request->_chuckCont += tmp.size();
+         tmp.erase(tmp.begin(), tmp.end());
+         memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+    }
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
@@ -168,7 +215,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     {
         rbuf[numbytes] = '\0';
         if (client->_request->_body)
-        {
+        {    
             parseBody(it, rbuf);
             return (0);
         }
@@ -237,7 +284,11 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     if(!client->_request->parseRequest()) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
     {
         if (client->_request->_body)
+        {
+            if (strlen(client->_request->_rBuf) > 0)
+                parseBody(it, client->_request->_rBuf);
             return(0);
+        }
         client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
