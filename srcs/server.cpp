@@ -172,12 +172,12 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
     std::string tmp = rbuf;
     size_t n = tmp.find("\r\n");
     size_t i = 0, x = 0;
- x = 0;
-  //  std::cout << "TMP SIZE 2 [" << tmp.size() << "]\n";
-    std::cout << "RREQ SIZE[" << client->_request->_req.size() << "]\n";
+     x = 0;
+   // if (client->_request->_req.size() <= 200)
+     //std::cout << "REQ   [" << client->_request->_req << "]\n";
     if ((i = tmp.find("\r\n\r\n")) != std::string::npos)
     {
-     /*   if ((n = tmp.find("\r\n")) != i)
+        if ((n = tmp.find("\r\n")) != i)
         {
             if ((x = tmp.find("\r\n", n + 2)) != i)
                 tmp.erase(tmp.begin() + n, tmp.begin() + x + 2);
@@ -185,20 +185,22 @@ void Server::parseBody(std::vector<Client*>::iterator it, char *rbuf)
                 tmp.erase(tmp.begin(), tmp.begin() + n);
             tmp.erase(tmp.end() - 7, tmp.end());
             client->_request->_req += tmp;
-        }*/
+        }
         proccessRequest(it);
+        return ;
     }
-    else if (/*Is chunkked &&*/n != std::string::npos && client->_request->_chucklen == 0 && tmp.size() > 5)
+    if (/*Is chunkked &&*/n != std::string::npos && client->_request->_chucklen == 0 && tmp.size() > 5)
         getNumber(tmp, it, n);
     else if (/*Is chunkked &&*/ n != std::string::npos && client->_request->_chucklen != 0)
         deChuck(tmp, it, n);
-    if(tmp.size() > 5 && tmp.find("\r") == std::string::npos)//add to body
+    else if(tmp.size() > 5 && tmp.find("\r") == std::string::npos)//add to body
     {
          client->_request->_req += tmp;
          client->_request->_chuckCont += tmp.size();
          tmp.erase(tmp.begin(), tmp.end());
          memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
     }
+   // tmp = client->_request->_rBuf;
 }
 
 int  Server::readRequest(std::vector<Client*>::iterator it)
