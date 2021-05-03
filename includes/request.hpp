@@ -29,8 +29,7 @@ class Request
         std::string                         _version;
         std::map<std::string, std::string>  _headers;
         unsigned int                        _bodyLen;
-        unsigned int                        _chucklen;
-        unsigned int                        _chuckCont;
+        int                                 _chucklen;
         bool                                _body;
         bool                                _bodyIn;
 

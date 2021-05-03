@@ -45,8 +45,10 @@ class Client
         std::string         _status;
         int                 _tmp_fd;
         pid_t               _cgi_pid;
+        int                 _chuckCont;
         bool                _chunkDone;
-        bool                _chunkFound;
+//       bool                _chunkFound;
+        bool                _chunkFinal;
 
 
         void setSendInfo(std::string info);

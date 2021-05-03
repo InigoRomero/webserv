@@ -68,3 +68,29 @@ or PF_INET6, type is SOCK_STREAM or SOCK_DGRAM, and protocol can be set to 0 to 
 for the given type. Or you can call getprotobyname() to look up the protocol you want, “tcp” or “udp”.)
 
 
+            /*if ((pos = tmp.find("\r")) != std::string::npos)
+            {
+                aux = tmp.substr(0, pos);
+                tmp = tmp.substr(pos);
+                client->_request->_req += aux;
+                client->_chuckCont += aux.size();
+                strcpy(client->_request->_rBuf, tmp.c_str());
+                tmp.clear();
+            }
+            else
+            {
+                if (tmp.size() + client->_chuckCont > client->_request->_chucklen)
+                {
+                    aux = tmp.substr(0, client->_request->_chucklen - client->_chuckCont);
+                    client->_chuckCont += aux.size();
+                    client->_request->_req += aux;
+                    strcpy(client->_request->_rBuf, tmp.substr(client->_request->_chucklen - client->_chuckCont).c_str());
+                    tmp.clear();
+                }
+                else
+                {
+                    client->_request->_req += tmp;
+                    tmp.clear();
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                }
+            }*/

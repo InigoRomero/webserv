@@ -56,7 +56,7 @@ class Server
         int     proccessRequest(std::vector<Client*>::iterator it);
         void    sendError(std::vector<Client*>::iterator it);
         void    getLocationAndMethod(std::vector<Client*>::iterator it);
-        void    parseBody(std::vector<Client*>::iterator it, char *rbuf);
+        void    parseBody(std::vector<Client*>::iterator it);
         int     getMaxFd();
         int		getOpenFd();
 };

@@ -34,7 +34,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-	//std::cout << "responsePost\n";
+	std::cout << "responsePost\n";
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -92,6 +92,7 @@ void createHeader(std::vector<Client*>::iterator it)
 	std::map<std::string, std::string> 	headers;
 	
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
+	std::cout << response << std::endl;
 	if (client->_status == "405 Not Allowed")
 		response = response + "Allow: " + client->_conf.method + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";

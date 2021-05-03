@@ -24,8 +24,7 @@ Request::Request(): _req("")
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
     _body = false;
-    _chucklen = 0;
-    _chuckCont = 0;
+    _chucklen = -1;
     _bodyIn = false;
     memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
 }
@@ -52,6 +51,7 @@ int Request::parseRequest()
 
     if (_body)
     {
+        std::cout << "mama\n";
         _headers["body"] = _req;
     }
     else
@@ -119,8 +119,7 @@ int Request::parseRequest()
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
        //  std::cout << "tmp 2 [" << tmp << "] \n";
         if (tmp.find("0\r\n\r\n") != std::string::npos)
-        {
-            
+        {   
             return (1);
         }
         strcpy(_rBuf, tmp.c_str());
@@ -203,6 +202,7 @@ void Request::execCGI(Client &client)
         ++i;
     }
     free(env);
+    std::cout << "hola\n";
 }
 
 char			**Request::setEnv(Client &client)

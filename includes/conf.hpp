@@ -10,25 +10,24 @@
 class Conf
 {
     private:
-        Conf();
         const char                  *_path;
         std::vector<std::string>    _conf;
         std::vector<Server>         _servers;
     protected:
 
     public:
-
+        Conf();
         Conf(const char *path);
 		~Conf();
 
         class ConfigFileException: public std::exception {
             virtual const char* what() const throw();
         };
+        void                setPath(const char *path);
         void                ReadFile(); //get in vector of strings all the data
         void                fillServer(); //get the info from the conf vector to Server vector object
         void                checkFile();
-        std::vector<Server> getServer() const; 
-        //std::vector<Server> GetInfo();
+        std::vector<Server> getServer() const;
         
 };
 

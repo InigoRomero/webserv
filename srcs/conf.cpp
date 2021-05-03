@@ -1,7 +1,7 @@
 #include "conf.hpp"
 
 Conf::Conf():
-    _path(), _conf(), _servers()
+    _path("")
 {}
 
 Conf::Conf(const char *path):
@@ -10,6 +10,11 @@ Conf::Conf(const char *path):
 
 Conf::~Conf()
 {}
+
+void Conf::setPath(const char *path)
+{
+    _path = path;
+}
 
 const char* Conf::ConfigFileException::what() const throw()
 {
@@ -37,6 +42,7 @@ void Conf::ReadFile()
     }
     if (ret < 0)
         throw ConfigFileException();
+    checkFile();
 }
 
 void Conf::checkFile()
@@ -53,6 +59,7 @@ void Conf::checkFile()
     }
     if (sum != 0)
         throw ConfigFileException();
+    fillServer();
 }
 
 void Conf::fillServer()

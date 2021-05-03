@@ -1,5 +1,19 @@
 #include "utils.hpp"
 
+int max_fd(std::vector<Server> servers)
+{
+    int max = 0;
+    int fd;
+
+    for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
+    {
+        fd = it->getMaxFd();
+        if (fd > max)
+            max = fd;
+    }
+    return (max);
+}
+
 std::string		get_date()
 {
 	struct timeval	time;
