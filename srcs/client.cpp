@@ -21,7 +21,28 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
 
 Client::~Client()
 {
-	
+	if (_fd != -1)
+	{
+		close(_fd);
+		FD_CLR(_fd, _rSet);
+		FD_CLR(_fd, _wSet);
+	}
+	if (_read_fd != -1)
+	{
+		close(_read_fd);
+		FD_CLR(_read_fd, _rSet);
+	}
+	if (_write_fd != -1)
+	{
+		close(_write_fd);
+		FD_CLR(_write_fd, _wSet);	
+	}
+	if (_tmp_fd != -1)
+	{
+		close(_tmp_fd);
+		unlink("./www/temp_file");
+	}
+
 }
 
 void Client::setSendInfo(std::string info)

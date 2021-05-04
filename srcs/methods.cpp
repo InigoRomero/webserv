@@ -2,6 +2,7 @@
 
 void responseGet(std::vector<Client*>::iterator it)
 {
+	//std::cout << "responseGet\n";
 	Client		*client = *it;
 	std::string response = client->_request->_version;
 	std::string		path;
@@ -19,7 +20,6 @@ void responseGet(std::vector<Client*>::iterator it)
 		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
 		client->setRFile(path.substr(pos, std::string::npos));
-	
 	//std::cout << "PATH: " << path << std::endl;
 	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
@@ -34,7 +34,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-	std::cout << "responsePost\n";
+	//std::cout << "responsePost\n";
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -92,7 +92,6 @@ void createHeader(std::vector<Client*>::iterator it)
 	std::map<std::string, std::string> 	headers;
 	
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
-	std::cout << response << std::endl;
 	if (client->_status == "405 Not Allowed")
 		response = response + "Allow: " + client->_conf.method + "\r\n";
 	response = response + "Sever: webserv/1.0.0\r\n";

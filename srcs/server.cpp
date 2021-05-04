@@ -165,7 +165,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                 tmp = tmp.substr(pos + 2);
                 if (tmp == "")
                 {
-                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
                     //print_helper(tmp.substr(0, pos), 'h');
                 }
             }
@@ -174,23 +174,23 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                 client->_chunkFinal = false;
                 aux = tmp.substr(0, pos);
                 client->_request->_req += aux;
-                std::cout << "totalsize1:" << client->_request->_req.size() << std::endl;
+                //std::cout << "totalsize1:" << client->_request->_req.size() << std::endl;
                 client->_chuckCont += aux.size();
                 tmp = tmp.substr(pos + 2);
                 if (client->_request->_chucklen == 0)
                 {
                     tmp.clear();
-                    std::cout << "totalsize2:" << client->_request->_req.size() << std::endl;
+                    //std::cout << "totalsize2:" << client->_request->_req.size() << std::endl;
                     proccessRequest(it);
                     //std::cout << "queloque\n";
-                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
                     client->_request->_chucklen = -1;
                     client->_chuckCont = 0;
                     break ;
                 }
                 //std::cout << "tmp2:" << tmp << std::endl;
                 //print_helper(tmp, '3');
-                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
                 client->_request->_chucklen = -1;
                 client->_chuckCont = 0;
             }
@@ -206,7 +206,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                     //std::cout << "tmp4:" << tmp << std::endl;
                     //print_helper(tmp, '4');
                     client->_request->_req += tmp.substr(0, client->_request->_chucklen - client->_chuckCont);
-                    std::cout << "totalsize3:" << client->_request->_req.size() << std::endl;
+                    //std::cout << "totalsize3:" << client->_request->_req.size() << std::endl;
                     tmp = tmp.substr(client->_request->_chucklen - client->_chuckCont);
                     //std::cout << "tmp5:" << tmp << std::endl;
                     //print_helper(tmp, '5');
@@ -219,10 +219,10 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                     //std::cout << "tmp6:" << tmp << std::endl;
                     //print_helper(tmp, '6');
                     client->_request->_req += tmp;
-                    std::cout << "totalsize4:" << client->_request->_req.size() << std::endl;
+                    //std::cout << "totalsize4:" << client->_request->_req.size() << std::endl;
                     client->_chuckCont += tmp.size();
                     tmp.clear();
-                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE);  
+                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);  
                 }
             }
             else
@@ -230,44 +230,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                 strcpy(client->_request->_rBuf, tmp.c_str());
                 tmp.clear();
             }
-        }
-        /*else
-        {
-            //std::cout << "tmp3:" << tmp << std::endl;
-            std::cout << "len2:" << client->_request->_chucklen << std::endl;
-            std::cout << "cont:" << client->_chuckCont << std::endl;
-            if (client->_chuckCont == client->_request->_chucklen)
-            {
-                //std::cout << "tmp4:" << tmp << std::endl;
-                strcpy(client->_request->_rBuf, tmp.c_str());
-                tmp.clear();
-                client->_chuckCont = 0;
-            }
-            else if ((int)tmp.size() >= client->_request->_chucklen - client->_chuckCont && client->_chuckCont != 0)
-            {
-                //std::cout << "tmp5:" << tmp << std::endl;
-                client->_request->_req += tmp.substr(0, client->_request->_chucklen - client->_chuckCont);
-                tmp = tmp.substr(client->_request->_chucklen - client->_chuckCont);
-                //std::cout << "substr:" << tmp << std::endl;
-                strcpy(client->_request->_rBuf, tmp.c_str());
-                tmp.clear();
-                client->_chuckCont = 0;      
-            }
-            else if (client->_request->_chucklen == -1)
-            {
-                strcpy(client->_request->_rBuf, tmp.c_str());
-                tmp.clear();
-                //client->_chuckCont = 0;
-            }
-            else
-            {
-                std::cout << "tmp6:" << tmp << std::endl;
-                client->_request->_req += tmp;
-                client->_chuckCont += tmp.size();
-                tmp.clear();
-                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
-            }
-        }*/ 
+        } 
     }
 }
 
@@ -285,7 +248,6 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         client->_request->_rBuf[numbytes] = '\0';
         if (client->_request->_body)
         {
-            std::cout << "Parsebody\n";
             parseBody(it);
             return (0);
         }
@@ -295,7 +257,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
             if (!client->_request->_body)
-                memset(client->_request->_rBuf, '\0', BUFFER_SIZE);
+                memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
             return (0);
         }
         client->_lastDate = get_date();
@@ -345,8 +307,8 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
 int  Server::proccessRequest(std::vector<Client*>::iterator it)
 {
     Client		*client = *it;
-    std::cout << "processRequest\n";
     client->_chunkDone = false;
+
     if (!client->_sendInfo.size())
         client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");

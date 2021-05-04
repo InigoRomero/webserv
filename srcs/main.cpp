@@ -42,22 +42,6 @@ int init(std::vector<Server> servers)
                 client = *it2;
                 //std::cout << "Server FD: " << it->_sockfd << std::endl;
                 //std::cout << "Cliente FD: " << client->_fd << std::endl;
-                if (FD_ISSET(client->_fd, &readSet))                 
-                {
-                    if (!it->readRequest(it2))
-                        break ;
-                    if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10))
-                    {
-                        memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-                        //free(client->_request->_rBuf);
-                        close(client->_fd);
-                        FD_CLR(client->_fd, client->_rSet);
-                        FD_CLR(client->_fd, client->_wSet);
-                        //it2 = it->_clients.erase(client);
-                        std::cout << "Bye client" << std::endl;
-                        break ;
-                    }
-                }
                 if (client->_write_fd != -1)
                 {
                     client->writeFd();
@@ -75,6 +59,24 @@ int init(std::vector<Server> servers)
                         client->_lastDate = get_date();
                         break ;
                     }
+                }
+                if (FD_ISSET(client->_fd, &readSet))                 
+                {
+                    if (!it->readRequest(it2))
+                        break ;
+                    /*if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 100))
+                    {
+                        //std::cout << "HELLLO\nHELLOOO\nHELLOo" << std::endl;
+                        memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE + 1);
+                        //if (client->_request->_rBuf != NULL)
+                        //    free(client->_request->_rBuf);
+                        close(client->_fd);
+                        FD_CLR(client->_fd, client->_rSet);
+                        FD_CLR(client->_fd, client->_wSet);
+                        //it2 = it->_clients.erase(client);
+                        std::cout << "Bye client" << std::endl;
+                        break ;
+                    }*/
                 }
             }
         }
@@ -100,4 +102,5 @@ int main(int argc, char **av)
 	}
     servers = conf.getServer();
     init(servers);
+    //system("leaks ./webserv");
 }

@@ -22,11 +22,11 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("WWW-Authenticate", ""));
     _headers.insert(std::pair<std::string,std::string>("body", ""));
     _avMethods = "GET|POST|PUT|HEAD|CONNECT|OPTIONS|TRACE|DELETE";
-    _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
     _body = false;
     _chucklen = -1;
     _bodyIn = false;
-    memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
+    _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    memset(_rBuf, '\0', sizeof(char)*(BUFFER_SIZE + 1));
 }
 
 Request::Request(std::string req): _req(req)
@@ -51,7 +51,7 @@ int Request::parseRequest()
 
     if (_body)
     {
-        std::cout << "mama\n";
+        //std::cout << "mama\n";
         _headers["body"] = _req;
     }
     else
@@ -151,7 +151,6 @@ void Request::execCGI(Client &client)
     int fd[2];
     std::string path;
 
-    std::cout << "execCGI\n";
     close(client._read_fd); //why
     client._read_fd = -1; //idk
     //cond
@@ -202,7 +201,6 @@ void Request::execCGI(Client &client)
         ++i;
     }
     free(env);
-    std::cout << "hola\n";
 }
 
 char			**Request::setEnv(Client &client)
@@ -317,5 +315,4 @@ void		Request::parseCGIResult(Client &client)
 	pos = client._chuckBody.find("\r\n\r\n") + 4;
 	client._chuckBody = client._chuckBody.substr(pos);
 	client._contentLength = client._chuckBody.size();
-    std::cout << "cgi parsed\n";
 }
