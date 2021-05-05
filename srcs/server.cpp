@@ -352,6 +352,10 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             responsePost(it);
         else if (client->_request->_method == "PUT")
             responsePut(it);
+        else if (client->_request->_method == "HEAD")
+            responseHead(it);
+        else if (client->_request->_method == "DELETE")
+            responseDelete(it);
     }
     else
         sendError(it);

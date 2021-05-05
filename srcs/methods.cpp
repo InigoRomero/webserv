@@ -86,6 +86,17 @@ void responsePut(std::vector<Client*>::iterator it)
 	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 }
 
+void	responseHead(std::vector<Client*>::iterator it)
+{
+	return;
+}
+
+void	responseDelete(std::vector<Client*>::iterator it)
+{
+	return;
+}
+
+
 void createHeader(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
