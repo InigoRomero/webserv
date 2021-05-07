@@ -101,5 +101,5 @@ int main(int argc, char **av)
 	}
     servers = conf.getServer();
     init(servers);
-    //system("leaks ./webserv");
+    system("leaks ./webserv");
 }

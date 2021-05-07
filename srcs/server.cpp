@@ -295,7 +295,6 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             delete client->_request;
             client->_request = new Request();
             client->_chuckBody.clear();
-            client->_chuckBody = "";
             client->_contentLength = 0;
         }
         client->_lastDate = get_date();
@@ -352,8 +351,8 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             responsePost(it);
         else if (client->_request->_method == "PUT")
             responsePut(it);
-        else if (client->_request->_method == "HEAD")
-            responseHead(it);
+        //else if (client->_request->_method == "HEAD")
+        //    responseHead(it);
         else if (client->_request->_method == "DELETE")
             responseDelete(it);
     }
