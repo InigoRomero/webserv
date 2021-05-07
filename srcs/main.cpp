@@ -63,19 +63,18 @@ int init(std::vector<Server> servers)
                 {
                     if (!it->readRequest(it2))
                         break ;
-                    /*if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 100))
+                    else /*(client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 100))*/
                     {
-                        //std::cout << "HELLLO\nHELLOOO\nHELLOo" << std::endl;
                         memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE + 1);
                         //if (client->_request->_rBuf != NULL)
                         //    free(client->_request->_rBuf);
                         close(client->_fd);
                         FD_CLR(client->_fd, client->_rSet);
                         FD_CLR(client->_fd, client->_wSet);
-                        //it2 = it->_clients.erase(client);
+                        it2 = it->_clients.erase(it2);
                         std::cout << "Bye client" << std::endl;
                         break ;
-                    }*/
+                    }
                 }
             }
         }

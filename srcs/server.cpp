@@ -253,7 +253,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
-        else
+        else if (bytes > 0)
         {
             memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
             free(client->_request->_rBuf);
