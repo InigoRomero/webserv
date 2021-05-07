@@ -7,7 +7,7 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("Allow", "")); 
     _headers.insert(std::pair<std::string,std::string>("Authorization", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Language", "")); 
-    _headers.insert(std::pair<std::string,std::string>("Content-Length", "")); 
+    _headers.insert(std::pair<std::string,std::string>("content-length", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Location", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Type", "")); 
     _headers.insert(std::pair<std::string,std::string>("Date", "")); 
@@ -48,6 +48,7 @@ int Request::parseRequest()
 
 	std::vector<std::string> lines;
 	size_t pos = 0, found = 0;
+    std::stringstream ss;
 
     if (_body)
     {
@@ -56,7 +57,7 @@ int Request::parseRequest()
     }
     else
     {
-       // std::cout << "REQ H [" << _req.substr(0, 20) << "] \n";
+        //std::cout << "REQ H [" << _req << "] \n";
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -87,15 +88,12 @@ int Request::parseRequest()
         _method = fline[0];
         _uri = fline[1];
         _version = fline[2].substr(0, fline[2].size() - 1);
-        //std::cout << "Method of the client: " << _method << std::endl;
-        //std::cout << "_avMethods: " << _avMethods << std::endl;
-       // std::cout << "_method " << _method << std::endl;
         if (_avMethods.find(_method) == std::string::npos)
             return 0;
-        //take all the headers we have to take
         for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
         {
             size_t pos2 = 0;
+    
             for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
                 if ((found = (*it).find(it2->first)) != std::string::npos)
@@ -111,16 +109,24 @@ int Request::parseRequest()
                     pos2 = (*it).find(":") + 1;
                     while (isspace((*it)[pos2]))
                         pos2++;
-                    _headers.insert(std::pair<std::string,std::string>((*it).substr(0, (*it).find(":")), (*it).substr(pos2, (*it).size() - pos2 - 1)));  
+                    _headers.insert(std::pair<std::string,std::string>((*it).substr(0, (*it).find(":")), (*it).substr(pos2, (*it).size() - pos2 - 1))); 
                 }
             }
         }
         //std::cout << "tmp 1 [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
-       //  std::cout << "tmp 2 [" << tmp << "] \n";
+        // std::cout << "tmp 2 [" << tmp << "] \n";
         if (tmp.find("0\r\n\r\n") != std::string::npos)
         {   
             return (1);
+        }
+        ss << _headers.find("content-length")->second;  
+        ss >> pos;
+        if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
+        {
+            _req = tmp;
+            _body = true;
+            return (2);
         }
         strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")
