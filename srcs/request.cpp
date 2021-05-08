@@ -7,7 +7,7 @@ Request::Request(): _req("")
     _headers.insert(std::pair<std::string,std::string>("Allow", "")); 
     _headers.insert(std::pair<std::string,std::string>("Authorization", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Language", "")); 
-    _headers.insert(std::pair<std::string,std::string>("content-length", "")); 
+    _headers.insert(std::pair<std::string,std::string>("Content-Length", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Location", "")); 
     _headers.insert(std::pair<std::string,std::string>("Content-Type", "")); 
     _headers.insert(std::pair<std::string,std::string>("Date", "")); 
@@ -58,6 +58,7 @@ int Request::parseRequest()
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
+        std::cout << "hello\n";
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -120,7 +121,7 @@ int Request::parseRequest()
         {   
             return (1);
         }
-        ss << _headers.find("content-length")->second;  
+        ss << _headers.find("Content-Length")->second;  
         ss >> pos;
         if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
         {
@@ -162,15 +163,20 @@ void Request::execCGI(Client &client)
     //cond
     if (!(args = (char**)malloc(sizeof(char *) * 3)))
         return ;
+    std::cout << "client_conf_location:" << client._conf.location << std::endl;
+    std::cout << "client_request_uri:" << client._request->_uri << std::endl;
+    std::cout << "client_conf_root:" << client._conf.root << std::endl;
+    std::cout << "client._conf.index:" << client._conf.index << std::endl;
     if (client._conf.location.size() < client._request->_uri.size())
 	{
 		if (client._request->_uri.find(".") == std::string::npos)
 			path =  client._conf.root + "/"+ client._request->_uri.substr(client._conf.location.size(), std::string::npos) + "/" + client._conf.index;
 		else
-			path =  client._conf.root + "/"+ client._request->_uri.substr(client._conf.location.size(), std::string::npos);
+			path =  client._conf.root + client._request->_uri.substr(client._conf.location.size(), std::string::npos);
 	}
 	else
 		path = client._conf.root + "/"+ client._conf.index;
+    std::cout << "filePathCGI:" << path << std::endl;
     args[0] = strdup(client._conf.cgi_path.c_str()); // req->location->cgi_root || php_root // cgi path del requested location
     args[1] = strdup(path.c_str()); // req->file
     args[2] = NULL;

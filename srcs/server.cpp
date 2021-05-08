@@ -111,78 +111,120 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     std::string         aux;
     std::stringstream   stream;
 
-    while (tmp.size() > 0)
+    if (client->_request->_headers.find("Content-Length")->second != "")
+        parseNoChunked(it);
+    else if (client->_request->_headers.find("Transfer-Encoding")->second == "chunked")
     {
-        if ((pos = tmp.find("\r\n")) != std::string::npos)
+        while (tmp.size() > 0)
         {
-            if (client->_chunkFinal == false)
+            /*print_helper(tmp, '1');
+            if (!client->_chunkFinal)
+                std::cout << "bool:false" << std::endl;
+            else
+                std::cout << "bool:true" << std::endl;*/
+            if ((pos = tmp.find("\r\n")) != std::string::npos)
             {
-                if (pos == 0)
+                if (client->_chunkFinal == false)
                 {
-                    tmp = tmp.erase(0, 2);
-                    continue;
+                    if (pos == 0)
+                    {
+                        tmp = tmp.erase(0, 2);
+                        continue;
+                    }
+                    client->_chunkFinal = true;
+                    //std::cout << "tmp1:" << tmp.substr(0, pos) << std::endl;
+                    //print_helper(tmp.substr(0, pos), '2');
+                    if (tmp.substr(0, pos) == "0")
+                        client->_request->_chucklen = 0;
+                    else
+                    {
+                        stream << std::hex << tmp.substr(0, pos);
+                        stream >> client->_request->_chucklen;
+                    }
+                    //std::cout << "len:" << client->_request->_chucklen << std::endl;
+                    tmp = tmp.substr(pos + 2);
+                    if (tmp == "")
+                    {
+                        memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
+                        //print_helper(tmp.substr(0, pos), 'h');
+                    }
                 }
-                client->_chunkFinal = true;
-                if (tmp.substr(0, pos) == "0")
-                    client->_request->_chucklen = 0;
                 else
                 {
-                    stream << std::hex << tmp.substr(0, pos);
-                    stream >> client->_request->_chucklen;
-                }
-                tmp = tmp.substr(pos + 2);
-                if (tmp == "")
-                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
-            }
-            else
-            {
-                client->_chunkFinal = false;
-                aux = tmp.substr(0, pos);
-                client->_request->_req += aux;
-                client->_chuckCont += aux.size();
-                tmp = tmp.substr(pos + 2);
-                if (client->_request->_chucklen == 0)
-                {
-                    tmp.clear();
-                    proccessRequest(it);
+                    client->_chunkFinal = false;
+                    aux = tmp.substr(0, pos);
+                    client->_request->_req += aux;
+                    //std::cout << "totalsize1:" << client->_request->_req.size() << std::endl;
+                    client->_chuckCont += aux.size();
+                    tmp = tmp.substr(pos + 2);
+                    if (client->_request->_chucklen == 0)
+                    {
+                        tmp.clear();
+                        //std::cout << "totalsize2:" << client->_request->_req.size() << std::endl;
+                        proccessRequest(it);
+                        //std::cout << "queloque\n";
+                        memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
+                        client->_request->_chucklen = -1;
+                        client->_chuckCont = 0;
+                        break ;
+                    }
+                    //std::cout << "tmp2:" << tmp << std::endl;
+                    //print_helper(tmp, '3');
                     memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
                     client->_request->_chucklen = -1;
                     client->_chuckCont = 0;
-                    break ;
-                }
-                memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
-                client->_request->_chucklen = -1;
-                client->_chuckCont = 0;
-            }
-        }
-        else
-        {
-            if (tmp.size() == BUFFER_SIZE)
-            {
-                if (((client->_chuckCont + (int)tmp.size()) > client->_request->_chucklen) && client->_chuckCont != 0)
-                {
-                    client->_request->_req += tmp.substr(0, client->_request->_chucklen - client->_chuckCont);
-                    tmp = tmp.substr(client->_request->_chucklen - client->_chuckCont);
-                    strcpy(client->_request->_rBuf, tmp.c_str());
-                    tmp.clear();
-                    client->_chuckCont = 0;
-                }
-                else
-                {
-                    client->_request->_req += tmp;
-                    client->_chuckCont += tmp.size();
-                    tmp.clear();
-                    memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);  
                 }
             }
             else
             {
-                strcpy(client->_request->_rBuf, tmp.c_str());
-                tmp.clear();
-            }
-        } 
+                //std::cout << "tmp3:" << tmp << std::endl;
+                //print_helper(tmp, 'E');
+                if (tmp.size() == BUFFER_SIZE)
+                {
+                    if (((client->_chuckCont + (int)tmp.size()) > client->_request->_chucklen) && client->_chuckCont != 0)
+                    {
+                        //std::cout << "tmp4:" << tmp << std::endl;
+                        //print_helper(tmp, '4');
+                        client->_request->_req += tmp.substr(0, client->_request->_chucklen - client->_chuckCont);
+                        //std::cout << "totalsize3:" << client->_request->_req.size() << std::endl;
+                        tmp = tmp.substr(client->_request->_chucklen - client->_chuckCont);
+                        //std::cout << "tmp5:" << tmp << std::endl;
+                        //print_helper(tmp, '5');
+                        strcpy(client->_request->_rBuf, tmp.c_str());
+                        tmp.clear();
+                        client->_chuckCont = 0;
+                    }
+                    else
+                    {
+                        //std::cout << "tmp6:" << tmp << std::endl;
+                        //print_helper(tmp, '6');
+                        client->_request->_req += tmp;
+                        //std::cout << "totalsize4:" << client->_request->_req.size() << std::endl;
+                        client->_chuckCont += tmp.size();
+                        tmp.clear();
+                        memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);  
+                    }
+                }
+                else
+                {
+                    strcpy(client->_request->_rBuf, tmp.c_str());
+                    tmp.clear();
+                }
+            } 
+        }
+    }
+    else
+    {
+        /*client->setStatus("400 Bad Request");
+        sendError(it);
+        createHeader(it);
+        FD_SET(client->_fd, _wSet);
+        client->_chunkDone = true;
+		return (0);*/
+        return ;
     }
 }
+
 
 void Server::parseNoChunked(std::vector<Client*>::iterator it)
 {
@@ -194,7 +236,7 @@ void Server::parseNoChunked(std::vector<Client*>::iterator it)
     client->_request->_req += tmp;
     tmp.clear();
     memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
-    ss << client->_request->_headers.find("content-length")->second;  
+    ss << client->_request->_headers.find("Content-Length")->second;  
     ss >> num; 
     if (client->_request->_req.size() >= num)
         proccessRequest(it);
@@ -213,10 +255,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         client->_request->_rBuf[numbytes] = '\0';
         if (client->_request->_body)
         {
-            if (client->_request->_headers.find("Transfer-Encoding")->second == "chunked")
-                parseBody(it);
-            else
-                parseNoChunked(it);
+            parseBody(it);
             return (0);
         }
         else

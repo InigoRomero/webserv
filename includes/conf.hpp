@@ -6,6 +6,7 @@
 #include "get_next_line.hpp"
 #include "server.hpp"
 #include "utils.hpp"
+#include <algorithm>
 
 class Conf
 {
