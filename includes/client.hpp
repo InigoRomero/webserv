@@ -49,6 +49,7 @@ class Client
         bool                _chunkDone;
 //       bool                _chunkFound;
         bool                _chunkFinal;
+        bool                _standBy;
 
 
         void setSendInfo(std::string info);

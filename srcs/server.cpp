@@ -299,6 +299,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             FD_CLR(client->_fd, _wSet);
             delete client->_request;
             client->_request = new Request();
+            client->_standBy = false;
             client->_chuckBody.clear();
             client->_contentLength = 0;
         }
@@ -368,6 +369,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         sendError(it);
     createHeader(it);
     FD_SET(client->_fd, _wSet);
+    client->_standBy = true;
     //FD_CLR(client->_fd, _rSet);
     return 0;
 }

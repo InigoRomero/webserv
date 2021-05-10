@@ -39,8 +39,6 @@ int init(std::vector<Server> servers)
             for (std::vector<Client*>::iterator it2 = it->_clients.begin(); it2 != it->_clients.end(); ++it2)
             {
                 client = *it2;
-                //std::cout << "Server FD: " << it->_sockfd << std::endl;
-                //std::cout << "Cliente FD: " << client->_fd << std::endl;
                 if (client->_write_fd != -1)
                 {
                     client->writeFd();
@@ -63,18 +61,16 @@ int init(std::vector<Server> servers)
                 {
                     if (!it->readRequest(it2))
                         break ;
-                    /*else (client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 100))
+                    else if (client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10 && !client->_standBy)
                     {
                         memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE + 1);
-                        //if (client->_request->_rBuf != NULL)
-                        //    free(client->_request->_rBuf);
                         close(client->_fd);
                         FD_CLR(client->_fd, client->_rSet);
                         FD_CLR(client->_fd, client->_wSet);
                         it2 = it->_clients.erase(it2);
                         std::cout << "Bye client" << std::endl;
                         break ;
-                    }*/
+                    }
                 }
             }
         }
