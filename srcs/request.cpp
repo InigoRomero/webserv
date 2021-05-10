@@ -29,9 +29,18 @@ Request::Request(): _req("")
     memset(_rBuf, '\0', sizeof(char)*(BUFFER_SIZE + 1));
 }
 
+
 Request::Request(std::string req): _req(req)
 {
 
+}
+
+std::string toLower(std::string src)
+{
+    std::string tmp;
+    for (int i = 0; src[i] != 0; i++)
+        tmp.push_back(tolower(src[i]));
+    return (tmp);
 }
 
 Request::~Request()
@@ -58,7 +67,6 @@ int Request::parseRequest()
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
-        std::cout << "hello\n";
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -94,10 +102,9 @@ int Request::parseRequest()
         for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
         {
             size_t pos2 = 0;
-    
             for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
-                if ((found = (*it).find(it2->first)) != std::string::npos)
+                if ((found = toLower((*it)).find(toLower(it2->first))) != std::string::npos)
                 {
                     pos2 = (*it).find(":") + 1;
                     while (isspace((*it)[pos2]))
