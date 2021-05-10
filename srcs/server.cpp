@@ -295,10 +295,8 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         else if (bytes > 0)
         {
             memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
-            free(client->_request->_rBuf);
-            client->_request->_rBuf = NULL;
             client->_sendInfo.clear();
-                FD_CLR(client->_fd, _wSet);
+            FD_CLR(client->_fd, _wSet);
             delete client->_request;
             client->_request = new Request();
             client->_chuckBody.clear();
