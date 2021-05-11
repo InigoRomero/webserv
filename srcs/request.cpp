@@ -170,10 +170,10 @@ void Request::execCGI(Client &client)
     //cond
     if (!(args = (char**)malloc(sizeof(char *) * 3)))
         return ;
-    std::cout << "client_conf_location:" << client._conf.location << std::endl;
-    std::cout << "client_request_uri:" << client._request->_uri << std::endl;
-    std::cout << "client_conf_root:" << client._conf.root << std::endl;
-    std::cout << "client._conf.index:" << client._conf.index << std::endl;
+    // std::cout << "client_conf_location:" << client._conf.location << std::endl;
+    // std::cout << "client_request_uri:" << client._request->_uri << std::endl;
+    // std::cout << "client_conf_root:" << client._conf.root << std::endl;
+    // std::cout << "client._conf.index:" << client._conf.index << std::endl;
     if (client._conf.location.size() < client._request->_uri.size())
 	{
 		if (client._request->_uri.find(".") == std::string::npos)
@@ -183,7 +183,7 @@ void Request::execCGI(Client &client)
 	}
 	else
 		path = client._conf.root + "/"+ client._conf.index;
-    std::cout << "filePathCGI:" << path << std::endl;
+    //std::cout << "filePathCGI:" << path << std::endl;
     args[0] = strdup(client._conf.cgi_path.c_str()); // req->location->cgi_root || php_root // cgi path del requested location
     args[1] = strdup(path.c_str()); // req->file
     args[2] = NULL;
