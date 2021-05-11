@@ -393,9 +393,10 @@ void Server::getLocationAndMethod(std::vector<Client*>::iterator it)
         else
             aux = aux2;
     }
+    size_t found;
     for (std::vector<struct location>::iterator it2 = _locations.begin(); it2 != _locations.end(); it2++)
     {
-        if (it2->location.find(aux) != std::string::npos)
+        if ((found = it2->location.find(aux) != std::string::npos) && aux.size() == it2->location.size() - 1)
         {
             client->_conf = *it2;
             return ;
