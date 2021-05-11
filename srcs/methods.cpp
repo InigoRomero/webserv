@@ -6,6 +6,7 @@ void responseGet(std::vector<Client*>::iterator it)
 	Client		*client = *it;
 	//std::string response = client->_request->_version;
 	std::string		path;
+	std::string ext;
 	int ret = 0;
 	size_t pos;
 
@@ -19,17 +20,27 @@ void responseGet(std::vector<Client*>::iterator it)
 	else
 		path = client->_conf.root + "/"+ client->_conf.index;
 	if ((pos = path.find_last_of(".")) != std::string::npos)
-		client->setRFile(path.substr(pos, std::string::npos));
-	//std::cout << "PATH: " << path << std::endl;
-	if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
 	{
-		client->_chunkDone = true;
-		client->setStatus("404 Not Found");
-		return ;
+		client->setRFile(path.substr(pos, std::string::npos));
+		ext = path.substr(pos, std::string::npos);
 	}
-	// if exits
-	client->setPath(path.c_str());
-	client->setReadFd(ret);
+	//std::cout << "PATH: " << path << std::endl;
+	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
+	{
+		client->_request->execCGI(*client);
+	}
+	else
+	{
+		if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
+		{
+			client->_chunkDone = true;
+			client->setStatus("404 Not Found");
+			return ;
+		}
+		// if exits
+		client->setPath(path.c_str());
+		client->setReadFd(ret);
+	}
 }
 
 void responsePost(std::vector<Client*>::iterator it)

@@ -191,6 +191,8 @@ void Request::execCGI(Client &client)
 
     client._tmp_fd = open("./www/temp_file", O_WRONLY | O_CREAT, 0666);
     pipe(fd);
+	if (client._request->_method == "GET")
+		close(fd[1]);
     if (!(client._cgi_pid = fork()))
     {
         close(fd[1]);
@@ -205,9 +207,12 @@ void Request::execCGI(Client &client)
     }
     else
     {
-        close(fd[0]);
-        client._write_fd = fd[1];
-        client._read_fd = open("./www/temp_file", O_RDONLY);
+	    //if (client._request->_method == "POST")
+        //{
+            close(fd[0]);
+            client._write_fd = fd[1];
+        //}
+            client._read_fd = open("./www/temp_file", O_RDONLY);
     }
     free(args[0]);
     free(args[1]);
