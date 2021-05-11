@@ -50,6 +50,7 @@ class Client
 //       bool                _chunkFound;
         bool                _chunkFinal;
         bool                _standBy;
+        bool                _kick;
 
 
         void setSendInfo(std::string info);

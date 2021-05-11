@@ -269,6 +269,8 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
         }
         client->_lastDate = get_date();
     }
+    if (numbytes <= 0)
+        client->_kick = true;
     return (1);
  }
 
@@ -303,6 +305,8 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             client->_chuckBody.clear();
             client->_contentLength = 0;
         }
+        if (bytes <= 0)
+            client->_kick = true;
         client->_lastDate = get_date();
         return (0);
     }

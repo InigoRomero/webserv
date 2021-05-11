@@ -61,7 +61,7 @@ int init(std::vector<Server> servers)
                 {
                     if (!it->readRequest(it2))
                         break ;
-                    else if (client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10 && !client->_standBy)
+                    else if ((client->_lastDate.size() != 0 && compareTime(client->_lastDate) >= 10 && !client->_standBy) || client->_kick)
                     {
                         memset( client->_request->_rBuf, '\0', sizeof(char)*BUFFER_SIZE + 1);
                         close(client->_fd);
