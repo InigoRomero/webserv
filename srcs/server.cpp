@@ -98,11 +98,6 @@ int		Server::getOpenFd()
 	return (nb);
 }
 
-int Server::refuseConnection()
-{
-    return (0);
-}
-
 void Server::parseBody(std::vector<Client*>::iterator it)
 {
     Client		        *client = *it;
@@ -390,6 +385,34 @@ int		Server::getMaxFd()
 			_maxFd = client->_write_fd;
 	}
 	return (_maxFd);
+}
+
+void	Server::send503()
+{
+	std::string		response;
+	int				ret = 0, fd = -1;
+    struct sockaddr_in  client_addr;
+    socklen_t             addrlen;
+    addrlen = sizeof(client_addr);
+
+    if ((fd = accept(_sockfd, (struct sockaddr *)&client_addr, &addrlen)) < 0)
+    {
+        perror("In accept");
+        exit(0);
+    }
+
+	response = "HTTP/1.1 503\r\n";
+    response +=  "Sever: webserv/1.0.0\r\n";
+	response += "Date: " + get_date() + "\r\n"; 
+	response += "Retry-After: 25\r\n\r\n";
+	response += "503\r\n\r\n";
+
+	ret = write(fd, response.c_str(), response.size());
+	if (ret >= -1)
+	{
+		close(fd);
+		FD_CLR(fd, _wSet);
+	}
 }
 
 //seters

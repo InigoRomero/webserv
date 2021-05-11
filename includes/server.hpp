@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #define UNAVAILABLE_TIME  20
+#define MAX_FD 256 - 20
 
 #include "methods.hpp"
 #include "get_next_line.hpp"
@@ -30,7 +31,6 @@ class Server
 		fd_set					    *_rSet;
 		fd_set					    *_wSet;
         
-        
 
     private:
  
@@ -44,7 +44,6 @@ class Server
     
         int     start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet);
         int     acceptNewClient();
-        int     refuseConnection();
         void    setError(const std::string &error);
         void    setName(const std::string &name);
         void    setHost(const std::string &host);
@@ -60,6 +59,7 @@ class Server
         void    parseNoChunked(std::vector<Client*>::iterator it);
         int     getMaxFd();
         int		getOpenFd();
+        void    send503();
 };
 
 #endif

@@ -31,8 +31,8 @@ int init(std::vector<Server> servers)
         {
             if (FD_ISSET((*it)._sockfd, &readSet))
             {
-                if (getOpenFd(servers) > maxFD)
-					(*it).refuseConnection();
+                if (getOpenFd(servers) > MAX_FD)
+					(*it).send503();
 				else
                     (*it).acceptNewClient();
             }
