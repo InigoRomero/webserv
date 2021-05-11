@@ -86,6 +86,8 @@ void Conf::fillServer()
                     throw ConfigFileException();
                 it++;
             }
+            if (_servers.back()._error == "")
+                _servers.back().setError("./www/error");
             _servers.back().setConf(_path);
             while ((*it).find("}") == std::string::npos)
             {
