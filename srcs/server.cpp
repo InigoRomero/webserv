@@ -387,21 +387,20 @@ void Server::getLocationAndMethod(std::vector<Client*>::iterator it)
     {
         aux2 = aux.substr(1);
         if (aux2.find("/") != std::string::npos)
-            aux = aux2.substr(0, aux2.find("/"));
+            aux = aux.substr(0, aux2.find("/") + 1);
         else if (aux2.find(".") != std::string::npos)
             aux = aux.substr(0, 1);
-        else
-            aux = aux2;
     }
     size_t found;
     for (std::vector<struct location>::iterator it2 = _locations.begin(); it2 != _locations.end(); it2++)
     {
-        if ((found = it2->location.find(aux) != std::string::npos) && aux.size() == it2->location.size() - 1)
+        if ((found = it2->location.find(aux) != std::string::npos) && aux.size() == it2->location.size())
         {
             client->_conf = *it2;
             return ;
         }
     }
+    std::cout << "NOT FOUND\n";
     client->setStatus("404  Not Found");
 }
 
