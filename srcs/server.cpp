@@ -174,13 +174,11 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     }
     else
     {
-        /*client->setStatus("400 Bad Request");
+        client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
         FD_SET(client->_fd, _wSet);
         client->_chunkDone = true;
-		return (0);*/
-        return ;
     }
 }
 
@@ -212,6 +210,7 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     if (numbytes > 0)
     {
         client->_request->_rBuf[numbytes] = '\0';
+        std::cout << client->_request->_rBuf;
         if (client->_request->_body)
         {
             parseBody(it);
