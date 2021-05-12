@@ -174,6 +174,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     }
     else
     {
+        //std::cout << "hello2\n";
         client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
@@ -210,7 +211,6 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
     if (numbytes > 0)
     {
         client->_request->_rBuf[numbytes] = '\0';
-        std::cout << client->_request->_rBuf;
         if (client->_request->_body)
         {
             parseBody(it);
@@ -221,8 +221,11 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             client->_request->_req += client->_request->_rBuf;
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
+            //std::cout << "mam:" << client->_request->_rBuf << std::endl;
             if (!client->_request->_body)
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
+            else if (strcmp(client->_request->_rBuf, "") != 0)
+                parseBody(it);
             return (0);
         }
         client->_lastDate = get_date();
@@ -244,7 +247,6 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
-            //std::cout << "response:" << client->_sendInfo << std::endl;
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }

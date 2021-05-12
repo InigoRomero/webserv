@@ -67,6 +67,7 @@ int Request::parseRequest()
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
+        //std::cout << "_req:" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -124,10 +125,6 @@ int Request::parseRequest()
         //std::cout << "tmp 1 [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
         // std::cout << "tmp 2 [" << tmp << "] \n";
-        if (tmp.find("0\r\n\r\n") != std::string::npos)
-        {   
-            return (1);
-        }
         ss << _headers.find("Content-Length")->second;  
         ss >> pos;
         if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
@@ -207,11 +204,8 @@ void Request::execCGI(Client &client)
     }
     else
     {
-	    //if (client._request->_method == "POST")
-        //{
             close(fd[0]);
             client._write_fd = fd[1];
-        //}
             client._read_fd = open("./www/temp_file", O_RDONLY);
     }
     free(args[0]);
@@ -303,17 +297,6 @@ void		Request::parseCGIResult(Client &client)
 	if (client._chuckBody.find("\r\n\r\n") == std::string::npos)
 		return ;
 	headers = client._chuckBody.substr(0, client._chuckBody.find("\r\n\r\n") + 1);
-	pos = headers.find("Status");
-	if (pos != std::string::npos)
-	{
-        client._status.clear();
-		pos += 8;
-		while (headers[pos] != '\r')
-		{
-			client.setStatus(client._status + &headers[pos]);
-			pos++;
-		}
-	}
 	pos = 0;
 	while (headers[pos])
 	{
