@@ -122,19 +122,47 @@ void	responseDelete(std::vector<Client*>::iterator it)
 	return;
 }
 
+/*static std::string allow_header(std::string str)
+{
+	std::string aux;
+	if(str.find("GET") != std::string::npos)
+		aux += "GET, ";
+	if(str.find("POST") != std::string::npos)
+		aux += "POST, ";
+	if(str.find("HEAD") != std::string::npos)
+		aux += "HEAD, ";
+	if(str.find("PUT") != std::string::npos)
+		aux += "PUT, ";
+	if(str.find("DELETE") != std::string::npos)
+		aux += "DELETE, ";
+	return aux.substr(0, aux.size() - 2);
+}*/
 
 void createHeader(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
 	std::map<std::string, std::string> 	headers;
 	
+	/*std::cout << "auth:" << client->_conf.auth << std::endl;
+	if (client->_conf.auth != "")
+	{
+		client->setStatus("401 Unauthorized");
+		if (client->_request->_headers["Authorization"] != "")
+		{
+
+		}	
+	}*/
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
-	if (client->_status == "405 Not Allowed")
-		response = response + "Allow: " + client->_conf.method + "\r\n";
-	response = response + "Sever: webserv/1.0.0\r\n";
-	response = response + "Date: " + get_date() + "\r\n";  
-	response = response + "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
-	response = response + "Content-Type: " + getDataType(client->_rFile) + "\r\n";
+	/*if (client->_status == "405 Not Allowed")
+		response += "Allow: " + allow_header(client->_conf.method) + "\r\n";
+	if (client->_status == "401 Unauthorized")
+		response += "WWW-Authenticate = Basic\r\n";*/
+	//if (client->_status == "201 OK")
+		//response += "Location" + path
+	response += "Sever: webserv/1.0.0\r\n";
+	response += "Date: " + get_date() + "\r\n";  
+	response += "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
+	response += "Content-Type: " + getDataType(client->_rFile) + "\r\n";
 	client->setSendInfo(response);
 	//std::cout << "sendinfo:\n" << response << std::endl;
 	response.clear();

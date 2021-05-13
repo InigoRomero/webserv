@@ -167,14 +167,15 @@ string TcpClient::receive(int size=512)
 {
     char buffer[size];
     string reply;
+    size_t ret;
 
     //Receive a reply from the server
-    if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
+    if((ret = recv(sock , buffer , sizeof(buffer) , 0)) < 0)
     {
         puts("recv failed");
         return NULL;
     }
-
+    buffer[ret] = '\0';
     reply = buffer;
     response_data = reply;
     

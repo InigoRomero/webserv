@@ -67,7 +67,7 @@ int Request::parseRequest()
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
-        //std::cout << "_req:" << _req << std::endl;
+        //std::cout << "_req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -122,6 +122,8 @@ int Request::parseRequest()
                 }
             }
         }
+        if (_headers["Host"] == "")
+            return 0;
         //std::cout << "tmp 1 [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
         // std::cout << "tmp 2 [" << tmp << "] \n";
