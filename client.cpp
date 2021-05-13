@@ -5,10 +5,52 @@
 #include <sys/socket.h> //socket
 #include <arpa/inet.h> //inet_addr
 #include <netdb.h> //hostent
+#include <map>
+#include <vector>
+
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"      /* Black */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 //USAGE clang++ client.cpp && ./a.out
 
 using namespace std;
+/*
+    Send data Class
+*/
+class SendData
+{
+    public:
+        SendData(int lenght, std::string req, std::string status, std::string body, std::string title);
+        int lenght;
+        std::string req;
+        std::string status;
+        std::string body;
+        std::string title;
+};
+
+SendData::SendData(int lenght, std::string req, std::string status, std::string body, std::string title)
+{
+    this->lenght = lenght;
+    this->req = req;
+    this->status = status;
+    this->body = body;
+    this->title = title;
+}
 
 /*
     TCP Client class
@@ -18,7 +60,7 @@ class TcpClient
     private:
         int sock;
         std::string address;
-        string response_data = "";
+        string response_data;
         int port;
         struct sockaddr_in server;
 
@@ -53,8 +95,6 @@ bool TcpClient::conn(string address , int port)
         {
             perror("Could not create socket");
         }
-
-        cout<<"Socket created\n";
     }
     else { /* OK , nothing */ }
 
@@ -82,8 +122,6 @@ bool TcpClient::conn(string address , int port)
             //strcpy(ip , inet_ntoa(*addr_list[i]) );
             server.sin_addr = *addr_list[i];
 
-            cout<<address<<" resolved to "<<inet_ntoa(*addr_list[i])<<endl;
-
             break;
         }
     }
@@ -104,7 +142,6 @@ bool TcpClient::conn(string address , int port)
         return false;
     }
 
-    cout<<"Connected\n";
     return true;
 }
 
@@ -113,18 +150,12 @@ bool TcpClient::conn(string address , int port)
 */
 bool TcpClient::send_data(string data)
 {
-    cout<<"Sending data...";
-    cout<<data;
-    cout<<"\n";
-    
     // Send some data
     if( send(sock , data.c_str() , strlen( data.c_str() ) , 0) < 0)
     {
         perror("Send failed : ");
         return false;
     }
-    
-    cout<<"Data send\n";
 
     return true;
 }
@@ -150,6 +181,29 @@ string TcpClient::receive(int size=512)
     return reply;
 }
 
+void ft_result(int expLen, int retLen, std::string expStatus, std::string retStatus, std::string expBody, std::string retBody, std::string title)
+{
+    std::cout << RESET <<"\n  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-\n\
+ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\\n\
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'\n\n";
+    std::cout << BOLDBLACK << title;
+    if (strcmp(expStatus.c_str(), retStatus.c_str()) == 0)
+        std::cout << BOLDBLACK <<"✅ Status [" << BOLDGREEN << retStatus << BOLDBLACK << "]\n";
+    else
+      std::cout << BOLDBLACK << "❌ Returned Status [" << BOLDRED << retStatus <<  BOLDBLACK << "]" << " Expected [" <<  BOLDGREEN  << expStatus << BOLDBLACK << "]\n";
+    if (expLen == retLen)
+        std::cout << BOLDBLACK <<"✅ Content-Length [" << BOLDGREEN << retLen << BOLDBLACK << "]\n";
+    else
+        std::cout << BOLDBLACK << "❌ Returned Content-Length [" << BOLDRED << retLen << BOLDBLACK << "]" << " Expected [" <<  BOLDGREEN  << expLen << BOLDBLACK << "]\n";
+    if (strcmp(expBody.c_str(), retBody.c_str()) == 0)
+        std::cout << BOLDBLACK <<"✅ Body[" << BOLDGREEN << retBody.substr(0, 100) << BOLDBLACK << "]\n";
+    else
+        std::cout << BOLDBLACK << "❌ Returned Body[" << BOLDRED << retBody.substr(0, 100) << BOLDBLACK << "]" << " Expected [" <<  BOLDGREEN  << expBody.substr(0, 100) << BOLDBLACK << "]\n";
+
+
+}
+
+
 int main(int argc , char *argv[])
 {
     TcpClient c;
@@ -157,19 +211,36 @@ int main(int argc , char *argv[])
 
     //connect to host
     c.conn(host , 80);
+    int test_c;
+    std::vector<SendData> data;
 
-    //BAD REQUEST EXAMPLE
-    c.send_data("\nPOST /directory/youpla.bla HTTP/1.1\r\n \
-    Host: localhost:80\r\n \
-    User-Agent: Go-http-client/1.1\r\n \
-    Content-Type: test/file\r\n \
-    Accept-Encoding: gzip\r\n\r\n \
-    a\r\nabcdefghij\r\n0\r\n\r\n");
+    data.push_back(SendData(
+        10,
+        "POST /directory/youpla.bla HTTP/1.1\r\n\
+Host: localhost:80\r\n\
+User-Agent: Go-http-client/1.1\r\n\
+Content-Type: test/file\r\n\
+Transfer-Encoding: chunked\r\n\
+Accept-Encoding: gzip\r\n\r\n\
+a\r\nabcdefghij\r\n0\r\n\r\n",
+        "HTTP/1.1 200 OK",
+        "ABCDEFGHIJ",
+        "POST /directory/youpla.bla - Chunked - 10 Lenght\n"
+    ));
 
+    std::vector<SendData>::iterator it;
+    for (it = data.begin(); it != data.end(); it++)
+    {
+        c.send_data(it->req);
+        std::string response = c.receive(1024);
+        std::cout << "response: " << response << std::endl;
+        ft_result(it->lenght, 10, it->status, "HTTP/1.1 200 OK", it->body, "ABCDEFGHIJ", it->title);
+    }
+        std::cout << RESET <<"\n  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-\n\
+ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\\n\
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'\n\n";
     //receive and echo reply
-    cout<<"----------------------------\n\n";
-    cout<<c.receive(1024);
-    cout<<"\n\n----------------------------\n\n";
+
 
     //done
     return 0;
