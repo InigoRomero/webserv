@@ -122,7 +122,7 @@ void	responseDelete(std::vector<Client*>::iterator it)
 	return;
 }
 
-/*static std::string allow_header(std::string str)
+static std::string allow_header(std::string str)
 {
 	std::string aux;
 	if(str.find("GET") != std::string::npos)
@@ -136,7 +136,7 @@ void	responseDelete(std::vector<Client*>::iterator it)
 	if(str.find("DELETE") != std::string::npos)
 		aux += "DELETE, ";
 	return aux.substr(0, aux.size() - 2);
-}*/
+}
 
 void createHeader(std::vector<Client*>::iterator it)
 {
@@ -153,10 +153,10 @@ void createHeader(std::vector<Client*>::iterator it)
 		}	
 	}*/
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
-	/*if (client->_status == "405 Not Allowed")
+	if (client->_status == "405 Not Allowed")
 		response += "Allow: " + allow_header(client->_conf.method) + "\r\n";
 	if (client->_status == "401 Unauthorized")
-		response += "WWW-Authenticate = Basic\r\n";*/
+		response += "WWW-Authenticate = Basic\r\n";
 	//if (client->_status == "201 OK")
 		//response += "Location" + path
 	response += "Sever: webserv/1.0.0\r\n";
