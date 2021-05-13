@@ -234,7 +234,8 @@ a\r\nabcdefghij\r\n0\r\n\r\n",
         c.send_data(it->req);
         std::string response = c.receive(1024);
         std::cout << "response: " << response << std::endl;
-        ft_result(it->lenght, 10, it->status, "HTTP/1.1 200 OK", it->body, "ABCDEFGHIJ", it->title);
+        std::string body = response.substr(response.find("\r\n\r\n") + 4, response.find("\r\n\r\n") + 4 + it->lenght);
+        ft_result(it->lenght, body.size(), it->status, response.substr(0, response.find("\r\n")), it->body,  body,it->title);
     }
         std::cout << RESET <<"\n  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-\n\
  / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\ / / \\ \\\n\
