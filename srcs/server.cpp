@@ -174,7 +174,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     }
     else
     {
-        //std::cout << "hello2\n";
+        std::cout << "hello2\n";
         client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
@@ -247,10 +247,10 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
+            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
-        //std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
             client->_sendInfo = client->_sendInfo.substr(bytes);
