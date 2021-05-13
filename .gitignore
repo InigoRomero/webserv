@@ -2,3 +2,5 @@ compiled_srcs
 .vscode
 .DS_Store
 temp_file
+webserv
+a.out
