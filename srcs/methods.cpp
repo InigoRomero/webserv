@@ -10,35 +10,25 @@ void responseGet(std::vector<Client*>::iterator it)
 	int ret = 0;
 	size_t pos;
 
-	if (client->_conf.location.size() < client->_request->_uri.size())
+	if ((pos = client->_path.find_last_of(".")) != std::string::npos)
 	{
-		if (client->_request->_uri.find(".") == std::string::npos)
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
-		else
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+		client->setRFile(client->_path.substr(pos, std::string::npos));
+		ext = client->_path.substr(pos, std::string::npos);
 	}
-	else
-		path = client->_conf.root + "/"+ client->_conf.index;
-	if ((pos = path.find_last_of(".")) != std::string::npos)
-	{
-		client->setRFile(path.substr(pos, std::string::npos));
-		ext = path.substr(pos, std::string::npos);
-	}
-	//std::cout << "PATH: " << path << std::endl;
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
 		client->_request->execCGI(*client);
 	}
 	else
 	{
-		if ((ret =  open(path.c_str(), O_RDONLY)) == -1)
+		if ((ret =  open(client->_path.c_str(), O_RDONLY)) == -1)
 		{
 			client->_chunkDone = true;
 			client->setStatus("404 Not Found");
 			return ;
 		}
 		// if exits
-		client->setPath(path.c_str());
+		//client->setPath(client->_path.c_str());
 		client->setReadFd(ret);
 	}
 }
@@ -49,36 +39,22 @@ void responsePost(std::vector<Client*>::iterator it)
 	size_t pos;
 	std::string ext;
 	std::string	path;
-	
-	if (client->_conf.location.size() < client->_request->_uri.size())
-	{
-		if (client->_request->_uri.find(".") == std::string::npos)
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
-		else
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
-	}
-	else
-		path = client->_conf.root + "/"+ client->_conf.index;
 		
-	if ((pos = path.find_last_of(".")) != std::string::npos)
-		ext = path.substr(pos, std::string::npos);
+	if ((pos = client->_path.find_last_of(".")) != std::string::npos)
+		ext = client->_path.substr(pos, std::string::npos);
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
 		client->_request->execCGI(*client);
 	}
 	else
 	{
-		if ((open(path.c_str(), O_RDONLY)) == -1)
+		if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 		{
-			client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+			client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 			client->setStatus("201 OK");
 		}
 		else
-			client->_write_fd = open(path.c_str(), O_APPEND|O_WRONLY|O_NONBLOCK, 0666);
-		/*std::cout << "Body size [" << client->_request->_headers["body"].size() << "] \n";
-		std::cout << "Write_fd [" << client->_write_fd << "] \n";
-		std::cout << "PATH [" << path << "] \n";
-		std::cout << "URI [" << client->_request->_uri << "] \n";*/
+			client->_write_fd = open(client->_path.c_str(), O_APPEND|O_WRONLY|O_NONBLOCK, 0666);
 		if (client->_request->_req.size() == 0)
 			client->_chunkDone = true;
 	}
@@ -89,11 +65,10 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::string	path;
 	Client		*client = *it;
 
-	path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
-	if ((open(path.c_str(), O_RDONLY)) == -1)
+	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 		client->setStatus("201 OK");
-	client->_write_fd = open(path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+	client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 }
 
 void	responseHead(std::vector<Client*>::iterator it)
@@ -113,7 +88,7 @@ void	responseDelete(std::vector<Client*>::iterator it)
 		if (client->_request->_uri.find(".") == std::string::npos)
 			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
 		else
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+			path =  client->_conf.root + client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
 	}
 	else
 		path = client->_conf.root + "/"+ client->_conf.index;
@@ -153,16 +128,18 @@ void createHeader(std::vector<Client*>::iterator it)
 		}	
 	}*/
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
+	response += "Sever: webserv/1.0.0\r\n";
+	response += "Date: " + get_date() + "\r\n";  
 	if (client->_status == "405 Not Allowed")
 		response += "Allow: " + allow_header(client->_conf.method) + "\r\n";
 	if (client->_status == "401 Unauthorized")
 		response += "WWW-Authenticate = Basic\r\n";
-	//if (client->_status == "201 OK")
-		//response += "Location" + path
-	response += "Sever: webserv/1.0.0\r\n";
-	response += "Date: " + get_date() + "\r\n";  
-	response += "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
-	response += "Content-Type: " + getDataType(client->_rFile) + "\r\n";
+	if (client->_status == "201 OK")
+		response += "Location: " + client->_request->_uri + "\r\n";
+	if (client->_status == "200 OK" && (client->_request->_method == "GET" || client->_request->_method == "HEAD"))
+		response += "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
+	if ((client->_request->_method == "GET" || client->_request->_method == "HEAD"))
+		response += "Content-Type: " + getDataType(client->_rFile) + "\r\n";
 	client->setSendInfo(response);
 	//std::cout << "sendinfo:\n" << response << std::endl;
 	response.clear();

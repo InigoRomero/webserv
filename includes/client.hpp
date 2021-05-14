@@ -51,12 +51,13 @@ class Client
         bool                _chunkFinal;
         bool                _standBy;
         bool                _kick;
+        bool                _error;
 
 
         void setSendInfo(std::string info);
         void setReadFd(int fd);
         void setStatus(std::string status);
-        void setPath(std::string path);
+        void setPath(std::string errorPath);
         void setRFile(std::string file);
         void readFd();
         void writeFd();

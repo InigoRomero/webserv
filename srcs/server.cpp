@@ -261,6 +261,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
             FD_CLR(client->_fd, _wSet);
             delete client->_request;
             client->_request = new Request();
+            client->_error = false;
             client->_standBy = false;
             client->_chuckBody.clear();
             client->_contentLength = 0;
@@ -318,6 +319,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             client->_chunkDone = true;
             return (0);
         }
+        (*it)->setPath("");
         if (client->_request->_method == "GET")
             responseGet(it);
         else if (client->_request->_method == "POST")
@@ -366,11 +368,13 @@ void Server::getLocationAndMethod(std::vector<Client*>::iterator it)
 void Server::sendError(std::vector<Client*>::iterator it)
 {
     std::string		path;
-    Client		*client = *it;  
-    path = _error + "/" + client->_status.substr(0, 3) + ".html";
-    client->setPath(path.c_str());
+    Client		*client = *it;
+
+    std::cout << "quepasa\n";
+    client->_error = true;
+    client->setPath(_error);
     client->_rFile = ".html";
-	client->setReadFd(open(path.c_str(), O_RDONLY));
+	client->setReadFd(open(client->_path.c_str(), O_RDONLY));
 }
 
 int		Server::getMaxFd()
