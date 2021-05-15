@@ -158,7 +158,7 @@ User-Agent: Go-http-client/1.1\r\n\
 Content-Type: test/file\r\n\
 Transfer-Encoding: chunked\r\n\
 Accept-Encoding: gzip\r\n\r\n\
-a\r\nabcdefghij\r\n0\r\n\r\n",
+8\r\nabcdefghij\r\n0\r\n\r\n",
         "HTTP/1.1 200 OK",
         "ABCDEFGHIJ",
         "POST /directory/youpla.bla - Chunked - 10 Lenght\n"
@@ -186,7 +186,7 @@ User-Agent: Go-http-client/1.1\r\n\
 Content-Type: test/file\r\n\
 Transfer-Encoding: chunked\r\n\
 Accept-Encoding: gzip\r\n\r\n\
-14\r\nabcdefghijabcdefghijabcdefghijabcdefghij\r\n0\r\n\r\n",
+28\r\nabcdefghijabcdefghijabcdefghijabcdefghij\r\n0\r\n\r\n",
         "HTTP/1.1 200 OK",
         "ABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJ",
         "POST /directory/youpla.bla - Chunked - 10 Lenght\n"
@@ -238,19 +238,6 @@ a\r\nabcdefghij\r\n0\r\n\r\n",
         "POST /directory/youpla.bla HTTP/1.1\r\n\
 User-Agent: Go-http-client/1.1\r\n\
 Content-Type: test/file\r\n\
-Transfer-Encoding: chunked\r\n\
-Accept-Encoding: gzip\r\n\r\n\
-a\r\nabcdefghij\r\n0\r\n\r\n",
-        "HTTP/1.1 400 Bad Request",
-        "",
-        " /directory/youpla.bla - BAD REQUEST - Making Request with out HOST\n"
-    ));
-
-    data->push_back(SendData(
-        10,
-        "POST /directory/youpla.bla HTTP/1.1\r\n\
-Host: localhost:80\r\n\
-User-Agent: Go-http-client/1.1\r\n\
 Transfer-Encoding: chunked\r\n\
 Accept-Encoding: gzip\r\n\r\n\
 a\r\nabcdefghij\r\n0\r\n\r\n",
