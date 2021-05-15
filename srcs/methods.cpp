@@ -18,6 +18,7 @@ void responseGet(std::vector<Client*>::iterator it)
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
 		client->_request->execCGI(*client);
+		client->_request->_cgi = true;
 	}
 	else
 	{
@@ -45,6 +46,7 @@ void responsePost(std::vector<Client*>::iterator it)
 	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
 	{
 		client->_request->execCGI(*client);
+		client->_request->_cgi = true;
 	}
 	else
 	{
@@ -138,8 +140,15 @@ void createHeader(std::vector<Client*>::iterator it)
 		response += "Location: " + client->_request->_uri + "\r\n";
 	if (client->_status == "200 OK" && (client->_request->_method == "GET" || client->_request->_method == "HEAD"))
 		response += "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
-	if ((client->_request->_method == "GET" || client->_request->_method == "HEAD"))
-		response += "Content-Type: " + getDataType(client->_rFile) + "\r\n";
+	std::cout << "PATH:" << client->_path << std::endl;
+	//if ((client->_request->_method == "GET" || client->_request->_method == "HEAD"))
+	if (client->_request->_cgi)
+		response += "Content-Type: text/html; charset=utf-8\r\n";
+	else if ((client->_request->_method == "POST" || client->_request->_method == "PUT") &&
+	client->_request->_headers["Content-Type"] != "" && !client->_error)
+		response += "Content-Type: " + client->_request->_headers["Content-Type"] + "\r\n";
+	else
+		response += "Content-Type: " + getDataType(client->_path.substr(client->_path.find_last_of("."))) + "\r\n";
 	client->setSendInfo(response);
 	//std::cout << "sendinfo:\n" << response << std::endl;
 	response.clear();
@@ -148,6 +157,7 @@ void createHeader(std::vector<Client*>::iterator it)
 
 std::string getDataType(std::string fileExt)
 {
+	std::cout << "fileExt" << fileExt << std::endl;
 	if (fileExt == ".txt")
 		return ("text/plain");
 	else if (fileExt == ".bin")

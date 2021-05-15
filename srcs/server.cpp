@@ -137,6 +137,9 @@ void Server::parseBody(std::vector<Client*>::iterator it)
                 {
                     client->_chunkFinal = false;
                     aux = tmp.substr(0, pos);
+                    client->_chuckCont += aux.size();
+                    if (client->_chuckCont > client->_request->_chucklen)
+                        aux = aux.substr(0,  aux.size() - (size_t)(client->_chuckCont - client->_request->_chucklen));
                     client->_request->_req += aux;
                     client->_chuckCont += aux.size();
                     tmp = tmp.substr(pos + 2);
@@ -243,11 +246,13 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     if (client->_chunkDone)
     {
         if (!client->_request->_bodyIn)
+        {
             client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
+            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
+        }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
-            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
@@ -330,6 +335,8 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         //    responseHead(it);
         else if (client->_request->_method == "DELETE")
             responseDelete(it);
+        if (client->_status == "404 Not Found")
+            sendError(it);
     }
     else
         sendError(it);
@@ -370,7 +377,6 @@ void Server::sendError(std::vector<Client*>::iterator it)
     std::string		path;
     Client		*client = *it;
 
-    std::cout << "quepasa\n";
     client->_error = true;
     client->setPath(_error);
     client->_rFile = ".html";

@@ -25,6 +25,7 @@ Request::Request(): _req("")
     _body = false;
     _chucklen = -1;
     _bodyIn = false;
+    _cgi = false;
     _rBuf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
     memset(_rBuf, '\0', sizeof(char)*(BUFFER_SIZE + 1));
 }
