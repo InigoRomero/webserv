@@ -32,6 +32,7 @@ class Request
         int                                 _chucklen;
         bool                                _body;
         bool                                _bodyIn;
+        bool                                _cgi;
 
         void setRequest(std::string req);
         int parseRequest();

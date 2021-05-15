@@ -126,7 +126,7 @@ void Client::setPath(std::string errorPath)
 {
      if (_error)
      {
-          std::cout << "hello\n";
+          std::cout << "error\n";
           _path = errorPath + "/" + _status.substr(0, 3) + ".html";
      }
      else
@@ -143,7 +143,7 @@ void Client::setPath(std::string errorPath)
           else
                _path = _conf.root + "/"+ _conf.index;
      }
-     std::cout << "PATH:" << _path << std::endl;
+     std::cout << "Path" << _path << std::endl;
 }
 
 void Client::setRFile(std::string file)
