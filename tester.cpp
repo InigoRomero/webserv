@@ -158,11 +158,40 @@ User-Agent: Go-http-client/1.1\r\n\
 Content-Type: test/file\r\n\
 Transfer-Encoding: chunked\r\n\
 Accept-Encoding: gzip\r\n\r\n\
-8\r\nabcdefghij\r\n0\r\n\r\n",
+a\r\nabcdefghij\r\n0\r\n\r\n",
         "HTTP/1.1 200 OK",
         "ABCDEFGHIJ",
         "POST /directory/youpla.bla - Chunked - 10 Lenght\n"
     ));
+
+        data->push_back(SendData(
+        8,
+        "POST /directory/youpla.bla HTTP/1.1\r\n\
+Host: localhost:80\r\n\
+User-Agent: Go-http-client/1.1\r\n\
+Content-Type: test/file\r\n\
+Transfer-Encoding: chunked\r\n\
+Accept-Encoding: gzip\r\n\r\n\
+8\r\nabcdefghij\r\n0\r\n\r\n",
+        "HTTP/1.1 200 OK",
+        "ABCDEFGH",
+        "POST /directory/youpla.bla - Chunked - 8 Lenght with chunkked len different to reality lower\n"
+    ));
+
+            data->push_back(SendData(
+        10,
+        "POST /directory/youpla.bla HTTP/1.1\r\n\
+Host: localhost:80\r\n\
+User-Agent: Go-http-client/1.1\r\n\
+Content-Type: test/file\r\n\
+Transfer-Encoding: chunked\r\n\
+Accept-Encoding: gzip\r\n\r\n\
+12\r\nabcdefghij\r\n0\r\n\r\n",
+        "HTTP/1.1 200 OK",
+        "ABCDEFGHIJ",
+        "POST /directory/youpla.bla - Chunked - 10 Lenght with chunkked len different to reality higher\n"
+    ));
+
 
         data->push_back(SendData(
         20,
