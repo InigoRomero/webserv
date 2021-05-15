@@ -14,6 +14,7 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
      _chunkFinal = false;
      _chuckCont = 0;
      _chunkDone = false;
+     _error = false;
      fcntl(_fd, F_SETFL, O_NONBLOCK);
      FD_SET(fd, _rSet);
 	//FD_SET(fd, _wSet);
@@ -121,9 +122,28 @@ void Client::setStatus(std::string status)
      _status = status;
 }
 
-void Client::setPath(std::string path)
+void Client::setPath(std::string errorPath)
 {
-     _path = path;
+     if (_error)
+     {
+          std::cout << "hello\n";
+          _path = errorPath + "/" + _status.substr(0, 3) + ".html";
+     }
+     else
+     {
+          if (_request->_method == "PUT")
+               _path =  _conf.root + "/"+ _request->_uri.substr(_conf.location.size(), std::string::npos);
+          else if (_conf.location.size() < _request->_uri.size())
+          {
+               if (_request->_uri.find(".") == std::string::npos)
+                    _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos) + "/" + _conf.index;
+               else
+                    _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos);
+          }
+          else
+               _path = _conf.root + "/"+ _conf.index;
+     }
+     std::cout << "PATH:" << _path << std::endl;
 }
 
 void Client::setRFile(std::string file)
