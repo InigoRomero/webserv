@@ -10,7 +10,6 @@ int init(std::vector<Server> servers)
     struct timeval			timeout;
     Client					*client;
 
-	signal(SIGINT, exit);
 	FD_ZERO(&rSet);
 	FD_ZERO(&wSet);
 	FD_ZERO(&readSet);

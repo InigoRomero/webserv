@@ -2,7 +2,7 @@
 #define MAXDATASIZE 1000
 
 Server::Server():
-     _locations(), _port(-1),  _error(""), _name(""), _host("")
+     _locations(), _port(-1),  _error(""), _name(""), _host(""), _sockfd(-1)
 {
     bzero(&_my_addr, sizeof(_my_addr));
 }
@@ -11,10 +11,34 @@ Server::Server(int port, std::string error, std::string serverName, std::string 
       _port(port),  _error(error), _name(serverName), _host(host)
 {
     bzero(&_my_addr, sizeof(_my_addr));
+    FD_ZERO(_rSet);
+	FD_ZERO(_wSet);
+	FD_ZERO(_readSet);
+	FD_ZERO(_writeSet);
 }
 
 Server::~Server()
-{}
+{
+
+    Client		*client = NULL;
+	if (_sockfd != -1)
+	{
+        if (!_clients.empty())
+        {
+            for (std::vector<Client*>::iterator it(_clients.begin()); it != _clients.end(); ++it)
+            {
+                client = *it;
+                *it = NULL;
+                if (client)
+                    delete client;
+            }
+            _clients.clear();
+        }
+		close(_sockfd);
+		FD_CLR(_sockfd, _rSet);
+		std::cout << "Port [" << _port << "closed\n";
+	}
+}
 
 int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 {
@@ -22,6 +46,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 	_writeSet = writeSet;
 	_wSet = wSet;
 	_rSet = rSet;
+    signal(SIGINT, exit);
     errno = 0;
     // socket
     _my_addr.sin_family = AF_INET;

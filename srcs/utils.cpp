@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-int max_fd(std::vector<Server> servers)
+int max_fd(std::vector<Server> &servers)
 {
     int max = 0;
     int fd;
