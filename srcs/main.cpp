@@ -1,6 +1,13 @@
 #include "server.hpp"
 #include "conf.hpp"
 
+
+void term (int)
+{
+   // system("leaks webserv");
+    exit (0);
+}
+
 int init(std::vector<Server> servers)
 {
     fd_set					readSet;
@@ -10,6 +17,7 @@ int init(std::vector<Server> servers)
     struct timeval			timeout;
     Client					*client;
 
+	signal(SIGINT, term);
 	FD_ZERO(&rSet);
 	FD_ZERO(&wSet);
 	FD_ZERO(&readSet);
@@ -80,6 +88,7 @@ int init(std::vector<Server> servers)
 int main(int argc, char **av)
 {
     Conf conf;
+
 	if (argc != 2) {
         std::cerr << "Usage: ./webserv config-file" << std::endl;
     	return (EXIT_FAILURE);

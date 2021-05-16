@@ -46,7 +46,6 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 	_writeSet = writeSet;
 	_wSet = wSet;
 	_rSet = rSet;
-    signal(SIGINT, exit);
     errno = 0;
     // socket
     _my_addr.sin_family = AF_INET;
