@@ -35,23 +35,24 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
     int yes = 1;
     if (setsockopt(_sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof (int)) == -1) {
         perror("setsockopt");
-        return(0);
+        exit(0);
     }
     if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr) < 0)
     {
         perror("In bind");
-        return(0);
+        std::cout << "Server " << _port << " is already in use :(\n";
+        exit(0);
     }
 
     if (listen(_sockfd, 256) < 0)
     {
         perror("listen");
-        return(0);
+        exit(0);
     }
     if (fcntl(_sockfd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		perror("fcntl");
-        return (0);
+        exit (0);
     }
     FD_SET(_sockfd, _rSet);
     _maxFd = _sockfd;
@@ -177,7 +178,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     }
     else
     {
-        std::cout << "hello2\n";
+       // std::cout << "hello2\n";
         client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
@@ -248,7 +249,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         if (!client->_request->_bodyIn)
         {
             client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
-            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
+           // std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
@@ -411,7 +412,7 @@ void	Server::send503()
         perror("In accept");
         exit(0);
     }
-
+    std::cout << "REFUSED CONECTION " <<  std::endl;
 	response = "HTTP/1.1 503\r\n";
     response +=  "Sever: webserv/1.0.0\r\n";
 	response += "Date: " + get_date() + "\r\n"; 

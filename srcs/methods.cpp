@@ -140,7 +140,7 @@ void createHeader(std::vector<Client*>::iterator it)
 		response += "Location: " + client->_request->_uri + "\r\n";
 	if (client->_status == "200 OK" && (client->_request->_method == "GET" || client->_request->_method == "HEAD"))
 		response += "Last-Modified: " + getLastModified(client->_path) + "\r\n"; //date de archivo requested by client
-	std::cout << "PATH:" << client->_path << std::endl;
+	//std::cout << "PATH:" << client->_path << std::endl;
 	//if ((client->_request->_method == "GET" || client->_request->_method == "HEAD"))
 	if (client->_request->_cgi)
 		response += "Content-Type: text/html; charset=utf-8\r\n";
@@ -157,7 +157,7 @@ void createHeader(std::vector<Client*>::iterator it)
 
 std::string getDataType(std::string fileExt)
 {
-	std::cout << "fileExt" << fileExt << std::endl;
+	//std::cout << "fileExt" << fileExt << std::endl;
 	if (fileExt == ".txt")
 		return ("text/plain");
 	else if (fileExt == ".bin")

@@ -67,7 +67,6 @@ void Client::readFd()
 			return ;
 		else if (WEXITSTATUS(status) == 1)
 		{
-               std::cout << "HOLA BB\n";
                close(_tmp_fd);
                _tmp_fd = -1;
                _cgi_pid = -1;
@@ -143,7 +142,7 @@ void Client::setPath(std::string errorPath)
           else
                _path = _conf.root + "/"+ _conf.index;
      }
-     std::cout << "Path" << _path << std::endl;
+    // std::cout << "Path" << _path << std::endl;
 }
 
 void Client::setRFile(std::string file)
