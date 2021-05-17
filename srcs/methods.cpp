@@ -169,16 +169,19 @@ static std::string base64_decode(std::string const& encoded_string) {
 void contentNegotiation(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
-	std::cout << client->_path << std::endl;
-	/*std::map<
-	while (client->_request->_headers["Accept-Language"] != "")
-	{
+	std::string aux;
+	std::map<std::string, std::string> lenguageMap;
 
+	std::cout << client->_path << std::endl;
+	aux = client->_request->_headers["Accept-Language"];
+	while (aux != "")
+	{
+		if (aux.find[])
 	}
 	if (client->_request->_headers["Accept-Charsets"] != "")
 	{
 
-	}*/
+	}
 }
 
 void createHeader(std::vector<Client*>::iterator it)
