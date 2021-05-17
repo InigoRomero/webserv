@@ -36,7 +36,6 @@ Server::~Server()
         }
 		close(_sockfd);
 		FD_CLR(_sockfd, _rSet);
-		std::cout << "Port [" << _port << "closed\n";
 	}
 }
 
@@ -50,7 +49,10 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
     // socket
     _my_addr.sin_family = AF_INET;
     _my_addr.sin_port = htons( _port );
-    _my_addr.sin_addr.s_addr = INADDR_ANY;
+    if (_ip != "")
+        _my_addr.sin_addr.s_addr = inet_addr(_ip.c_str());
+    else
+        _my_addr.sin_addr.s_addr = INADDR_ANY;
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
 		//std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
@@ -63,9 +65,8 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
     }
     if (bind(_sockfd, (struct sockaddr *)&_my_addr, sizeof _my_addr) < 0)
     {
-        perror("In bind");
-        std::cout << "Server " << _port << " is already in use :(\n";
-        exit(0);
+        std::cout << "Error: Server [" << _port << "] ip [" << _ip << "] skiping...\n";
+        return(0);
     }
 
     if (listen(_sockfd, 256) < 0)
@@ -459,6 +460,8 @@ void	Server::setName(const std::string &name) { this->_name = name; }
 void	Server::setHost(const std::string &host) { this->_host = host; }
 
 void	Server::setConf(const std::string &conf) { this->_conf = conf; }
+
+void	Server::setIp(const std::string &ip) { this->_ip = ip; }
 
 void	Server::setPort(int port) { this->_port = port; }
 

@@ -24,9 +24,16 @@ int init(std::vector<Server> servers)
 	FD_ZERO(&writeSet);
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
-	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end(); ++it)
+	for (std::vector<Server>::iterator it(servers.begin()); it != servers.end();)
+    {
 		if(!(it->start(&readSet, &writeSet, &rSet, &wSet)))
+        {
+            it = servers.erase(it);
             perror("start");
+        }
+        else
+            it++;
+    }
     std::cout << "Server waiting for connections..." << std::endl;
     for(;;)
     {

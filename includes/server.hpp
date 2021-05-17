@@ -23,6 +23,7 @@ class Server
         std::string                 _error;
         std::string                 _name;
         std::string                 _host;
+        std::string                 _ip;
         std::string                 _conf;
         int                         _maxFd;
         int                         _sockfd;
@@ -47,6 +48,7 @@ class Server
         void    setError(const std::string &error);
         void    setName(const std::string &name);
         void    setHost(const std::string &host);
+        void    setIp(const std::string &ip);
         void    setConf(const std::string &host);
         void    setPort(int port);
         void    setLocations(struct location methods);

@@ -76,10 +76,14 @@ void Conf::fillServer()
             {
                 if ((found = (*it).find("listen")) != std::string::npos)
                     _servers.back().setPort(stoi((*it).substr(found + 6, std::string::npos)));
+                if ((found = (*it).find("listen")) != std::string::npos)
+                    _servers.back().setPort(stoi((*it).substr(found + 6, std::string::npos)));
                 else if ((found = (*it).find("error")) != std::string::npos)
                     _servers.back().setError((*it).substr(found + 5, std::string::npos));
                 else if ((found = (*it).find("name")) != std::string::npos)
                     _servers.back().setName((*it).substr(found + 4, std::string::npos));
+                else if ((found = (*it).find("server_addr")) != std::string::npos)
+                    _servers.back().setIp((*it).substr(found + 11, std::string::npos));
                 else if ((found = (*it).find("host")) != std::string::npos)
                     _servers.back().setHost((*it).substr(found + 4, std::string::npos));
                 else
