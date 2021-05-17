@@ -40,6 +40,7 @@ class Client
         std::string         _rFile;
         std::string         _lastDate;
         std::string         _chuckBody;
+        std::string         _errorPath;
         int                 _contentLength;
         Request             *_request;
         std::string         _status;
@@ -57,7 +58,7 @@ class Client
         void setSendInfo(std::string info);
         void setReadFd(int fd);
         void setStatus(std::string status);
-        void setPath(std::string errorPath);
+        void setPath();
         void setRFile(std::string file);
         void readFd();
         void writeFd();

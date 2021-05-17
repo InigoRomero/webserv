@@ -121,28 +121,19 @@ void Client::setStatus(std::string status)
      _status = status;
 }
 
-void Client::setPath(std::string errorPath)
+void Client::setPath()
 {
-     if (_error)
+     if (_request->_method == "PUT")
+          _path =  _conf.root + "/"+ _request->_uri.substr(_conf.location.size(), std::string::npos);
+     else if (_conf.location.size() < _request->_uri.size())
      {
-          std::cout << "error\n";
-          _path = errorPath + "/" + _status.substr(0, 3) + ".html";
+          if (_request->_uri.find(".") == std::string::npos)
+               _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos) + "/" + _conf.index;
+          else
+               _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos);
      }
      else
-     {
-          if (_request->_method == "PUT")
-               _path =  _conf.root + "/"+ _request->_uri.substr(_conf.location.size(), std::string::npos);
-          else if (_conf.location.size() < _request->_uri.size())
-          {
-               if (_request->_uri.find(".") == std::string::npos)
-                    _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos) + "/" + _conf.index;
-               else
-                    _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos);
-          }
-          else
-               _path = _conf.root + "/"+ _conf.index;
-     }
-    // std::cout << "Path" << _path << std::endl;
+          _path = _conf.root + "/"+ _conf.index;
 }
 
 void Client::setRFile(std::string file)

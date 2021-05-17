@@ -350,7 +350,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             client->_chunkDone = true;
             return (0);
         }
-        (*it)->setPath("");
+        (*it)->setPath();
         if (client->_request->_method == "GET")
             responseGet(it);
         else if (client->_request->_method == "POST")
@@ -404,7 +404,7 @@ void Server::sendError(std::vector<Client*>::iterator it)
     Client		*client = *it;
 
     client->_error = true;
-    client->setPath(_error);
+    client->_errorPath = _error + "/" + client->_status.substr(0, 3) + ".html";
     client->_rFile = ".html";
 	client->setReadFd(open(client->_path.c_str(), O_RDONLY));
 }

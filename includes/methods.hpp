@@ -13,6 +13,7 @@ void            responsePost(std::vector<Client*>::iterator it);
 void            responseHead(std::vector<Client*>::iterator it);
 void            responseDelete(std::vector<Client*>::iterator it);
 void            createHeader(std::vector<Client*>::iterator it); 
+void            contentNegotiation(std::vector<Client*>::iterator it);
 std::string     getLastModified(std::string path);
 std::string     getDataType(std::string fileExt);
 
