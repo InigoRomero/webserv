@@ -35,6 +35,8 @@ int init(std::vector<Server> servers)
             it++;
     }
     std::cout << "Server waiting for connections..." << std::endl;
+    if (servers.size() <= 0)
+        return (0);
     for(;;)
     {
         readSet = rSet; //reset fds
@@ -111,5 +113,4 @@ int main(int argc, char **av)
 	}
     servers = conf.getServer();
     init(servers);
-    system("leaks ./webserv");
 }
