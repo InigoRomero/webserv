@@ -68,7 +68,7 @@ int Request::parseRequest()
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
-        //std::cout << "_req:\n" << _req << std::endl;
+        std::cout << "_req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -101,6 +101,7 @@ int Request::parseRequest()
         _version = fline[2].substr(0, fline[2].size() - 1);
         if (_avMethods.find(_method) == std::string::npos)
             return 0;
+        std::cout << "mama\n";
         for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
         {
             size_t pos2 = 0;
@@ -124,12 +125,6 @@ int Request::parseRequest()
                 }
             }
        }
-       /*std::cout << "headers\n";
-       for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
-       {
-            std::cout << it2->first << std::endl;
-            std::cout << it2->second << std::endl;
-       }*/
        if (_headers["Host"] == "")
             return 0;
         //std::cout << "tmp 1 [" << tmp << "] \n";

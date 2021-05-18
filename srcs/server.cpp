@@ -132,6 +132,7 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     std::string         aux;
     std::stringstream   stream;
 
+    std::cout << "parseBody\n";
     if (client->_request->_headers.find("Content-Length")->second != "")
         parseNoChunked(it);
     else if (client->_request->_headers.find("Transfer-Encoding")->second == "chunked")
@@ -224,7 +225,8 @@ void Server::parseNoChunked(std::vector<Client*>::iterator it)
     tmp.clear();
     memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
     ss << client->_request->_headers.find("Content-Length")->second;  
-    ss >> num; 
+    ss >> num;
+    std::cout << "hello\n";
     if (client->_request->_req.size() >= num)
         proccessRequest(it);
 }
@@ -311,7 +313,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     client->_chunkDone = false;
     int ret;
 
-    std::cout << "processRequest\n";
     if (!client->_sendInfo.size())
         client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");
@@ -331,6 +332,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     if (ret == 2)
         proccessRequest(it);
     getLocationAndMethod(it);
+    std::cout << "holaamigo\n";
     if (client->_status == "200 OK")
     {
         if (client->_request->_body && client->_conf.max_body > 0 && client->_conf.max_body < (int)client->_request->_headers["body"].size())
@@ -369,6 +371,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         sendError(it);
     createHeader(it);
     FD_SET(client->_fd, _wSet);
+    std::cout << "hihi\n";
     client->_standBy = true;
     //FD_CLR(client->_fd, _rSet);
     return 0;

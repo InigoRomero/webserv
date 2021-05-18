@@ -68,10 +68,12 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::string	path;
 	Client		*client = *it;
 
+	std::cout << "responsePut\n";
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
 	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 		client->setStatus("201 OK");
 	client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+	client->_chunkDone = true;
 }
 
 void	responseHead(std::vector<Client*>::iterator it)
@@ -289,7 +291,8 @@ void createHeader(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
 	std::map<std::string, std::string> 	headers;
-	
+
+	std::cout << "holi\n";
 	if (client->_conf.auth != "")
 	{
 		client->setStatus("401 Unauthorized");
@@ -299,6 +302,7 @@ void createHeader(std::vector<Client*>::iterator it)
 				client->setStatus("200 OK");
 		}	
 	}
+	std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	response += "Sever: webserv/1.0.0\r\n";
 	response += "Date: " + get_date() + "\r\n";
@@ -327,7 +331,6 @@ void createHeader(std::vector<Client*>::iterator it)
 	if (client->_request->_headers["Content-Location"] != "")
 		response += "Content-Location: " + client->_request->_headers["Content-Location"] + "\r\n";
 	client->setSendInfo(response);
-	//std::cout << "sendinfo:\n" << response << std::endl;
 	response.clear();
 	//client->setSendInfo(client->_sendInfo + "Content-Type: text/html\r\n");
 }

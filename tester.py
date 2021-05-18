@@ -10,11 +10,16 @@ def printResponse(r):
 	print(r.text)
 	print("******************\n")
 
-print("PUT on 80/put_test")
-r = requests.put('http://localhost:80/put_test')
+print("PUT on 80/put_test/testfile.txt")
+body = "Some text to test"
+r = requests.post('http://localhost:80/put_test/testfile.txt', data=body)
 printResponse(r)
 
-print("GET on 8080/test/index.html with preferred language EN and preferred encoding utf8")
-headers = {'Accept-Language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'Accept-Charset': 'iso-8859-5, unicode-1-1;q=0.8'}
-r = requests.get('http://localhost:8081/index.html', headers=headers)
-printResponse(r)
+#print("PUT on 80/put_test")
+#r = requests.post('http://localhost:80/put_test')
+#printResponse(r)
+
+#print("GET on 8080/test/index.html with preferred language EN and preferred encoding utf8")
+#headers = {'Accept-Language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'Accept-Charset': 'iso-8859-5, unicode-1-1;q=0.8'}
+#r = requests.get('http://localhost:8081/index.html', headers=headers)
+#printResponse(r)
