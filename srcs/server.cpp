@@ -274,7 +274,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         if (!client->_request->_bodyIn)
         {
             client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
-           // std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
+            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {

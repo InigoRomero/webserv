@@ -26,6 +26,7 @@ void responseGet(std::vector<Client*>::iterator it)
 		{
 			client->_chunkDone = true;
 			client->setStatus("404 Not Found");
+			contentNegotiation(it);
 			return ;
 		}
 		// if exits
@@ -180,14 +181,14 @@ static std::map<std::string, std::string> parseAcceptHeaders(std::string aux)
 			aux2 = aux.substr(0, pos);
 			aux = aux.substr(pos + 1);
 			if ((pos = aux2.find(";")) != std::string::npos)
-				acceptMap.insert(std::pair<std::string, std::string>(aux2.substr(0, pos), aux2.substr(aux2.find("=") + 1)));
+				acceptMap.insert(std::pair<std::string, std::string>(aux2.substr(aux2.find_last_of(" ") + 1, pos - 1), aux2.substr(aux2.find("=") + 1)));
 			else
 				acceptMap.insert(std::pair<std::string, std::string>(aux2, "1"));
 		}
 		else
 		{
 			if ((pos = aux.find(";")) != std::string::npos)
-				acceptMap.insert(std::pair<std::string, std::string>(aux.substr(0, pos), aux.substr(aux.find("=") + 1)));
+				acceptMap.insert(std::pair<std::string, std::string>(aux.substr(aux.find_last_of(" ") + 1, pos - 1), aux.substr(aux.find("=") + 1)));
 			else
 				acceptMap.insert(std::pair<std::string, std::string>(aux, "1"));
 			break;
@@ -201,8 +202,12 @@ void contentNegotiation(std::vector<Client*>::iterator it)
 	Client		*client = *it;
 	std::map<std::string, std::string> lenguageMap;
 	std::map<std::string, std::string> charsetMap;
+	std::string path;
+	std::string ext;
+	int fd = -1;
 
-	std::cout << client->_path << std::endl;
+	//std::cout << "Negotiate" << std::endl;
+	//std::cout << client->_path << std::endl;
 	lenguageMap = parseAcceptHeaders(client->_request->_headers["Accept-Language"]);
 	charsetMap = parseAcceptHeaders(client->_request->_headers["Accept-Charset"]);
 	for (std::map<std::string, std::string>::iterator it(lenguageMap.begin()); it != lenguageMap.end(); ++it)
@@ -216,7 +221,68 @@ void contentNegotiation(std::vector<Client*>::iterator it)
 		std::cout << it->first << std::endl;
 		std::cout << it->second << std::endl;
 	}
-	std::cout << "End negotiation" << std::endl;
+	if (!lenguageMap.empty())
+	{
+		for (std::multimap<std::string, std::string>::reverse_iterator it(lenguageMap.rbegin()); it != lenguageMap.rend(); ++it)
+		{
+			if (fd != -1)
+				break;
+			if (!charsetMap.empty())
+			{
+				for (std::multimap<std::string, std::string>::reverse_iterator it2(charsetMap.rbegin()); it2 != charsetMap.rend(); ++it2)
+				{
+					ext = it->first + "." + it2->first;
+					path = client->_path + "." + ext;
+					fd = open(path.c_str(), O_RDONLY);
+					if (fd != -1)
+					{
+						std::cout << "hola\n";
+						client->_request->_headers["Content-Language"] = it->first;
+						break ;
+					}
+					ext = it2->first + "." + it->first;
+					path = client->_path + "." + ext;
+					fd = open(path.c_str(), O_RDONLY);
+					if (fd != -1)
+					{
+						client->_request->_headers["Content-Language"] = it->first;
+						break ;
+					}
+				}
+			}
+			else
+			{
+				ext = it->first;
+				path = client->_path + "." + ext;
+				fd = open(path.c_str(), O_RDONLY);
+				if (fd != -1)
+				{
+					client->_request->_headers["Content-Language"] = it->first;
+					break ;
+				}
+			}
+		}
+	}
+	else if (!charsetMap.empty())
+	{
+		for (std::multimap<std::string, std::string>::reverse_iterator it2(charsetMap.rbegin()); it2 != charsetMap.rend(); ++it2)
+		{
+			ext = it2->first;
+			path = client->_path + "." + ext;
+			fd = open(path.c_str(), O_RDONLY);
+			if (fd != -1)
+				break ;
+		}
+	}
+	if (fd != -1)
+	{
+		client->_path = path;
+		client->_request->_headers["Content-Location"] = client->_request->_uri + "." + ext;
+		if (client->_read_fd != -1)
+			close(client->_read_fd);
+		client->_read_fd = fd;
+		client->setStatus("200 OK");
+	}
 }
 
 void createHeader(std::vector<Client*>::iterator it)
@@ -232,10 +298,6 @@ void createHeader(std::vector<Client*>::iterator it)
 			if (client->_conf.auth == base64_decode(client->_request->_headers["Authorization"]))
 				client->setStatus("200 OK");
 		}	
-	}
-	if (client->_status == "404 Not Found")
-	{
-		contentNegotiation(it);
 	}
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	response += "Sever: webserv/1.0.0\r\n";
@@ -260,6 +322,10 @@ void createHeader(std::vector<Client*>::iterator it)
 		else
 			response += "Content-Type: " + getDataType(client->_path.substr(client->_path.find_last_of("."))) + "\r\n";
 	}
+	if (client->_request->_headers["Content-Language"] != "")
+		response += "Content-Language: " + client->_request->_headers["Content-Language"] + "\r\n";
+	if (client->_request->_headers["Content-Location"] != "")
+		response += "Content-Location: " + client->_request->_headers["Content-Location"] + "\r\n";
 	client->setSendInfo(response);
 	//std::cout << "sendinfo:\n" << response << std::endl;
 	response.clear();
