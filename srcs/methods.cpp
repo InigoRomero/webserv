@@ -166,22 +166,57 @@ static std::string base64_decode(std::string const& encoded_string) {
   return ret;
 }
 
+static std::map<std::string, std::string> parseAcceptHeaders(std::string aux)
+{
+	std::map<std::string, std::string> acceptMap;
+	std::string aux2;
+	size_t pos;
+
+	while (aux != "")
+	{
+		aux2 = aux;
+		if ((pos = aux.find(",")) != std::string::npos)
+		{
+			aux2 = aux.substr(0, pos);
+			aux = aux.substr(pos + 1);
+			if ((pos = aux2.find(";")) != std::string::npos)
+				acceptMap.insert(std::pair<std::string, std::string>(aux2.substr(0, pos), aux2.substr(aux2.find("=") + 1)));
+			else
+				acceptMap.insert(std::pair<std::string, std::string>(aux2, "1"));
+		}
+		else
+		{
+			if ((pos = aux.find(";")) != std::string::npos)
+				acceptMap.insert(std::pair<std::string, std::string>(aux.substr(0, pos), aux.substr(aux.find("=") + 1)));
+			else
+				acceptMap.insert(std::pair<std::string, std::string>(aux, "1"));
+			break;
+		}
+	}
+	return acceptMap;
+}
+
 void contentNegotiation(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
-	std::string aux;
 	std::map<std::string, std::string> lenguageMap;
+	std::map<std::string, std::string> charsetMap;
 
 	std::cout << client->_path << std::endl;
-	aux = client->_request->_headers["Accept-Language"];
-	while (aux != "")
+	lenguageMap = parseAcceptHeaders(client->_request->_headers["Accept-Language"]);
+	charsetMap = parseAcceptHeaders(client->_request->_headers["Accept-Charset"]);
+	for (std::map<std::string, std::string>::iterator it(lenguageMap.begin()); it != lenguageMap.end(); ++it)
 	{
-		if (aux.find[])
+		std::cout << it->first << std::endl;
+		std::cout << it->second << std::endl;
 	}
-	if (client->_request->_headers["Accept-Charsets"] != "")
+	std::cout << "\n\n";
+	for (std::map<std::string, std::string>::iterator it(charsetMap.begin()); it != charsetMap.end(); ++it)
 	{
-
+		std::cout << it->first << std::endl;
+		std::cout << it->second << std::endl;
 	}
+	std::cout << "End negotiation" << std::endl;
 }
 
 void createHeader(std::vector<Client*>::iterator it)

@@ -311,6 +311,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     client->_chunkDone = false;
     int ret;
 
+    std::cout << "processRequest\n";
     if (!client->_sendInfo.size())
         client->setSendInfo("HTTP/1.1");
     client->setStatus("200 OK");

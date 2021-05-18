@@ -2,7 +2,7 @@
 
 Request::Request(): _req("")
 {
-    _headers.insert(std::pair<std::string,std::string>("Accept-Charsets", "" ));
+    _headers.insert(std::pair<std::string,std::string>("Accept-Charset", "" ));
     _headers.insert(std::pair<std::string,std::string>("Accept-Language", "")); 
     _headers.insert(std::pair<std::string,std::string>("Allow", "")); 
     _headers.insert(std::pair<std::string,std::string>("Authorization", "")); 
@@ -57,7 +57,7 @@ int Request::parseRequest()
 {
 
 	std::vector<std::string> lines;
-	size_t pos = 0, found = 0;
+	size_t pos = 0;
     std::stringstream ss;
 
     if (_body)
@@ -106,7 +106,8 @@ int Request::parseRequest()
             size_t pos2 = 0;
             for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
-                if ((found = toLower((*it)).find(toLower(it2->first))) != std::string::npos)
+                if (toLower((*it).substr(0,(*it).find(":"))) == toLower(it2->first))
+                //if ((found = toLower((*it)).find(toLower(it2->first))) != std::string::npos)
                 {
                     pos2 = (*it).find(":") + 1;
                     while (isspace((*it)[pos2]))
@@ -122,8 +123,14 @@ int Request::parseRequest()
                     _headers.insert(std::pair<std::string,std::string>((*it).substr(0, (*it).find(":")), (*it).substr(pos2, (*it).size() - pos2 - 1))); 
                 }
             }
-        }
-        if (_headers["Host"] == "")
+       }
+       /*std::cout << "headers\n";
+       for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
+       {
+            std::cout << it2->first << std::endl;
+            std::cout << it2->second << std::endl;
+       }*/
+       if (_headers["Host"] == "")
             return 0;
         //std::cout << "tmp 1 [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
