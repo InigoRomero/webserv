@@ -66,7 +66,6 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::string	path;
 	Client		*client = *it;
 
-	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
 	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 	{
 		client->_chuckBody = "File created\n";
