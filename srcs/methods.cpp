@@ -37,7 +37,6 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
-	std::cout << "responsePost" << std::endl;
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -52,7 +51,6 @@ void responsePost(std::vector<Client*>::iterator it)
 	}
 	else
 	{
-		client->_chuckBody = "File modified\n";
 		if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 		{
 			client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
@@ -60,8 +58,13 @@ void responsePost(std::vector<Client*>::iterator it)
 		}
 		else
 			client->_write_fd = open(client->_path.c_str(), O_APPEND|O_WRONLY|O_NONBLOCK, 0666);
-		if (client->_request->_req.size() == 0)
-			client->_chunkDone = true;
+		if (client->_write_fd == -1)
+			client->setStatus("500 Internal Server Error");
+		else
+			client->_chuckBody = "File modified\n";
+		//std::cout << "writefd:" << client->_write_fd << std::endl;
+		//if (client->_request->_req.size() == 0)
+		//client->_chunkDone = true;
 	}
 }
 
@@ -70,16 +73,18 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::string	path;
 	Client		*client = *it;
 
-	std::cout << "responsePut\n";
+	//std::cout << "responsePut\n";
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
 	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 	{
 		client->_chuckBody = "File created\n";
 		client->setStatus("201 OK");
 	}
+	client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
+	if (client->_write_fd == -1)
+		client->setStatus("500 Internal Server Error");
 	else
 		client->_chuckBody = "File modified\n";
-	client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
 	//client->_chunkDone = true;
 }
 
@@ -92,21 +97,21 @@ void	responseHead(std::vector<Client*>::iterator it)
 void	responseDelete(std::vector<Client*>::iterator it)
 {
 	Client		*client = *it;
-	std::string		path;
-	//int ret = 0;
+	int	ret;
+	std::ifstream file(client->_path);
 
-	if (client->_conf.location.size() < client->_request->_uri.size())
+	if (file.good())
 	{
-		if (client->_request->_uri.find(".") == std::string::npos)
-			path =  client->_conf.root + "/"+ client->_request->_uri.substr(client->_conf.location.size(), std::string::npos) + "/" + client->_conf.index;
-		else
-			path =  client->_conf.root + client->_request->_uri.substr(client->_conf.location.size(), std::string::npos);
+		ret = remove(client->_path.c_str());
+		if (!ret)
+		{
+			client->setStatus("200 OK");
+			client->_chuckBody = "File deleted\n";
+		}
 	}
 	else
-		path = client->_conf.root + "/"+ client->_conf.index;
-
-	client->_chuckBody = "File deleted\n";
-	return;
+		client->setStatus("204 No Content");
+	client->_chunkDone = true;
 }
 
 static std::string allow_header(std::string str)
@@ -219,17 +224,6 @@ void contentNegotiation(std::vector<Client*>::iterator it)
 	//std::cout << client->_path << std::endl;
 	lenguageMap = parseAcceptHeaders(client->_request->_headers["Accept-Language"]);
 	charsetMap = parseAcceptHeaders(client->_request->_headers["Accept-Charset"]);
-	for (std::map<std::string, std::string>::iterator it(lenguageMap.begin()); it != lenguageMap.end(); ++it)
-	{
-		std::cout << it->first << std::endl;
-		std::cout << it->second << std::endl;
-	}
-	std::cout << "\n\n";
-	for (std::map<std::string, std::string>::iterator it(charsetMap.begin()); it != charsetMap.end(); ++it)
-	{
-		std::cout << it->first << std::endl;
-		std::cout << it->second << std::endl;
-	}
 	if (!lenguageMap.empty())
 	{
 		for (std::multimap<std::string, std::string>::reverse_iterator it(lenguageMap.rbegin()); it != lenguageMap.rend(); ++it)
@@ -245,7 +239,6 @@ void contentNegotiation(std::vector<Client*>::iterator it)
 					fd = open(path.c_str(), O_RDONLY);
 					if (fd != -1)
 					{
-						std::cout << "hola\n";
 						client->_request->_headers["Content-Language"] = it->first;
 						break ;
 					}

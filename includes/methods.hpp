@@ -1,6 +1,7 @@
 #ifndef METHODS_HPP
 #define METHODS_HPP
 
+#include <fstream>
 #include "client.hpp"
 #include "utils.hpp"
 

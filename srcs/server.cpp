@@ -132,7 +132,6 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     std::string         aux;
     std::stringstream   stream;
 
-    std::cout << "parseBody\n";
     if (client->_request->_headers.find("Content-Length")->second != "")
         parseNoChunked(it);
     else if (client->_request->_headers.find("Transfer-Encoding")->second == "chunked")
@@ -226,9 +225,6 @@ void Server::parseNoChunked(std::vector<Client*>::iterator it)
     memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
     ss << client->_request->_headers.find("Content-Length")->second;  
     ss >> num;
-    //std::cout << "num:" << num << std::endl;
-    //std::cout << "req1:" << client->_request->_req << std::endl;
-    //std::cout << client->_request->_req.size() << std::endl;
     if (client->_request->_req.size() >= num)
         proccessRequest(it);
 }
@@ -254,10 +250,9 @@ int  Server::readRequest(std::vector<Client*>::iterator it)
             client->_request->_req += client->_request->_rBuf;
             if (client->_request->_req.find("\r\n\r\n") != std::string::npos)
                 proccessRequest(it);
-            //std::cout << "mam:" << client->_request->_rBuf << std::endl;
             if (!client->_request->_body)
                 memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
-            else if (strcmp(client->_request->_rBuf, "") != 0)
+            else if (strcmp(client->_request->_rBuf, "") != 0 || client->_request->_headers["Content-Length"] != "")
                 parseBody(it);
             return (0);
         }
@@ -276,9 +271,7 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
     if (client->_chunkDone)
     {
         if (!client->_request->_bodyIn)
-        {
             client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
-        }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
@@ -331,8 +324,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         client->_chunkDone = true;
 		return (0);
     }
-    //if (ret == 2)
-    //   proccessRequest(it);
     getLocationAndMethod(it);
     if (client->_status == "200 OK")
     {
@@ -366,6 +357,8 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         else if (client->_request->_method == "DELETE")
             responseDelete(it);
         if (client->_status == "404 Not Found")
+            sendError(it);
+        else if (client->_status == "500 Internal Server Error")
             sendError(it);
     }
     else
@@ -410,7 +403,7 @@ void Server::sendError(std::vector<Client*>::iterator it)
     client->_error = true;
     client->_errorPath = _error + "/" + client->_status.substr(0, 3) + ".html";
     client->_rFile = ".html";
-	client->setReadFd(open(client->_path.c_str(), O_RDONLY));
+	client->setReadFd(open(client->_errorPath.c_str(), O_RDONLY));
 }
 
 int		Server::getMaxFd()

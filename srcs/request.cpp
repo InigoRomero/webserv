@@ -136,8 +136,6 @@ int Request::parseRequest()
         //std::cout << "tmpSize" << tmp.size() << std::endl;
         if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
         {
-            std::cout << "hi\n";
-            //_req = tmp;
             strcpy(_rBuf, tmp.c_str());
             _body = true;
             return (0);
