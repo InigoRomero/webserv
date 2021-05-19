@@ -2,9 +2,7 @@
 
 void responseGet(std::vector<Client*>::iterator it)
 {
-	//std::cout << "responseGet\n";
 	Client		*client = *it;
-	//std::string response = client->_request->_version;
 	std::string		path;
 	std::string ext;
 	int ret = 0;
@@ -41,10 +39,10 @@ void responsePost(std::vector<Client*>::iterator it)
 	size_t pos;
 	std::string ext;
 	std::string	path;
-		
+	
 	if ((pos = client->_path.find_last_of(".")) != std::string::npos)
 		ext = client->_path.substr(pos, std::string::npos);
-	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext))
+	if ((client->_conf.cgi != ""  && client->_conf.cgi == ext) && client->_request->_req.size() != 0)
 	{
 		client->_request->execCGI(*client);
 		client->_request->_cgi = true;
@@ -64,7 +62,7 @@ void responsePost(std::vector<Client*>::iterator it)
 			client->_chuckBody = "File modified\n";
 		//std::cout << "writefd:" << client->_write_fd << std::endl;
 		//if (client->_request->_req.size() == 0)
-		//client->_chunkDone = true;
+		//	client->_chunkDone = true;
 	}
 }
 

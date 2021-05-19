@@ -130,7 +130,7 @@ void Client::setPath()
           if (_request->_uri.find(".") == std::string::npos)
                _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos) + "/" + _conf.index;
           else
-               _path =  _conf.root + _request->_uri.substr(_conf.location.size(), std::string::npos);
+               _path =  _conf.root + "/" + _request->_uri.substr(_conf.location.size(), std::string::npos);
      }
      else
           _path = _conf.root + "/"+ _conf.index;
