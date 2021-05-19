@@ -62,13 +62,13 @@ int Request::parseRequest()
 
     if (_body)
     {
-        //std::cout << "mama\n";
+        //std::cout << "bodyRequest\n";
         _headers["body"] = _req;
     }
     else
     {
         //std::cout << "REQ H [" << _req << "] \n";
-        std::cout << "_req:\n" << _req << std::endl;
+        //std::cout << "_req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -101,7 +101,6 @@ int Request::parseRequest()
         _version = fline[2].substr(0, fline[2].size() - 1);
         if (_avMethods.find(_method) == std::string::npos)
             return 0;
-        std::cout << "mama\n";
         for (std::vector<std::string>::iterator it = std::next(lines.begin(),1); it != lines.end(); it++)
         {
             size_t pos2 = 0;
@@ -132,11 +131,16 @@ int Request::parseRequest()
         // std::cout << "tmp 2 [" << tmp << "] \n";
         ss << _headers.find("Content-Length")->second;  
         ss >> pos;
+        //std::cout << "pos:" << pos << std::endl;
+        //std::cout << "tmp" << tmp << std::endl;
+        //std::cout << "tmpSize" << tmp.size() << std::endl;
         if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
         {
-            _req = tmp;
+            std::cout << "hi\n";
+            //_req = tmp;
+            strcpy(_rBuf, tmp.c_str());
             _body = true;
-            return (2);
+            return (0);
         }
         strcpy(_rBuf, tmp.c_str());
         if (_method == "POST" || _method == "PUT")

@@ -37,6 +37,7 @@ void responseGet(std::vector<Client*>::iterator it)
 
 void responsePost(std::vector<Client*>::iterator it)
 {
+	std::cout << "responsePost" << std::endl;
 	Client		*client = *it;
 	size_t pos;
 	std::string ext;
@@ -51,6 +52,7 @@ void responsePost(std::vector<Client*>::iterator it)
 	}
 	else
 	{
+		client->_chuckBody = "File modified\n";
 		if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 		{
 			client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
@@ -71,9 +73,14 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::cout << "responsePut\n";
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
 	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
+	{
+		client->_chuckBody = "File created\n";
 		client->setStatus("201 OK");
+	}
+	else
+		client->_chuckBody = "File modified\n";
 	client->_write_fd = open(client->_path.c_str(), O_CREAT|O_WRONLY|O_NONBLOCK, 0666);
-	client->_chunkDone = true;
+	//client->_chunkDone = true;
 }
 
 void	responseHead(std::vector<Client*>::iterator it)
@@ -292,7 +299,6 @@ void createHeader(std::vector<Client*>::iterator it)
 	Client		*client = *it;
 	std::map<std::string, std::string> 	headers;
 
-	std::cout << "holi\n";
 	if (client->_conf.auth != "")
 	{
 		client->setStatus("401 Unauthorized");
@@ -302,7 +308,6 @@ void createHeader(std::vector<Client*>::iterator it)
 				client->setStatus("200 OK");
 		}	
 	}
-	std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
 	std::string response = client->_sendInfo + " " + client->_status + "\r\n";
 	response += "Sever: webserv/1.0.0\r\n";
 	response += "Date: " + get_date() + "\r\n";

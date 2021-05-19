@@ -226,7 +226,9 @@ void Server::parseNoChunked(std::vector<Client*>::iterator it)
     memset(client->_request->_rBuf, '\0', BUFFER_SIZE + 1);
     ss << client->_request->_headers.find("Content-Length")->second;  
     ss >> num;
-    std::cout << "hello\n";
+    //std::cout << "num:" << num << std::endl;
+    //std::cout << "req1:" << client->_request->_req << std::endl;
+    //std::cout << client->_request->_req.size() << std::endl;
     if (client->_request->_req.size() >= num)
         proccessRequest(it);
 }
@@ -276,13 +278,13 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         if (!client->_request->_bodyIn)
         {
             client->_sendInfo += "Content-Length: " + std::to_string(client->_chuckBody.size()) + "\r\n\r\n";
-            std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
             //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
+            //std::cout << "sendinfo:\n" << client->_sendInfo << std::endl;
         }
         bytes = write(client->_fd, client->_sendInfo.c_str(), client->_sendInfo.size());
         if (bytes < client->_sendInfo.size())
@@ -329,10 +331,9 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         client->_chunkDone = true;
 		return (0);
     }
-    if (ret == 2)
-        proccessRequest(it);
+    //if (ret == 2)
+    //   proccessRequest(it);
     getLocationAndMethod(it);
-    std::cout << "holaamigo\n";
     if (client->_status == "200 OK")
     {
         if (client->_request->_body && client->_conf.max_body > 0 && client->_conf.max_body < (int)client->_request->_headers["body"].size())
@@ -371,7 +372,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
         sendError(it);
     createHeader(it);
     FD_SET(client->_fd, _wSet);
-    std::cout << "hihi\n";
     client->_standBy = true;
     //FD_CLR(client->_fd, _rSet);
     return 0;

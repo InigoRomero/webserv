@@ -10,10 +10,16 @@ def printResponse(r):
 	print(r.text)
 	print("******************\n")
 
-print("PUT on 80/put_test/testfile.txt")
-body = "Some text to test"
-r = requests.post('http://localhost:80/put_test/testfile.txt', data=body)
+print("POST on 80/put_test/testfile.txt")
+body = "Some text for example"
+r = requests.put('http://localhost:80/put_test/testfile.txt', data=body)
 printResponse(r)
+
+# print("POST on 80/put_test/testfile.txt")
+# headers = {'Transfer-Encoding': 'chunked'}
+# body = "a\r\nabcdefghij\r\n0\r\n\r\n"
+# r = requests.post('http://localhost:80/put_test/testfile.txt', headers=headers, data=body)
+# printResponse(r)
 
 #print("PUT on 80/put_test")
 #r = requests.post('http://localhost:80/put_test')
