@@ -43,7 +43,7 @@ Client::~Client()
 		close(_tmp_fd);
 		unlink("./www/temp_file");
 	}
-
+     delete _request;
 }
 
 void Client::setSendInfo(std::string info)
