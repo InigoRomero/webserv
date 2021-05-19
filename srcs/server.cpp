@@ -46,7 +46,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
 	_wSet = wSet;
 	_rSet = rSet;
     errno = 0;
-    // socket
+
     _my_addr.sin_family = AF_INET;
     _my_addr.sin_port = htons( _port );
     if (_ip != "")
@@ -55,7 +55,7 @@ int Server::start(fd_set *readSet, fd_set *writeSet, fd_set *rSet, fd_set *wSet)
         _my_addr.sin_addr.s_addr = INADDR_ANY;
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		//std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
+	    std::cout << "Error: " << "Server::start -> socket(): " << std::string(strerror(errno)) << std::endl;
         return (0);
     }
     int yes = 1;
@@ -203,7 +203,6 @@ void Server::parseBody(std::vector<Client*>::iterator it)
     }
     else
     {
-       // std::cout << "hello2\n";
         client->setStatus("400 Bad Request");
         sendError(it);
         createHeader(it);
@@ -277,7 +276,6 @@ int  Server::writeResponse(std::vector<Client*>::iterator it)
         }
         if (!client->_request->_bodyIn && client->_request->_method != "HEAD")
         {
-            //std::cout << "RESPONSE [" << client->_sendInfo.substr(0, 100) << "] \n";
             client->_request->_bodyIn = true;
             client->_sendInfo += client->_chuckBody;
         }
@@ -316,7 +314,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     client->setStatus("200 OK");
     client->_lastDate = get_date();
 
-    if(! (ret = client->_request->parseRequest())) // comprobar que nos pasan header -> Host, sin este header http/1.1 responde bad request
+    if(! (ret = client->_request->parseRequest()))
     {
         if (client->_request->_body)
             return(0);
@@ -354,10 +352,7 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             if (client->_request->_headers["Authorization"] != "")
             {
                 if (client->_conf.auth == base64_decode(client->_request->_headers["Authorization"]))
-                {
-                    std::cout << "hello\n";
                     client->setStatus("200 OK");
-                }
             }
             if (client->_status != "200 OK")
             {
@@ -375,8 +370,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
             responsePost(it);
         else if (client->_request->_method == "PUT")
             responsePut(it);
-        //else if (client->_request->_method == "HEAD")
-        //    responseHead(it);
         else if (client->_request->_method == "DELETE")
             responseDelete(it);
         if (client->_status == "404 Not Found")
@@ -389,7 +382,6 @@ int  Server::proccessRequest(std::vector<Client*>::iterator it)
     createHeader(it);
     FD_SET(client->_fd, _wSet);
     client->_standBy = true;
-    //FD_CLR(client->_fd, _rSet);
     return 0;
 }
 

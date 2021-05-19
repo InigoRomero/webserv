@@ -4,7 +4,6 @@
 
 void term (int)
 {
-   // system("leaks webserv");
     exit (0);
 }
 

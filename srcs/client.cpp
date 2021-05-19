@@ -17,7 +17,6 @@ Client::Client(int fd, fd_set *readSet, fd_set *writeSet, struct sockaddr_in  cl
      _error = false;
      fcntl(_fd, F_SETFL, O_NONBLOCK);
      FD_SET(fd, _rSet);
-	//FD_SET(fd, _wSet);
 }
 
 Client::~Client()
@@ -75,7 +74,6 @@ void Client::readFd()
                _contentLength = _chuckBody.size();
                setReadFd(-1);
                _request->_headers["body"] = "Error with cgi\n";
-               //_chunkDone = true;
                return ;
 		}
 	}
@@ -83,7 +81,6 @@ void Client::readFd()
      if (ret >= 0)
 		buffer[ret] = '\0';
      std::string	tmp(buffer, ret);
-    // std::cout << "HE lido de archivo: " << tmp << std::endl;
      _chuckBody += tmp;
      memset(buffer, '\0', sizeof(char)*32678 );
      if (ret == 0)
@@ -101,13 +98,11 @@ void Client::readFd()
                _request->parseCGIResult(*this);
           }
      }
-     //std::cout << "body response read" << _chuckBody.size() << std::endl;
 }
 
 void Client::writeFd()
 {
      int ret = 0;
-     //std::cout << "HE escrito en el cgi: " << _request->_headers["body"].substr(0, 20) << std::endl;
 
      ret = write(_write_fd, _request->_headers["body"].c_str(), _request->_headers["body"].size());
      _write_fd = -1;

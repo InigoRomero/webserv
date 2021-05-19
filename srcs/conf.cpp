@@ -66,7 +66,6 @@ void Conf::fillServer()
 {
     for (std::vector<std::string>::iterator it = _conf.begin(); it != _conf.end(); it++)
     {
-      //  std::cout << *it << std::endl;
         size_t found;
         if ((*it).find("server{") != std::string::npos)
         {
@@ -95,7 +94,7 @@ void Conf::fillServer()
             _servers.back().setConf(_path);
             while ((*it).find("}") == std::string::npos)
             {
-                if ((*it).find("location") != std::string::npos) //falta coger texto location
+                if ((*it).find("location") != std::string::npos)
                 {
                     struct location p;
                     initMethods(&p);

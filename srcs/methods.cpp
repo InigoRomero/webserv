@@ -27,8 +27,6 @@ void responseGet(std::vector<Client*>::iterator it)
 			contentNegotiation(it);
 			return ;
 		}
-		// if exits
-		//client->setPath(client->_path.c_str());
 		client->setReadFd(ret);
 	}
 }
@@ -60,9 +58,6 @@ void responsePost(std::vector<Client*>::iterator it)
 			client->setStatus("500 Internal Server Error");
 		else
 			client->_chuckBody = "File modified\n";
-		//std::cout << "writefd:" << client->_write_fd << std::endl;
-		//if (client->_request->_req.size() == 0)
-		//	client->_chunkDone = true;
 	}
 }
 
@@ -71,7 +66,6 @@ void responsePut(std::vector<Client*>::iterator it)
 	std::string	path;
 	Client		*client = *it;
 
-	//std::cout << "responsePut\n";
 	//si el archivo no existia y se ha creado devolver 201, si ya existia y ha sido modificado 200 o contenido vacio 204
 	if ((open(client->_path.c_str(), O_RDONLY)) == -1)
 	{
@@ -83,7 +77,6 @@ void responsePut(std::vector<Client*>::iterator it)
 		client->setStatus("500 Internal Server Error");
 	else
 		client->_chuckBody = "File modified\n";
-	//client->_chunkDone = true;
 }
 
 void	responseHead(std::vector<Client*>::iterator it)
@@ -167,8 +160,6 @@ void contentNegotiation(std::vector<Client*>::iterator it)
 	std::string ext;
 	int fd = -1;
 
-	//std::cout << "Negotiate" << std::endl;
-	//std::cout << client->_path << std::endl;
 	lenguageMap = parseAcceptHeaders(client->_request->_headers["Accept-Language"]);
 	charsetMap = parseAcceptHeaders(client->_request->_headers["Accept-Charset"]);
 	if (!lenguageMap.empty())
@@ -273,7 +264,6 @@ void createHeader(std::vector<Client*>::iterator it)
 
 std::string getDataType(std::string fileExt)
 {
-	//std::cout << "fileExt" << fileExt << std::endl;
 	if (fileExt == ".txt")
 		return ("text/plain");
 	else if (fileExt == ".bin")

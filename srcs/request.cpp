@@ -48,7 +48,6 @@ Request::~Request()
 {
 	_req.clear();
     _headers["body"].clear();
-    //memset(_rBuf, '\0', sizeof(char)*BUFFER_SIZE );
     free(_rBuf);
     _rBuf = NULL; 
 }
@@ -61,14 +60,9 @@ int Request::parseRequest()
     std::stringstream ss;
 
     if (_body)
-    {
-        //std::cout << "bodyRequest\n";
         _headers["body"] = _req;
-    }
     else
     {
-        //std::cout << "REQ H [" << _req << "] \n";
-        //std::cout << "_req:\n" << _req << std::endl;
         std::string tmp = _req;
 	    if (_req[0] == '\r')
 		    _req.erase(_req.begin());
@@ -95,7 +89,7 @@ int Request::parseRequest()
             fline.push_back(lines[0].substr(0, pos));
             lines[0].erase(0, pos + 1);
         }
-        fline.push_back(lines[0]); // pushear fuera si hay espacio despues de http/1.1 ?
+        fline.push_back(lines[0]);
         _method = fline[0];
         _uri = fline[1];
         _version = fline[2].substr(0, fline[2].size() - 1);
@@ -107,7 +101,6 @@ int Request::parseRequest()
             for (std::map<std::string, std::string>::iterator it2 = _headers.begin(); it2 != _headers.end(); it2++)
             {
                 if (toLower((*it).substr(0,(*it).find(":"))) == toLower(it2->first))
-                //if ((found = toLower((*it)).find(toLower(it2->first))) != std::string::npos)
                 {
                     pos2 = (*it).find(":") + 1;
                     while (isspace((*it)[pos2]))
@@ -126,14 +119,9 @@ int Request::parseRequest()
        }
        if (_headers["Host"] == "")
             return 0;
-        //std::cout << "tmp 1 [" << tmp << "] \n";
         tmp = tmp.substr(tmp.find("\r\n\r\n") + 4);
-        // std::cout << "tmp 2 [" << tmp << "] \n";
         ss << _headers.find("Content-Length")->second;  
         ss >> pos;
-        //std::cout << "pos:" << pos << std::endl;
-        //std::cout << "tmp" << tmp << std::endl;
-        //std::cout << "tmpSize" << tmp.size() << std::endl;
         if (tmp.size() >= pos && _headers.find("Transfer-Encoding")->second != "chunked")
         {
             strcpy(_rBuf, tmp.c_str());
@@ -155,11 +143,6 @@ void Request::setRequest(std::string req)
 {
 	_req = req;
 }
-/*
-void Request::setRbuf(char *req)
-{
-	_rBuf = req;
-}*/
 
 void Request::execCGI(Client &client)
 {
@@ -169,18 +152,13 @@ void Request::execCGI(Client &client)
     int fd[2];
     std::string path;
 
-    close(client._read_fd); //why
-    client._read_fd = -1; //idk
-    //cond
+    close(client._read_fd);
+    client._read_fd = -1; 
+
     if (!(args = (char**)malloc(sizeof(char *) * 3)))
         return ;
-    // std::cout << "client_conf_location:" << client._conf.location << std::endl;
-    // std::cout << "client_request_uri:" << client._request->_uri << std::endl;
-    // std::cout << "client_conf_root:" << client._conf.root << std::endl;
-    // std::cout << "client._conf.index:" << client._conf.index << std::endl;
-    //std::cout << "filePathCGI:" << path << std::endl;
-    args[0] = strdup(client._conf.cgi_path.c_str()); // req->location->cgi_root || php_root // cgi path del requested location
-    args[1] = strdup(client._path.c_str()); // req->file
+    args[0] = strdup(client._conf.cgi_path.c_str()); 
+    args[1] = strdup(client._path.c_str()); 
     args[2] = NULL;
     env = setEnv(client);
 
@@ -191,7 +169,7 @@ void Request::execCGI(Client &client)
     if (!(client._cgi_pid = fork()))
     {
         close(fd[1]);
-        dup2(fd[0], 0);  //why
+        dup2(fd[0], 0);
         dup2(client._tmp_fd, 1);
         errno = 0;
 		if ((ret = execve(client._conf.cgi_path.c_str(), args, env)) == -1)
@@ -241,16 +219,8 @@ char			**Request::setEnv(Client &client)
 		envMap["QUERY_STRING"];
 	if (client._request->_headers.find("Content-Type") != client._request->_headers.end())
 		envMap["CONTENT_TYPE"] = client._request->_headers["Content-Type"];
-	//if (client._conf.exe != client.conf.end())
-//		envMap["SCRIPT_NAME"] = client.conf["exec"];
-//	else
 	envMap["SCRIPT_NAME"] = client._conf.cgi_path;
-	//if (client._port)
-	//{
 	envMap["SERVER_NAME"] = "webserv";
-	    //envMap["SERVER_PORT"] = client._port;
-	//}
-	//else*/
 	envMap["SERVER_PORT"] = "80";
 	if (client._request->_headers.find("Authorization") != client._request->_headers.end())
 	{
@@ -259,9 +229,6 @@ char			**Request::setEnv(Client &client)
 		envMap["REMOTE_USER"] = client._request->_headers["Authorization"].substr(pos + 1);
 		envMap["REMOTE_IDENT"] = client._request->_headers["Authorization"].substr(pos + 1);
 	}
-	//if (client._conf.find("php") != client.conf.end() && client._request->.uri.find(".php") != std::string::npos)
-	//	envMap["REDIRECT_STATUS"] = "200";
-
 	std::map<std::string, std::string>::iterator b = client._request->_headers.begin();
 	while (b != client._request->_headers.end())
 	{
@@ -272,11 +239,9 @@ char			**Request::setEnv(Client &client)
 	env = (char **)malloc(sizeof(char *) * (envMap.size() + 1));
 	std::map<std::string, std::string>::iterator it = envMap.begin();
 	int i = 0;
-    //std::cout << "ENV" << std::endl;
 	while (it != envMap.end())
 	{
 		env[i] = strdup((it->first + "=" + it->second).c_str());
-       // std::cout << env[i] << std::endl;
 		++i;
 		++it;
 	}

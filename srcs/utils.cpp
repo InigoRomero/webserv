@@ -46,7 +46,7 @@ int				compareTime(std::string start)
 
 void initMethods(struct location *methods)
 {
-	methods->location.clear();
+	  methods->location.clear();
     methods->method.clear();
     methods->root.clear();
     methods->index.clear();
